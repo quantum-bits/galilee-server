@@ -1,8 +1,11 @@
 \documentclass{article}
 
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
+\usepackage{booktabs}
+\usepackage{rotating}
 
 \newcommand{\gal}{\emph{Galilee}}
+\newcommand{\tcse}{TCSE}
 
 \title{Galilee:\\A Web-Based Scripture Engagement Application}
 \author{Tom Nurkkala \and Ken Kiers}
@@ -11,8 +14,8 @@
 \maketitle
 
 Throughout the 2015--16 academic year,
+Phil Collins has worked with
 Tom and his Information Systems students
-worked with Phil Collins
 to design and prototype
 a web-based application
 to support and encourage scripture engagement.
@@ -20,27 +23,28 @@ This document proposes initial work
 on a production-ready implementation of
 the key features of such a system,
 to be created in partnership
-with the Taylor Center for Scripture Engagement (TCSE).
+with the Taylor Center for Scripture Engagement (\tcse).
 
 The working name for the project
 is \gal.\footnote{The source for the project name
   follows a circuitous path of brainstorming
   from ``Scripture Engagement Application''
   to ``SEA''
-  to ``some relevant sea''
+  to ``some relevant \emph{sea}''
   to ``\gal.''
   This is the name of the \emph{project},
   not necessarily the name of the \emph{application}.}
-In the following,
-we identify a prioritized list of features (section~\ref{sec:features}),
+In the following, we
+identify a prioritized list of features (section~\ref{sec:features}),
 clarify key requirements (section~\ref{sec:requirements}),
+suggest a strategy for managing the project (section~\ref{sec:management}),
 and estimate the time and cost to implement \gal (section~\ref{sec:cost-time}).
 Appendix~\ref{sec:defs} defines terms used with specific intent throughout.
 
 \section{Features}
 \label{sec:features}
 
-The initial features of \gal,
+The \emph{initial} features of \gal,
 in priority order, are as follows.
 \begin{enumerate}
 \item A \emph{reading plan}
@@ -52,10 +56,10 @@ in priority order, are as follows.
   followed by numerous denominations worldwide.
 \item Written instruction and resources
   regarding scripture engagement \emph{practices}
-  (e.g., Lectio Divina, prayer, journaling, memorization).
+  (e.g., Lectio Divina, journaling, memorization).
   Source material for these resources to be
   provided by
-  the TCSE.\footnote{See \url{https://www.biblegateway.com/resources/scripture-engagement/}}
+  the \tcse.\footnote{See \url{https://www.biblegateway.com/resources/scripture-engagement/}}
 \item Ability to connect passages or readings
   to extra-biblical \emph{resources} including initially
   web sites,
@@ -67,16 +71,21 @@ in priority order, are as follows.
   with the ability to:
   \begin{enumerate}
   \item Add or revise scripture engagement practices
-  \item Associate practices with specific readings or passages
+  \item Associate a specific practice with readings or passages
     to which the practice is applicable,
     including written guidelines and suggestions
     about how to apply the practice to a specific reading or passage.
   \item Add or revise resources (i.e., images, recordings, etc.)
-    and associate those resources with specific readings or passages.
+    and associate those resources with specific readings or passages,
+    along with \tcse-provided commentary on the relevance of the resource
+    to the reading or passage.
+  \item Manage users authorized to perform administrative functions.
+  \item Manage members (item~\ref{i:member})
+    who have registered with the system.
   \end{enumerate}
 \item Public access to all plans, readings, passages, practices, and resources
   without requiring users to register.
-\item Capabilities available only to \emph{members},
+\item\label{i:member} Capabilities available only to \emph{members},
   who are users who choose to register with the system.
   In addition to all the functionality available to
   unregistered, public users, a member can:
@@ -87,8 +96,9 @@ in priority order, are as follows.
     regarding readings, passages, practices, and resources.
   \item Receive an optional e-mail reminder to visit the site
     after a period of inactivity.
-  \item Provide feedback on experience with practices,
-    including the reading or passage with which the practice was employed.
+  \item Provide feedback regarding their experience with a practice
+    (e.g., 1--5 ``stars,'', written message).
+    This feedback would be available to authorized \tcse{} staff.
   \end{enumerate}
 \end{enumerate}
 
@@ -104,6 +114,8 @@ following are additional requirements for \gal.
 \item Employ responsive design that supports users accessing the system
   with devices having varying screen resolutions,
   ranging from smart phones and tablets to laptop and desktop computers.
+\item Track basic user behavior on the site
+  to provide data for further analysis (e.g., using Google Analytics).
 \item Require and support secure access to all administrative functions
   on the site.
 \item Store all system data in a robust and reliable
@@ -117,10 +129,103 @@ following are additional requirements for \gal.
   similar to the capabilities of BG.
 \end{enumerate}
 
+\section{Management}
+\label{sec:management}
+
+Historically,
+projects like \gal{} have been managed using one of two strategies.
+\begin{enumerate}
+\item A \emph{fixed-price} contract
+  requires detailed, fixed, \emph{a priori} negotiation of
+  features, schedule, and cost.
+  In practice, it is difficult to specify the feature details in advance
+  and to predict the time and schedule prior to beginning work.
+  Typically, a fixed-price contract disadvantages the development team
+  when they discover that incompletely specified features
+  take longer to implement than expected.
+\item A \emph{time-and-materials} contract
+  also includes \emph{a priori} negotiation of features
+  but cost and schedule are allowed to float.
+  Such a contract often disadvantages customers,
+  who incur a vague financial liability
+  that could change dramatically should the project run long.
+\end{enumerate}
+As an alternative to these traditional project management strategies,
+we propose to develop \gal{}
+using an agile, iterative process
+that circumvents traditional problems
+by replacing a negotiated contract
+with a collaborative process that
+encourages frequent communication between the \gal{} team and the \tcse.
+Under such a process,
+the \tcse{} retains flexibility in prioritizing features
+and controls its financial liability
+(difficult under a time-and-materials contract).
+Similarly, the \gal{} team gets the feedback it needs to be successful
+and is compensated fairly for the work performed
+(relatively rare under a fixed-price contract).
+In particular, the \tcse{}:
+\begin{enumerate}
+\item Prioritizes features to be implemented next in \gal,
+  altering priorities as necessary throughout the project
+\item Reviews and approves the progress of the project
+  regularly (every two weeks or so)
+\item Controls cost by retaining authority to alter---or even terminate---the project 
+if requirements are not being met
+\end{enumerate}
+Concomitantly, the \gal{} development team:
+\begin{enumerate}
+\item Benefits from regular direction on how best
+  to satisfy \tcse{} requirements throughout the project
+\item Controls its internal work practices to optimize
+  delivery of relevant \gal{} features
+\item Receives fair compensation
+  based on the actual time spent satisfying \tcse{} requirements.
+\end{enumerate}
+
 \section{Cost and Time}
 \label{sec:cost-time}
 
+Table~\ref{tab:time} on page~\pageref{tab:time} shows
+an estimate of the number of hours to implement
+the features and requirements described in
+sections~\ref{sec:features} and~\ref{sec:requirements}.
 
+At our proposed rate for \gal{} of \$40/hour,
+the estimated 364~hours yield a
+total cost of \$14,560.
+
+Note that Table~\ref{tab:time}
+represents a good-faith estimate
+that could vary
+based on changing requirements
+or unforeseen technical issues.
+As detailed in section~\ref{sec:management},
+regular communication
+between the development team and the \tcse{}
+allows the \tcse{} to control features and costs
+as it sees fit throughout the project.
+
+\begin{sidewaystable}
+  \centering
+  \begin{tabular}{rrrrrrrrrr}
+    \toprule
+                 & \multicolumn{4}{c}{Application} & & & \multicolumn{2}{c}{Communication} & \\
+    \cmidrule{2-5}
+    \cmidrule{8-9}
+                 & Model & View & Controller & Admin & Data Import & Tooling & TCSE & BG & Total \\
+    Start-up     & 8     & 8    &            &       & 4           & 12      & 4    & 4  & 40    \\
+    Reading Plan & 4     & 8    & 8          & 8     & 24          &         & 4    & 4  & 60    \\
+    Practices    & 8     & 24   & 8          & 16    & 8           &         & 12   &    & 76    \\
+    Resources    & 12    & 32   & 16         & 12    &             & 16      & 12   & 4  & 104   \\
+    Members      & 8     & 24   & 24         & 16    &             &         & 8    & 4  & 84    \\
+    \addlinespace
+    Total        & 40    & 96   & 56         & 52    & 36          & 28      & 40   & 16 & 364   \\
+    \bottomrule
+  \end{tabular}
+  \caption{Time estimate for \gal{} (hours)}
+  \label{tab:time}
+\end{sidewaystable}
 
 \appendix
 
