@@ -1,0 +1,155 @@
+\documentclass{article}
+
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+
+\newcommand{\gal}{\emph{Galilee}}
+
+\title{Galilee:\\A Web-Based Scripture Engagement Application}
+\author{Tom Nurkkala \and Ken Kiers}
+
+\begin{document}
+\maketitle
+
+Throughout the 2015--16 academic year,
+Tom and his Information Systems students
+worked with Phil Collins
+to design and prototype
+a web-based application
+to support and encourage scripture engagement.
+This document proposes initial work
+on a production-ready implementation of
+the key features of such a system,
+to be created in partnership
+with the Taylor Center for Scripture Engagement (TCSE).
+
+The working name for the project
+is \gal.\footnote{The source for the project name
+  follows a circuitous path of brainstorming
+  from ``Scripture Engagement Application''
+  to ``SEA''
+  to ``some relevant sea''
+  to ``\gal.''
+  This is the name of the \emph{project},
+  not necessarily the name of the \emph{application}.}
+In the following,
+we identify a prioritized list of features (section~\ref{sec:features}),
+clarify key requirements (section~\ref{sec:requirements}),
+and estimate the time and cost to implement \gal (section~\ref{sec:cost-time}).
+Appendix~\ref{sec:defs} defines terms used with specific intent throughout.
+
+\section{Features}
+\label{sec:features}
+
+The initial features of \gal,
+in priority order, are as follows.
+\begin{enumerate}
+\item A \emph{reading plan}
+  that provides a structured collection of scripture \emph{passages}
+  for engagement in a regular cycle.
+  The initial plan will follow the Revised Common Lectionary
+  (RCL),\footnote{See, for example, \url{http://lectionary.library.vanderbilt.edu/}.}
+  a three-year cycle of scripture \emph{readings}
+  followed by numerous denominations worldwide.
+\item Written instruction and resources
+  regarding scripture engagement \emph{practices}
+  (e.g., Lectio Divina, prayer, journaling, memorization).
+  Source material for these resources to be
+  provided by
+  the TCSE.\footnote{See \url{https://www.biblegateway.com/resources/scripture-engagement/}}
+\item Ability to connect passages or readings
+  to extra-biblical \emph{resources} including initially
+  web sites,
+  images,
+  audio recordings,
+  and video recordings.
+\item Administrative oversight of the system
+  that provides properly authenticated users
+  with the ability to:
+  \begin{enumerate}
+  \item Add or revise scripture engagement practices
+  \item Associate practices with specific readings or passages
+    to which the practice is applicable,
+    including written guidelines and suggestions
+    about how to apply the practice to a specific reading or passage.
+  \item Add or revise resources (i.e., images, recordings, etc.)
+    and associate those resources with specific readings or passages.
+  \end{enumerate}
+\item Public access to all plans, readings, passages, practices, and resources
+  without requiring users to register.
+\item Capabilities available only to \emph{members},
+  who are users who choose to register with the system.
+  In addition to all the functionality available to
+  unregistered, public users, a member can:
+  \begin{enumerate}
+  \item Keep a record of those readings or passages
+    with which he or she has engaged using a practice.
+  \item Write a private, searchable journal of reflections
+    regarding readings, passages, practices, and resources.
+  \item Receive an optional e-mail reminder to visit the site
+    after a period of inactivity.
+  \item Provide feedback on experience with practices,
+    including the reading or passage with which the practice was employed.
+  \end{enumerate}
+\end{enumerate}
+
+\section{Requirements}
+\label{sec:requirements}
+
+In addition to the features enumerated in section~\ref{sec:features},
+following are additional requirements for \gal.
+\begin{enumerate}
+\item Provide a public-facing interface
+  that employs attractive, functional, and modern
+  technologies and design practices.
+\item Employ responsive design that supports users accessing the system
+  with devices having varying screen resolutions,
+  ranging from smart phones and tablets to laptop and desktop computers.
+\item Require and support secure access to all administrative functions
+  on the site.
+\item Store all system data in a robust and reliable
+  relational database management system.
+\item Consult and collaborate with Bible Gateway (BG)
+  to facilitate future integration or interoperability
+  with BG systems, servers, and services.
+\item Use technology, tools, and development practices
+  that will allow the system to scale
+  to handle traffic and request rates
+  similar to the capabilities of BG.
+\end{enumerate}
+
+\section{Cost and Time}
+\label{sec:cost-time}
+
+
+
+\appendix
+
+\section{Definitions}
+\label{sec:defs}
+
+Some terms in this document are used with specific technical intent
+as follows.
+
+\begin{description}
+\item[Member] A user who elects to register with the system.
+\item[Passage] Contiguous Bible verses
+ that form one element of a reading.
+\item[Practice] Shorthand for a scripture engagement practice
+  such as Lectio Divina or journaling.
+\item[Reading] One section of a reading plan,
+  such as the readings for a week or a day.
+  A reading consists of one or more passages.
+\item[Reading Plan] A long-term plan of readings
+  such as the Revised Common Lectionary or the One Year Bible.
+  A plan consists of one or more readings.
+\item[Resource] An extra-biblical asset such as an image or recording.
+\end{description}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+
+%  LocalWords:  TCSE RCL Lectio Divina
