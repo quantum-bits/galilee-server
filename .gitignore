@@ -4,3 +4,4 @@
 *.pdf
 auto/
 .idea/
+node_modules/

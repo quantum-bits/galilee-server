@@ -1,0 +1,27 @@
+{
+  "name": "galilee",
+  "version": "0.0.1",
+  "description": "Scripture Engagement Application: Server",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quantum-bits/galilee.git"
+  },
+  "author": "Tom Nurkkala",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/quantum-bits/galilee/issues"
+  },
+  "homepage": "https://github.com/quantum-bits/galilee#readme",
+  "dependencies": {
+    "knex": "^0.11.5",
+    "objection": "^0.5.1",
+    "pg": "^5.1.0"
+  }
+}
