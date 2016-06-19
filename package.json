@@ -20,6 +20,9 @@
   },
   "homepage": "https://github.com/quantum-bits/galilee#readme",
   "dependencies": {
+    "good": "^7.0.1",
+    "good-console": "^6.1.2",
+    "hapi": "^13.4.1",
     "knex": "^0.11.5",
     "objection": "^0.5.1",
     "pg": "^5.1.0"
