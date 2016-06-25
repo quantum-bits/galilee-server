@@ -22,4 +22,4 @@ exports.down = function (knex, Promise) {
         knex.schema.dropTableIfExists('practice_detail'),
         knex.schema.dropTableIfExists('practice')
     ])
-};
+}

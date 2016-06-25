@@ -12,6 +12,7 @@ module.exports = function (callback) {
 
     server.register(
         [
+            {register: require('./plugins/engagement')},
             {register: require('./plugins/lection')},
 
             {
