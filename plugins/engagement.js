@@ -18,6 +18,26 @@ exports.register = function (server, options, next) {
         }
     });
 
+    server.route({
+        method: 'GET',
+        path: '/practices/{id}',
+        handler: function(request, reply) {
+            Practice
+                .query()
+                .eager('details')
+                .where('id', request.params.id)
+                .first()
+                .then(practice => {
+                    if (practice) {
+                        reply(practice);
+                    } else {
+                        reply(Boom.notFound(`No practice with ID ${request.params.id}`));
+                    }
+                })
+                .catch(err => Boom.badImplementation(err));
+        }
+    });
+
     next();
 };
 
