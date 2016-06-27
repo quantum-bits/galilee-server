@@ -4,9 +4,9 @@ Scripture Engagement Application: Server
 
 == Create a Database
 
-Create a Postgres database as follows:
+Create a Postgres database:
 
-* Name: `galilee`
+* Database name: `galilee`
 * User: `galilee`
 * Password: `pass`
 
@@ -16,7 +16,7 @@ to correspond to your preferences.
 
 == Create the Schema
 
-From the command line, run
+From the command line, run:
 
    npm run knex:migrate
 
@@ -25,7 +25,7 @@ in the current version of the software.
 
 == Load Fixture Data
 
-From the command line, run
+From the command line, run:
 
    npm run knex:seed
 
@@ -33,18 +33,22 @@ This should add sample data to the database.
 
 == Run the Server
 
-Run the `start` command from `package.json` as follows
+Run the `start` command from `package.json`:
 
    npm start
 
 You can also run a `nodemon` server,
-which will restart the server when any source file changes
+which will restart the server when any source file changes:
 
    npm run watch
 
 == Run Tests
 
-To run the complete test suite
+Run the complete test suite:
 
    npm test
 
+Run the suite with coverage output
+(currently to `foo-coverage.html`):
+
+   npm run test-cov
