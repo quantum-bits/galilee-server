@@ -7,13 +7,29 @@ module.exports = function (callback) {
     const server = new Hapi.Server();
 
     server.connection({
-        port: 3000
+        port: 3000,
+        routes: {
+            cors: true
+        }
     });
 
     server.register(
         [
             {register: require('./plugins/engagement')},
             {register: require('./plugins/lection')},
+            {register: require('./plugins/bible_gateway')},
+
+            {register: require('vision')},
+            {register: require('inert')},
+            {register: require('lout')},
+
+            {
+                register: require('blipp'),
+                options: {
+                    showStart: true,
+                    showAuth: true
+                }
+            },
 
             {
                 register: require('good'),
@@ -21,13 +37,13 @@ module.exports = function (callback) {
                     reporters: {
                         console: [
                             {
-                                module: 'good-console',
-                                args: [{
-                                    response: '*',
-                                    log: '*'
-                                }]
-                            }
-                        ]
+                                module: 'good-squeeze',
+                                name: 'Squeeze',
+                                args: [{log: '*', response: '*'}]
+                            },
+                            {
+                                module: 'good-console'
+                            }, 'stdout']
                     }
                 }
             }
