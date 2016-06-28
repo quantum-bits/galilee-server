@@ -37,7 +37,7 @@ Run the `start` command from `package.json`:
 
    npm start
 
-You can also run a `nodemon` server,
+You can also run the `nodemon` server,
 which will restart the server when any source file changes:
 
    npm run watch
