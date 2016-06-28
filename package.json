@@ -9,10 +9,8 @@
   "scripts": {
     "start": "node index.js",
     "watch": "nodemon index.js",
-
     "test": "lab --verbose --transform node_modules/lab-babel --globals __core-js_shared__",
     "test-cov": "lab --transform node_modules/lab-babel --globals __core-js_shared__ --reporter html --output foo-coverage.html",
-
     "knex:migrate": "knex migrate:latest",
     "knex:seed": "knex seed:run"
   },
@@ -42,6 +40,7 @@
     "pg": "^5.1.0",
     "rx": "^4.1.0",
     "superagent": "^2.0.0",
+    "tv": "^5.0.2",
     "vision": "^4.1.0"
   },
   "devDependencies": {

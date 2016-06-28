@@ -22,6 +22,13 @@ module.exports = function (callback) {
             {register: require('vision')},
             {register: require('inert')},
             {register: require('lout')},
+            {
+                register: require('tv'),
+                options: {
+                    host: 'localhost',
+                    port: 2020
+                }
+            },
 
             {
                 register: require('blipp'),
