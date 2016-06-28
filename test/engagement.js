@@ -85,7 +85,7 @@ lab.experiment('Test engagement endpoints', () => {
         server.inject(
             {
                 method: 'GET',
-                url: `/practices/${practice_id}`,
+                url: `/practices/${practice_id}`
             }, res => {
                 const response = JSON.parse(res.payload);
                 console.log("RES", JSON.stringify(response, null, 4));
@@ -100,7 +100,7 @@ lab.experiment('Test engagement endpoints', () => {
         server.inject(
             {
                 method: 'GET',
-                url: '/practices/0',
+                url: '/practices/0'
             }, res => {
                 const response = JSON.parse(res.payload);
                 console.log("RES", JSON.stringify(response, null, 4));

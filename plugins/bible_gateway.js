@@ -3,7 +3,6 @@
 const Boom = require('boom');
 const Joi = require('joi');
 const Request = require('superagent');
-const Rx = require('rx');
 
 const ACCESS_TOKEN_KEY = 'bg-access-token';
 

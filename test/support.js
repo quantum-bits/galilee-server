@@ -40,6 +40,6 @@ exports.init_test = function() {
     });
 
     return lab;
-}
+};
 
 exports.db = require('../db');
