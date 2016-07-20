@@ -50,7 +50,9 @@ module.exports = function (callback) {
                             },
                             {
                                 module: 'good-console'
-                            }, 'stdout']
+                            },
+                            'stdout'
+                        ]
                     }
                 }
             }
