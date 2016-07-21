@@ -1,75 +1,86 @@
 'use strict';
 
 const Practice = require('../../models/Practice');
+const Collection = require('../../models/Collection');
 
 exports.seed = function (knex, Promise) {
 
-    return knex('practice_detail').del()
-        .then(result => knex('practice').del())
+    return knex('practice').del()
         .then(result => {
             return Promise.all([
-                Practice
-                    .query()
-                    .insertWithRelated({
-                        title: "Lectio Divina",
-                        description: "Description of Lectio Divina",
-                        details: [
-                            {
-                                title: "Lectio Divina Tips",
-                                description: "Tips on Lectio Divina"
-                            },
-                            {
-                                title: "Lectio Divina in a small group",
-                                description: "Tips on Lectio Divina in a small group"
-                            },
-                            {
-                                title: "Lectio Divina resources",
-                                description: "Resources for Lectio Divina"
+                Practice.query().insertWithRelated({
+                    title: "Lectio Divina",
+                    description: "Description of Lectio Divina",
+                    resources: [
+                        {
+                            description: 'More Information',
+                            url: 'https://www.biblegateway.com/resources/scripture-engagement/lectio-divina/home',
+                            type: {
+                                title: 'Link',
+                                icon: 'link-icon',
+                                "#id": 'resource-type-link'
                             }
-                        ]
-                    }),
+                        }
+                    ]
+                }),
 
-                Practice
-                    .query()
-                    .insertWithRelated({
-                        title: "Praying Scripture",
-                        description: "Description of Praying Scripture",
-                        details: [
-                            {
-                                title: "Praying Scripture Tips",
-                                description: "Tips on Praying Scripture"
+                Practice.query().insertWithRelated({
+                    title: "Praying Scripture",
+                    description: "Description of Praying Scripture"
+                }),
+
+                Practice.query().insertWithRelated({
+                    title: "Journaling Scripture",
+                    description: "Description of Journaling Scripture"
+                }),
+
+                Collection.query().insertWithRelated({
+                    title: 'Miracles',
+                    description: 'Paintings of miracles',
+                    resources: [
+                        {
+                            description: 'Wedding at Cana',
+                            url: 'file://wedding.png',
+                            copyright_year: 2006,
+                            copyright_owner: 'Zondervan',
+                            tags: [
+                                {
+                                    title: 'Miracle',
+                                    "#id": 'resource-tag-miracle'
+                                },
+                                {
+                                    title: 'Wedding',
+                                }
+                            ],
+                            type: {
+                                title: 'Image',
+                                icon: 'image-icon',
+                                "#id": 'resource-type-image'
                             },
-                            {
-                                title: "Praying Scripture in a small group",
-                                description: "Tips on Praying Scripture in a small group"
-                            },
-                            {
-                                title: "Praying Scripture resources",
-                                description: "Resources for Praying Scripture"
+                        },
+                        {
+                            description: 'Feeding 5,000',
+                            url: 'file://loaves-and-fishes.png',
+                            copyright_year: 2012,
+                            copyright_owner: 'Zondervan',
+                            tags: [
+                                {
+                                    "#ref": 'resource-tag-miracle'
+                                },
+                                {
+                                    title: 'Loaves'
+                                },
+                                {
+                                    title: 'Fishes'
+                                }
+                            ],
+                            type: {
+                                "#ref": 'resource-type-image'
                             }
-                        ]
-                    }),
-                
-                Practice
-                    .query()
-                    .insertWithRelated({
-                        title: "Journaling Scripture",
-                        description: "Description of Journaling Scripture",
-                        details: [
-                            {
-                                title: "Journaling Scripture Tips",
-                                description: "Tips on Journaling Scripture"
-                            },
-                            {
-                                title: "Journaling Scripture in a small group",
-                                description: "Tips on Journaling Scripture in a small group"
-                            },
-                            {
-                                title: "Journaling Scripture resources",
-                                description: "Resources for Journaling Scripture"
-                            }
-                        ]
-                    })
+                        }
+
+                    ]
+                })
             ])
         });
 };

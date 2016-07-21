@@ -2,9 +2,9 @@
 
 const db = require('../db');
 
-class Practice extends db.Model {
+class Collection extends db.Model {
     static get tableName() {
-        return 'practice';
+        return 'collection';
     }
 
     static get relationMappings() {
@@ -13,10 +13,10 @@ class Practice extends db.Model {
                 relation: db.Model.ManyToManyRelation,
                 modelClass: __dirname + '/Resource',
                 join: {
-                    from: 'practice.id',
+                    from: 'collection.id',
                     through: {
-                        from: 'practice_resource.practice_id',
-                        to: 'practice_resource.resource_id'
+                        from: 'collection_resource.collection_id',
+                        to: 'collection_resource.resource_id'
                     },
                     to: 'resource.id'
                 }
@@ -25,10 +25,10 @@ class Practice extends db.Model {
                 relation: db.Model.ManyToManyRelation,
                 modelClass: __dirname + '/Pericope',
                 join: {
-                    from: 'practice.id',
+                    from: 'collection.id',
                     through: {
-                        from: 'pericope_practice.practice_id',
-                        to: 'pericope_practice.pericope_id',
+                        from: 'pericope_collection.collection_id',
+                        to: 'pericope_collection.pericope_id',
                         extra: ['advice']
                     },
                     to: 'pericope.id'
@@ -39,4 +39,4 @@ class Practice extends db.Model {
 
 }
 
-module.exports = Practice;
+module.exports = Collection;

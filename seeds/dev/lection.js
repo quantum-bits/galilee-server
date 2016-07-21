@@ -16,12 +16,14 @@ exports.seed = function (knex, Promise) {
             Lection.query().insertWithRelated({
                 type: {
                     title: 'Semi-continuous',
+                    "#id": 'lection-type-semi'
                 },
                 readings: [
                     {
                         seq: 1,
                         type: {
-                            title: 'First Reading'
+                            title: 'First Reading',
+                            "#id": 'reading-type-first'
                         },
                         pericopes: [
                             {
@@ -38,7 +40,8 @@ exports.seed = function (knex, Promise) {
                     {
                         seq: 2,
                         type: {
-                            title: 'Psalm'
+                            title: 'Psalm',
+                            "#id": 'reading-type-psalm'
                         },
                         pericopes: [
                             {
@@ -55,7 +58,8 @@ exports.seed = function (knex, Promise) {
                     {
                         seq: 3,
                         type: {
-                            title: 'Second Reading'
+                            title: 'Second Reading',
+                            "#id": 'reading-type-second'
                         },
                         pericopes: [
                             {
@@ -77,7 +81,8 @@ exports.seed = function (knex, Promise) {
                     {
                         seq: 4,
                         type: {
-                            title: 'Gospel'
+                            title: 'Gospel',
+                            "#id": 'reading-type-gospel'
                         },
                         pericopes: [
                             {
