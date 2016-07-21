@@ -17,8 +17,8 @@ class Lection extends db.Model {
                     to: 'reading.lection_id'
                 }
             },
-            lection_type: {
-                relation: db.Model.HasOneRelation,
+            type: {
+                relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/LectionType',
                 join: {
                     from: 'lection.lection_type_id',

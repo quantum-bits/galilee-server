@@ -2,7 +2,7 @@
 
 const db = require('../db');
 
-class LectionType extends db.model {
+class LectionType extends db.Model {
     static get tableName() {
         return 'lection_type';
     }
