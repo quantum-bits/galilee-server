@@ -7,6 +7,10 @@ class Pericope extends db.Model {
         return 'pericope';
     }
 
+    fullReference() {
+        return this.passages.map(p => p.reference()).join(' ');
+    }
+
     static get relationMappings() {
         return {
             reading: {

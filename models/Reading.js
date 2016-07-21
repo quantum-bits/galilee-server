@@ -10,7 +10,7 @@ class Reading extends db.Model {
     static get relationMappings() {
         return {
             lection: {
-                relation: db.Model.HasOneRelation,
+                relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/Lection',
                 join: {
                     from: 'reading.lection_id',

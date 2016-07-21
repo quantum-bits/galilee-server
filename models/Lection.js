@@ -7,6 +7,18 @@ class Lection extends db.Model {
         return 'lection';
     }
 
+    jsonReadings() {
+        return this.readings.map(reading => {
+            return {
+                title: reading.type.title,
+                description: reading.pericopes[0].fullReference(),
+                text: '',
+                practices: [],
+                resources: []
+            };
+        });
+    }
+
     static get relationMappings() {
         return {
             readings: {

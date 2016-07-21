@@ -7,6 +7,14 @@ class Passage extends db.Model {
         return 'passage';
     }
 
+    reference() {
+        if (this.optional) {
+            return `[${this.osis_ref}]`;
+        } else {
+            return this.osis_ref;
+        }
+    }
+
     static get relationMappings() {
         return {
             pericope: {
