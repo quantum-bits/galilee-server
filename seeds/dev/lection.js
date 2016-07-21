@@ -33,6 +33,62 @@ exports.seed = function (knex, Promise) {
                                         seq: 1,
                                         optional: false
                                     }
+                                ],
+                                practices: [
+                                    {
+                                        title: "Praying Scripture",
+                                        description: "Description of Praying Scripture"
+                                    }
+                                ],
+                                collections: [
+                                    {
+                                        title: 'Miracles',
+                                        description: 'Paintings of miracles',
+                                        advice: 'Consider these paintings',
+                                        resources: [
+                                            {
+                                                description: 'Wedding at Cana',
+                                                url: 'file://wedding.png',
+                                                copyright_year: 2006,
+                                                copyright_owner: 'Zondervan',
+                                                tags: [
+                                                    {
+                                                        title: 'Miracle',
+                                                        "#id": 'resource-tag-miracle'
+                                                    },
+                                                    {
+                                                        title: 'Wedding',
+                                                    }
+                                                ],
+                                                type: {
+                                                    title: 'Image',
+                                                    icon: 'image-icon',
+                                                    "#id": 'resource-type-image'
+                                                },
+                                            },
+                                            {
+                                                description: 'Feeding 5,000',
+                                                url: 'file://loaves-and-fishes.png',
+                                                copyright_year: 2012,
+                                                copyright_owner: 'Zondervan',
+                                                tags: [
+                                                    {
+                                                        "#ref": 'resource-tag-miracle'
+                                                    },
+                                                    {
+                                                        title: 'Loaves'
+                                                    },
+                                                    {
+                                                        title: 'Fishes'
+                                                    }
+                                                ],
+                                                type: {
+                                                    "#ref": 'resource-type-image'
+                                                }
+                                            }
+
+                                        ]
+                                    }
                                 ]
                             }
                         ]
