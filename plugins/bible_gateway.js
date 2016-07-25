@@ -49,29 +49,126 @@ exports.register = function (server, options, next) {
             });
     }
 
+    function bg_authenticate(username, password, next) {
+        delete_access_token().then(() => {
+            Request
+                .post('https://api.biblegateway.com/3/user/authenticate')
+                .type('form')
+                .send({username: username, password: password})
+                .accept('json')
+                .end(function (err, res) {
+                    if (err) {
+                        return next(Boom.serverUnavailable("Can't authenticate"), null);
+                    }
+                    const response = JSON.parse(res.text);
+                    if (response.hasOwnProperty('authentication')) {
+                        insert_access_token(response.authentication.access_token).then(tuple => {
+                            return next(null, response);
+                        })
+                    } else {
+                        return next(Boom.unauthorized('Authentication failed'), null);
+                    }
+                });
+        });
+    }
+
+    function bg_translations(next) {
+        get_access_token()
+            .then(token => {
+                if (!token) {
+                    return next(Boom.unauthorized('Must authenticate first'), null);
+                } else {
+                    Request
+                        .get('https://api.biblegateway.com/3/bible')
+                        .query({access_token: token})
+                        .end((err, res) => {
+                            if (err) {
+                                return next(Boom.serverUnavailable("Can't list translations"), null);
+                            }
+                            return next(null, JSON.parse(res.text));
+                        })
+                }
+            })
+    }
+
+    function bg_version_info(version, next) {
+        get_access_token()
+            .then(token => {
+                if (!token) {
+                    return next(Boom.unauthorized('Must authenticate first'), null);
+                } else {
+                    Request
+                        .get(`https://api.biblegateway.com/3/bible/${version}`)
+                        .query({access_token: token})
+                        .end((err, res) => {
+                            if (err) {
+                                return next(Boom.serverUnavailable("Can't get version information"), null);
+                            }
+                            const response = JSON.parse(res.text);
+                            if (!response.hasOwnProperty('data')) {
+                                return next(Boom.badData('Invalid version name'), null);
+                            }
+                            return next(null, response);
+                        });
+                }
+            });
+    }
+
+    function bg_passage(version, osis, next) {
+        get_access_token()
+            .then(token => {
+                if (!token) {
+                    return next(Boom.unauthorized('Must authenticate first'), null);
+                } else {
+                    Request
+                        .get(`https://api.biblegateway.com/3/bible/${osis}/${version}`)
+                        .query({access_token: token})
+                        .end((err, res) => {
+                            if (err) {
+                                return next(Boom.serverUnavailable("Can't get passage"), null);
+                            }
+                            const response = JSON.parse(res.text);
+                            if (!response.hasOwnProperty('data')) {
+                                return next(Boom.badData('Invalid version or passage'), null);
+                            }
+                            return next(null, response);
+                        });
+                }
+            });
+    }
+
+    server.method([
+        {
+            name: 'bg_authenticate',
+            method: bg_authenticate,
+            options: {}
+        },
+        {
+            name: 'bg_translations',
+            method: bg_translations,
+            options: {}
+        },
+        {
+            name: 'bg_version_info',
+            method: bg_version_info,
+            options: {}
+        },
+        {
+            name: 'bg_passage',
+            method: bg_passage,
+            options: {}
+        }
+    ]);
+
     server.route({
         method: 'POST',
         path: '/bg/authenticate',
         handler: function (request, reply) {
-            delete_access_token().then(() => {
-                Request
-                    .post('https://api.biblegateway.com/3/user/authenticate')
-                    .type('form')
-                    .send({username: request.payload.username, password: request.payload.password})
-                    .accept('json')
-                    .end(function (err, res) {
-                        if (err) {
-                            return reply(Boom.serverUnavailable("Can't authenticate"));
-                        }
-                        const response = JSON.parse(res.text);
-                        if (response.hasOwnProperty('authentication')) {
-                            insert_access_token(response.authentication.access_token).then(tuple => {
-                                return reply(response);
-                            })
-                        } else {
-                            return reply(Boom.unauthorized('Authentication failed'));
-                        }
-                    });
+            server.methods.bg_authenticate(request.payload.username, request.payload.password, (err, result) => {
+                if (err) {
+                    return reply(err);
+                }
+                return reply(result);
             });
         },
         config: {
@@ -89,22 +186,12 @@ exports.register = function (server, options, next) {
         method: 'GET',
         path: '/bg/translations',
         handler: function (request, reply) {
-            get_access_token()
-                .then(token => {
-                    if (!token) {
-                        return reply(Boom.unauthorized('Must authenticate first'));
-                    } else {
-                        Request
-                            .get('https://api.biblegateway.com/3/bible')
-                            .query({access_token: token})
-                            .end((err, res) => {
-                                if (err) {
-                                    return reply(Boom.serverUnavailable("Can't list translations"));
-                                }
-                                return reply(JSON.parse(res.text));
-                            });
-                    }
-                });
+            server.methods.bg_translations((err, result) => {
+                if (err) {
+                    return reply(err);
+                }
+                return reply(result);
+            });
         }
     });
 
@@ -112,26 +199,12 @@ exports.register = function (server, options, next) {
         method: 'GET',
         path: '/bg/translations/{version}',
         handler: function (request, reply) {
-            get_access_token()
-                .then(token => {
-                    if (!token) {
-                        return reply(Boom.unauthorized('Must authenticate first'));
-                    } else {
-                        Request
-                            .get(`https://api.biblegateway.com/3/bible/${request.params.version}`)
-                            .query({access_token: token})
-                            .end((err, res) => {
-                                if (err) {
-                                    return reply(Boom.serverUnavailable("Can't get version information"));
-                                }
-                                const response = JSON.parse(res.text);
-                                if (!response.hasOwnProperty('data')) {
-                                    return reply(Boom.badData('Invalid version name'));
-                                }
-                                return reply(response);
-                            });
-                    }
-                });
+            server.methods.bg_version_info(request.params.version, (err, result) => {
+                if (err) {
+                    return reply(err);
+                }
+                return reply(result);
+            })
         },
         config: {
             validate: {
@@ -145,27 +218,13 @@ exports.register = function (server, options, next) {
     server.route({
         method: 'GET',
         path: '/bg/translations/{version}/{osis}',
-        handler: function (request, reply) {
-            get_access_token()
-                .then(token => {
-                    if (!token) {
-                        return reply(Boom.unauthorized('Must authenticate first'));
-                    } else {
-                        Request
-                            .get(`https://api.biblegateway.com/3/bible/${request.params.osis}/${request.params.version}`)
-                            .query({access_token: token})
-                            .end((err, res) => {
-                                if (err) {
-                                    return reply(Boom.serverUnavailable("Can't get passage"));
-                                }
-                                const response = JSON.parse(res.text);
-                                if (!response.hasOwnProperty('data')) {
-                                    return reply(Boom.badData('Invalid version or passage'));
-                                }
-                                return reply(response);
-                            });
-                    }
-                });
+        handler: function(request, reply) {
+            server.methods.bg_passage(request.params.version, request.params.osis, (err, result) => {
+                if (err) {
+                    return reply(err);
+                }
+                return reply(result);
+            })
         },
         config: {
             validate: {
