@@ -18,6 +18,8 @@ module.exports = function (callback) {
             {register: require('./plugins/engagement')},
             {register: require('./plugins/lection')},
             {register: require('./plugins/bible_gateway')},
+            {register: require('./plugins/calendar')},
+            {register: require('./plugins/resource')},
 
             {register: require('vision')},
             {register: require('inert')},

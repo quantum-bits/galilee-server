@@ -9,7 +9,8 @@ exports.seed = function (knex, Promise) {
         knex('practice_resource').del(),
         knex('collection_resource').del(),
         knex('pericope_practice').del(),
-        knex('pericope_collection').del()
+        knex('pericope_collection').del(),
+        knex('pericope_date').del()
 
     ]).then(() => Promise.all([
         knex('resource').del(),
@@ -19,7 +20,8 @@ exports.seed = function (knex, Promise) {
         knex('pericope').del(),
         knex('reading').del(),
         knex('lection').del(),
-        knex('tag').del()
+        knex('tag').del(),
+        knex('calendar_date').del()
 
     ])).then(() => Promise.all([
         knex('resource_type').del(),

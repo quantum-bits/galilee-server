@@ -7,6 +7,18 @@ class Collection extends db.Model {
         return 'collection';
     }
 
+    allResources() {
+        return this.resources.map(resource => {
+            return {
+                description: resource.description,
+                url: resource.url,
+                copyright_year: resource.copyright_year,
+                copyright_owner: resource.copyright_owner,
+                tags: resource.tags.map(tag => tag.title)
+            }
+        })
+    }
+
     static get relationMappings() {
         return {
             resources: {

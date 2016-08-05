@@ -13,7 +13,7 @@ exports.register = function (server, options, next) {
             Lection
                 .query()
                 .first()
-                .eager('[type, readings.[type, pericopes.passages]]')
+                .eager('[type, readings.[type, pericopes.[passages, practices, collections.resources.[type, tags]]]]')
                 .then(lection => {
                     let promises = [];
                     lection.readings.map(reading => {
@@ -33,7 +33,7 @@ exports.register = function (server, options, next) {
                             })
                         })
                     })
-                    Promise.all(promises).then(res => reply(lection));
+                    Promise.all(promises).then(res => reply(lection.asJson()));
                 })
                 .catch(err => Boom.badImplementation(err));
         }

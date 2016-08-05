@@ -7,14 +7,15 @@ class Lection extends db.Model {
         return 'lection';
     }
 
-    jsonReadings() {
+    asJson() {
         return this.readings.map(reading => {
+            let pericope = reading.pericopes[0];
             return {
                 title: reading.type.title,
-                description: reading.pericopes[0].fullReference(),
-                text: '',
-                practices: [],
-                resources: []
+                description: pericope.fullReference(),
+                text: pericope.fullText(),
+                practices: pericope.allPractices(),
+                resource_collections: pericope.allCollections(),
             };
         });
     }

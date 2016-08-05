@@ -8,7 +8,33 @@ class Pericope extends db.Model {
     }
 
     fullReference() {
-        return this.passages.map(p => p.reference()).join(' ');
+        return this.passages.map(passage => passage.reference()).join(' ');
+    }
+
+    fullText() {
+        return this.passages.map(passage => passage.text).join(' ');
+    }
+
+    allPractices() {
+        return this.practices.map(practice => {
+            return {
+                title: practice.title,
+                description: practice.description,
+                advice: practice.advice
+            };
+        })
+    }
+
+    allCollections() {
+        return this.collections.map(collection => {
+            return {
+                title: collection.title,
+                description: collection.description,
+                advice: collection.advice,
+                resources: collection.allResources()
+            };
+        })
+
     }
 
     static get relationMappings() {
@@ -60,4 +86,5 @@ class Pericope extends db.Model {
 
 }
 
-module.exports = Pericope;
+module
+    .exports = Pericope;
