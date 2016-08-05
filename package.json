@@ -41,6 +41,7 @@
     "rx": "^4.1.0",
     "superagent": "^2.0.0",
     "tv": "^5.0.2",
+    "uuid": "^2.0.2",
     "vision": "^4.1.0"
   },
   "devDependencies": {
