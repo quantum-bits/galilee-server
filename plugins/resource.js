@@ -9,13 +9,21 @@ const Joi = require('Joi');
 
 const ResourceType = require('../models/ResourceType');
 const Collection = require('../models/Collection');
+const Config = require('../models/Config');
 
 exports.register = function (server, options, next) {
+
+    const upload_root_promise = Config
+        .query()
+        .where('key', 'upload-root')
+        .first()
+        .then(result => result.value)
+        .catch(err => Boom.badImplementation("No upload root configured", err));
 
     server.route({
         method: 'GET',
         path: '/collections',
-        handler: function(request, reply) {
+        handler: function (request, reply) {
             Collection
                 .query()
                 .then(collections => reply(collections))
@@ -33,25 +41,32 @@ exports.register = function (server, options, next) {
         handler: function (request, reply) {
             const uploadName = path.basename(request.payload.file.filename);
             const uploadPath = request.payload.file.path;
-            const destination = path.join(__dirname, '../resources', uploadName);
 
-            const unique_id = uuid.v4();
+            Config.query()
+                .where('key', 'upload-root')
+                .first()
+                .then(result => {
+                    const upload_root = result.value;
+                    const destination = path.join(__dirname, upload_root, uploadName);
+                    const unique_id = uuid.v4();
 
-            server.log('info', `upload name ${uploadName}`);
-            server.log('info', `upload path ${uploadPath}`);
-            server.log('info', `destination ${destination}`);
-            server.log('info', `uuid        ${unique_id}`);
+                    server.log('info', `upload name ${uploadName}`);
+                    server.log('info', `upload path ${uploadPath}`);
+                    server.log('info', `destination ${destination}`);
+                    server.log('info', `uuid        ${unique_id}`);
 
-            fs.rename(uploadPath, destination, err => {
-                if (err) {
-                    reply(Boom.badImplementation("Can't rename uploaded file", err));
-                }
+                    fs.rename(uploadPath, destination, err => {
+                        if (err) {
+                            reply(Boom.badImplementation("Can't rename uploaded file", err));
+                        }
 
-                reply({
-                    status: 'ok',
-                    resourceId: unique_id
+                        reply({
+                            status: 'ok',
+                            resourceId: unique_id
+                        });
+                    });
                 });
-            });
+
         },
         config: {
             description: 'Add a new resource',
@@ -90,6 +105,7 @@ exports.register = function (server, options, next) {
     });
 
     next();
-};
+}
+;
 
 exports.register.attributes = {name: 'resources', version: '0.0.1'};

@@ -1,5 +1,7 @@
 'use strict';
 
+const uuid = require('uuid');
+
 const Lection = require('../../models/Lection');
 
 exports.seed = function (knex, Promise) {
@@ -10,13 +12,14 @@ exports.seed = function (knex, Promise) {
         knex('collection_resource').del(),
         knex('pericope_practice').del(),
         knex('pericope_collection').del(),
-        knex('pericope_date').del()
+        knex('pericope_date').del(),
+
+        knex('passage').del(),
 
     ]).then(() => Promise.all([
         knex('resource').del(),
         knex('practice').del(),
         knex('collection').del(),
-        knex('passage').del(),
         knex('pericope').del(),
         knex('reading').del(),
         knex('lection').del(),
@@ -61,8 +64,11 @@ exports.seed = function (knex, Promise) {
                                 advice: "Here's how",
                                 resources: [
                                     {
-                                        description: 'More Information',
-                                        url: 'https://www.biblegateway.com/resources/scripture-engagement/lectio-divina/home',
+                                        id: uuid(),
+                                        details: {
+                                            url: 'https://www.biblegateway.com/resources/scripture-engagement/lectio-divina/home'
+                                        },
+                                        caption: 'More Information',
                                         type: {
                                             title: 'Link',
                                             icon: 'link-icon',
@@ -74,13 +80,17 @@ exports.seed = function (knex, Promise) {
                         ],
                         collections: [
                             {
+                                id: uuid(),
                                 title: 'Miracles',
                                 description: 'Paintings of miracles',
                                 advice: 'Consider these paintings',
                                 resources: [
                                     {
-                                        description: 'Wedding at Cana',
-                                        url: 'file://wedding.png',
+                                        id: uuid(),
+                                        details: {
+                                            filename: 'cana.png'
+                                        },
+                                        caption: 'Wedding at Cana',
                                         copyright_year: 2006,
                                         copyright_owner: 'Zondervan',
                                         tags: [
@@ -99,8 +109,11 @@ exports.seed = function (knex, Promise) {
                                         },
                                     },
                                     {
-                                        description: 'Feeding 5,000',
-                                        url: 'file://loaves-and-fishes.png',
+                                        id: uuid(),
+                                        details: {
+                                            filename: 'feeding5000.jpeg'
+                                        },
+                                        caption: 'Feeding 5,000',
                                         copyright_year: 2012,
                                         copyright_owner: 'Zondervan',
                                         tags: [
