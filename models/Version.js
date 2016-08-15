@@ -2,24 +2,23 @@
 
 const db = require('../db');
 
-class Cycle extends db.Model {
+class Version extends db.Model {
     static get tableName() {
-        return 'cycle';
+        return 'version';
     }
 
     static get relationMappings() {
         return {
-            years: {
+            users: {
                 relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/CalendarYear',
+                modelClass: __dirname + '/User',
                 join: {
-                    from: 'cycle.id',
-                    to: 'calendar_year.cycle_id'
+                    from: 'version.id',
+                    to: 'user.preferred_version_id'
                 }
             }
         }
     }
-
 }
 
-module.exports = Cycle;
+module.exports = Version;

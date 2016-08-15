@@ -1,17 +1,54 @@
 'use strict';
 
+const User = require('../../models/User');
+
 exports.seed = function (knex, Promise) {
-    return knex.schema.dropTableIfExists('version')
+    return knex('version').del()
 
         .then(Promise.all([
-            knex.schema.dropTableIfExists('user_permission'),
-            knex.schema.dropTableIfExists('permission'),
-            knex.schema.dropTableIfExists('user')
+            knex('user_permission').del(),
+            knex('permission').del(),
+            knex('user').del()
         ]))
 
-        .then(() => {
-
-        })
+        .then(() => User.query().insertWithRelated(
+            [
+                {
+                    email: 'alpha@example.com',
+                    password: 'foo',
+                    first_name: 'Alpha',
+                    last_name: 'User',
+                    version: {
+                        code: 'KJV',
+                        title: 'King James Version'
+                    }
+                },
+                {
+                    email: 'super@example.com',
+                    password: 'foo',
+                    first_name: 'Super',
+                    last_name: 'User',
+                    version: {
+                        code: 'ESV',
+                        title: 'English Standard Version'
+                    },
+                    permissions: [
+                        {
+                            id: 'EDIT_RES',
+                            title: 'Edit Resources'
+                        },
+                        {
+                            id: 'EDIT_PRAC',
+                            title: 'Edit Practices',
+                        },
+                        {
+                            id: 'ADMIN',
+                            title: 'Administrator'
+                        }
+                    ]
+                }
+            ])
+        )
 
         .catch(err => console.log('There was a problem', err));
 };
