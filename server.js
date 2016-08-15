@@ -24,6 +24,8 @@ module.exports = function (callback) {
             {register: require('vision')},
             {register: require('inert')},
             {register: require('lout')},
+            {register: require('hapi-auth-jwt')},
+
             {
                 register: require('tv'),
                 options: {
@@ -60,7 +62,19 @@ module.exports = function (callback) {
             }
         ],
 
-        err => callback(err, server)
+        err => {
+            if (err) {
+                throw(err);
+            }
+
+            server.auth.strategy('jwt', 'jwt', {
+                // TODO: Store this in a configuration file!
+                key: 'MY SUPER SECRET KEY',
+                verifyOptions: { algorithms: ['HS256']}
+            });
+
+            callback(err, server);
+        }
     );
 
 };
