@@ -14,7 +14,6 @@ const Config = require('../models/Config');
 
 exports.register = function (server, options, next) {
 
-    // Non-capturing group
     const extension_re = /^\.(?:gif|jpe?g|png)$/;
 
     server.route({
@@ -166,7 +165,6 @@ exports.register = function (server, options, next) {
     });
 
     next();
-}
-;
+};
 
 exports.register.attributes = {name: 'resources', version: '0.0.1'};
