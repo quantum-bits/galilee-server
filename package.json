@@ -27,6 +27,7 @@
   "dependencies": {
     "bcrypt": "^1.0.1",
     "blipp": "^2.3.0",
+    "bluebird": "^3.4.7",
     "boom": "^4.2.0",
     "good": "^7.0.1",
     "good-console": "^6.1.2",

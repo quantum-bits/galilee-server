@@ -2,8 +2,10 @@
 
 const Boom = require('boom');
 const Joi = require('Joi');
-const JWT = require('jsonwebtoken');
 
+const User = require('../models/User');
+
+const JWT = require('jsonwebtoken');
 const JWT_SECRET_KEY = 'My Super Secret Key';   // TODO: Store in config file!
 
 exports.register = function (server, options, next) {
@@ -13,10 +15,10 @@ exports.register = function (server, options, next) {
         return callback(null, true);
     };
 
-    function createToken() {
+    function createToken(email) {
         return JWT.sign(
             {
-                key: 'a value'
+                email: email
             },
             JWT_SECRET_KEY,
             {
@@ -37,7 +39,22 @@ exports.register = function (server, options, next) {
             method: 'POST',
             path: '/authenticate',
             handler: function (request, reply) {
-                reply({ id_token: createToken()});
+                let email = request.payload.email;
+                let password = request.payload.password;
+
+                User
+                    .query()
+                    .where('email', email)
+                    .first()
+                    .then(user => user.checkPassword(password))
+                    .then(isValid => {
+                        if (isValid) {
+                            reply({id_token: createToken(email)});
+                        } else {
+                            reply(Boom.badRequest('Invalid credentials'));
+                        }
+                    })
+                    .catch(err => Boom.badImplementation(err));
             },
             config: {
                 description: 'Authenticate user',
@@ -53,6 +70,37 @@ exports.register = function (server, options, next) {
             config: {
                 auth: 'jwt'
             },
+        },
+        {
+            method: 'GET',
+            path: '/users',
+            handler: function (request, reply) {
+                User
+                    .query()
+                    .then(users => reply(users))
+                    .catch(err => Boom.badImplementation("Can't fetch users", err));
+            },
+            config: {
+                description: 'Retrieve all users'
+            }
+        },
+        {
+            method: 'GET',
+            path: '/users/{email}',
+            handler: function (request, reply) {
+                User
+                    .query()
+                    .where('email', request.params.email)
+                    .first()
+                    .then(user => {
+                        if (user) {
+                            reply(user);
+                        } else {
+                            reply(Boom.notFound(`No user with ID ${request.params.email}`));
+                        }
+                    })
+                    .catch(err => Boom.badImplementation(err));
+            }
         }
     ]);
 

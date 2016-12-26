@@ -2,6 +2,17 @@
 
 const db = require('../db');
 
+const Boom = require('boom');
+const Promise = require('bluebird');
+const bcrypt = Promise.promisifyAll(require('bcrypt'));
+
+// Hash the password; return a promise containing the hashed password.
+function hashPassword(password) {
+    return bcrypt.genSalt(10)
+        .then(salt => bcrypt.hash(password, salt))
+        .catch(err => Boom.badRequest('Password processing'));
+}
+
 class User extends db.Model {
     static get tableName() {
         return 'user';
@@ -30,6 +41,22 @@ class User extends db.Model {
                 }
             }
         }
+    }
+
+    // Check the users's password against the parameter.
+    // Returns a promise with and 'isValid' value.
+    checkPassword(password) {
+        return bcrypt.compare(password, this.password);
+    }
+
+    // Encrypt the password before insertion into the database.
+    $beforeInsert(queryContext) {
+        return hashPassword(this.password).then(hash => this.password = hash);
+    }
+
+    // Encrypt the password before updating to the database.
+    $beforeUpdate(opt, queryContext) {
+        return hashPassword(this.password).then(hash => this.password = hash);
     }
 }
 
