@@ -41,17 +41,23 @@ exports.register = function (server, options, next) {
             handler: function (request, reply) {
                 let email = request.payload.email;
                 let password = request.payload.password;
+                const INVALID_MSGE = 'Invalid credentials';
 
                 User
                     .query()
                     .where('email', email)
                     .first()
-                    .then(user => user.checkPassword(password))
+                    .then(user => {
+                        if (user) {
+                            return user.checkPassword(password);
+                        }
+                        return reply(Boom.badRequest(INVALID_MSGE));
+                    })
                     .then(isValid => {
                         if (isValid) {
-                            reply({id_token: createToken(email)});
+                            return reply({id_token: createToken(email)});
                         } else {
-                            reply(Boom.badRequest('Invalid credentials'));
+                            return reply(Boom.badRequest(INVALID_MSGE));
                         }
                     })
                     .catch(err => Boom.badImplementation(err));
