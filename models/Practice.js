@@ -21,17 +21,17 @@ class Practice extends db.Model {
                     to: 'resource.id'
                 }
             },
-            pericopes: {
+            readings: {
                 relation: db.Model.ManyToManyRelation,
-                modelClass: __dirname + '/Pericope',
+                modelClass: __dirname + '/reading',
                 join: {
                     from: 'practice.id',
                     through: {
-                        from: 'pericope_practice.practice_id',
-                        to: 'pericope_practice.pericope_id',
+                        from: 'reading_practice.practice_id',
+                        to: 'reading_practice.reading_id',
                         extra: ['advice']
                     },
-                    to: 'pericope.id'
+                    to: 'reading.id'
                 }
             }
         }

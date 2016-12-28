@@ -2,23 +2,28 @@
 
 const db = require('../db');
 
-class ReadingType extends db.Model {
+class ReadingDay extends db.Model {
     static get tableName() {
-        return 'reading_type';
+        return 'reading_day';
     }
-    
+
+    static get idColumn() {
+        return 'date';
+    }
+
     static get relationMappings() {
         return {
             readings: {
                 relation: db.Model.HasManyRelation,
                 modelClass: __dirname + '/Reading',
                 join: {
-                    from: 'reading_type.id',
-                    to: 'reading.reading_type_id'
+                    from: 'reading_day.date',
+                    to: 'reading.for'
                 }
             }
         }
     }
+
 }
 
-module.exports = ReadingType;
+module.exports = ReadingDay;

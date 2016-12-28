@@ -33,17 +33,17 @@ class Collection extends db.Model {
                     to: 'resource.id'
                 }
             },
-            pericopes: {
+            readings: {
                 relation: db.Model.ManyToManyRelation,
-                modelClass: __dirname + '/Pericope',
+                modelClass: __dirname + '/Reading',
                 join: {
                     from: 'collection.id',
                     through: {
-                        from: 'pericope_collection.collection_id',
-                        to: 'pericope_collection.pericope_id',
+                        from: 'reading_collection.collection_id',
+                        to: 'reading_collection.reading_id',
                         extra: ['advice']
                     },
-                    to: 'pericope.id'
+                    to: 'reading.id'
                 }
             }
         }

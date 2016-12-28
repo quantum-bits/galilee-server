@@ -9,28 +9,38 @@ class Reading extends db.Model {
 
     static get relationMappings() {
         return {
-            lection: {
+            reading_day: {
                 relation: db.Model.BelongsToOneRelation,
-                modelClass: __dirname + '/Lection',
+                modelClass: __dirname + '/ReadingDay',
                 join: {
-                    from: 'reading.lection_id',
-                    to: 'lection.id'
+                    from: 'reading.for',
+                    to: 'reading_day.date'
                 }
             },
-            type: {
-                relation: db.Model.BelongsToOneRelation,
-                modelClass: __dirname + '/ReadingType',
-                join: {
-                    from: 'reading.reading_type_id',
-                    to: 'reading_type.id'
-                }
-            },
-            pericopes: {
-                relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/Pericope',
+            collections: {
+                relation: db.Model.ManyToManyRelation,
+                modelClass: __dirname + '/Collection',
                 join: {
                     from: 'reading.id',
-                    to: 'pericope.reading_id'
+                    through: {
+                        from: 'reading_collection.reading_id',
+                        to: 'reading_collection.collection_id',
+                        extra: ['advice']
+                    },
+                    to: 'collection.id'
+                }
+            },
+            practices: {
+                relation: db.Model.ManyToManyRelation,
+                modelClass: __dirname + '/Practice',
+                join: {
+                    from: 'reading.id',
+                    through: {
+                        from: 'reading_practice.reading_id',
+                        to: 'reading_practice.practice_id',
+                        extra: ['advice']
+                    },
+                    to: 'practice.id'
                 }
             }
         }

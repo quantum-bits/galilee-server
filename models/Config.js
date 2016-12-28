@@ -6,6 +6,7 @@ class Config extends db.Model {
     static get tableName() {
         return 'config';
     }
+
     static get idColumn() {
         return 'key';
     }

@@ -48,18 +48,18 @@ exports.up = function (knex, Promise) {
             table.primary(['resource_id', 'tag_id']);
         }),
 
-        knex.schema.createTableIfNotExists('pericope_collection', table => {
-            table.integer('pericope_id').references('pericope.id');
+        knex.schema.createTableIfNotExists('reading_collection', table => {
+            table.integer('reading_id').references('reading.id');
             table.uuid('collection_id').references('collection.id');
             table.text('advice').notNullable();
-            table.primary(['pericope_id', 'collection_id']);
+            table.primary(['reading_id', 'collection_id']);
         })
     ])
 };
 
 exports.down = function (knex, Promise) {
     return Promise.all([
-        knex.schema.dropTableIfExists('pericope_collection'),
+        knex.schema.dropTableIfExists('reading_collection'),
         knex.schema.dropTableIfExists('collection_resource'),
         knex.schema.dropTableIfExists('practice_resource'),
         knex.schema.dropTableIfExists('collection'),
