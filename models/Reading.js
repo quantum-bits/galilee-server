@@ -3,6 +3,27 @@
 const db = require('../db');
 
 class Reading extends db.Model {
+    allPractices() {
+        return this.practices.map(practice => {
+            return {
+                title: practice.title,
+                description: practice.description,
+                advice: practice.advice
+            };
+        });
+    }
+
+    allCollections() {
+        return this.collections.map(collection => {
+            return {
+                title: collection.title,
+                description: collection.description,
+                advice: collection.advice,
+                resources: collection.allResources()
+            };
+        });
+    }
+
     static get tableName() {
         return 'reading';
     }

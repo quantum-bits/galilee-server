@@ -15,14 +15,13 @@ module.exports = function (callback) {
 
     server.register(
         [
-            {register: require('./plugins/engagement')},
-            {register: require('./plugins/lection')},
-            {register: require('./plugins/bible_gateway')},
-            {register: require('./plugins/calendar')},
-            {register: require('./plugins/resource')},
-
             {register: require('hapi-auth-jwt2')},
             {register: require('./plugins/authentication')},
+
+            {register: require('./plugins/bible_gateway')},
+            {register: require('./plugins/engagement')},
+            {register: require('./plugins/reading')},
+            {register: require('./plugins/resource')},
 
             {register: require('vision')},
             {register: require('inert')},

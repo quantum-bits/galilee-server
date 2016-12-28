@@ -3,6 +3,18 @@
 const db = require('../db');
 
 class ReadingDay extends db.Model {
+    asJson() {
+        return this.readings.map(reading => {
+            return {
+                title: 'A Reading',
+                description: reading.std_ref,
+                text: reading.text,
+                practices: reading.allPractices(),
+                collections: reading.allCollections(),
+            };
+        });
+    }
+
     static get tableName() {
         return 'reading_day';
     }
@@ -23,7 +35,6 @@ class ReadingDay extends db.Model {
             }
         }
     }
-
 }
 
 module.exports = ReadingDay;

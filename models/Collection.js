@@ -3,10 +3,6 @@
 const db = require('../db');
 
 class Collection extends db.Model {
-    static get tableName() {
-        return 'collection';
-    }
-
     allResources() {
         return this.resources.map(resource => {
             return {
@@ -17,6 +13,10 @@ class Collection extends db.Model {
                 tags: resource.tags.map(tag => tag.title)
             }
         })
+    }
+
+    static get tableName() {
+        return 'collection';
     }
 
     static get relationMappings() {
