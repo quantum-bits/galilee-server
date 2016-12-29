@@ -6,6 +6,7 @@ class ReadingDay extends db.Model {
     asJson() {
         return this.readings.map(reading => {
             return {
+                id: reading.id,
                 title: 'A Reading',
                 description: reading.std_ref,
                 text: reading.text,

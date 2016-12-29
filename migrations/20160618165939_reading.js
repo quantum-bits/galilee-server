@@ -15,6 +15,7 @@ exports.up = function (knex, Promise) {
             table.integer('seq');
             table.string('std_ref');
             table.string('osis_ref');
+            table.text('passage');
         })
 
     ]);
