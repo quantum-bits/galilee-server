@@ -21,7 +21,22 @@ exports.seed = function (knex, Promise) {
                     version: {
                         code: 'KJV',
                         title: 'King James Version'
-                    }
+                    },
+                    groups: [
+                        {
+                            name: 'Second North Euler',
+                            organization: {
+                                "#id": "TU",
+                                name: 'Taylor University'
+                            }
+                        },
+                        {
+                            name: 'SNAS',
+                            organization: {
+                                "#ref": "TU"
+                            }
+                        }
+                    ]
                 },
                 {
                     email: 'super@example.com',

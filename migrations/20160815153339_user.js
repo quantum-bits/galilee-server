@@ -16,7 +16,7 @@ exports.up = function (knex, Promise) {
         knex.schema.createTableIfNotExists('organization', table => {
            table.increments('id');
            table.string('name').notNullable();
-           table.dateTime('create_at').defaultTo(knex.raw('NOW()'));
+           table.timestamps();
         }),
 
         knex.schema.createTableIfNotExists('group', table => {

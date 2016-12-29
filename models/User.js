@@ -39,6 +39,18 @@ class User extends db.Model {
                     },
                     to: 'permission.id'
                 }
+            },
+            groups: {
+                relation: db.Model.ManyToManyRelation,
+                modelClass: __dirname + '/Group',
+                join: {
+                    from: 'user.id',
+                    through: {
+                        from: 'membership.user_id',
+                        to: 'membership.group_id'
+                    },
+                    to: 'group.id'
+                }
             }
         }
     }
