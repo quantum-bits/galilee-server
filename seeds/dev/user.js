@@ -14,13 +14,13 @@ exports.seed = function (knex, Promise) {
         .then(() => User.query().insertWithRelated(
             [
                 {
-                    email: 'alpha@example.com',
-                    password: 'foo',
-                    first_name: 'Alpha',
-                    last_name: 'User',
+                    email: 'teacher@example.com',
+                    password: 'password',
+                    first_name: 'Penny',
+                    last_name: 'Lane',
                     version: {
-                        code: 'KJV',
-                        title: 'King James Version'
+                        code: 'NKJV',
+                        title: 'New King James Version'
                     },
                     groups: [
                         {
@@ -39,13 +39,31 @@ exports.seed = function (knex, Promise) {
                     ]
                 },
                 {
-                    email: 'super@example.com',
-                    password: 'foo',
-                    first_name: 'Super',
-                    last_name: 'User',
+                    email: 'student@example.com',
+                    password: 'password',
+                    first_name: 'Ferris',
+                    last_name: 'Wheeler',
                     version: {
+                        '#id': 'version-esv',
                         code: 'ESV',
                         title: 'English Standard Version'
+                    },
+                    groups: [
+                        {
+                            name: 'The Brotherhood',
+                            organization: {
+                                "#ref": "TU",
+                            }
+                        }
+                    ]
+                },
+                {
+                    email: 'admin@example.com',
+                    password: 'password',
+                    first_name: 'Royal',
+                    last_name: 'Payne',
+                    version: {
+                        '#ref': 'version-esv'
                     },
                     permissions: [
                         {
