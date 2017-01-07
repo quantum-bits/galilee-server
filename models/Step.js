@@ -9,20 +9,16 @@ class Step extends db.Model {
 
     static get relationMappings() {
         return {
-            practice: {
-                relation: db.Model.BelongsToOneRelation,
-                modelClass: __dirname + '/Practice',
+            applications: {
+                relation: db.Model.ManyToManyRelation,
+                modelClass: __dirname + '/Application',
                 join: {
-                    from: 'practice_id',
-                    to: 'practice.id'
-                }
-            },
-            reading: {
-                relation: db.Model.BelongsToOneRelation,
-                modelClass: __dirname + '/Reading',
-                join: {
-                    from: 'reading_id',
-                    to: 'reading.id'
+                    from: 'step.id',
+                    through: {
+                        from: 'application_step.step_id',
+                        to: 'application_step.application_id'
+                    },
+                    to: 'application.id'
                 }
             },
             resources: {

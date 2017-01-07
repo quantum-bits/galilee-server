@@ -38,17 +38,12 @@ class Reading extends db.Model {
                     to: 'reading_day.date'
                 }
             },
-            collections: {
-                relation: db.Model.ManyToManyRelation,
-                modelClass: __dirname + '/Collection',
+            applications: {
+                relation: db.Model.HasManyRelation,
+                modelClass: __dirname + '/Application',
                 join: {
                     from: 'reading.id',
-                    through: {
-                        from: 'reading_collection.reading_id',
-                        to: 'reading_collection.collection_id',
-                        extra: ['advice']
-                    },
-                    to: 'collection.id'
+                    to: 'application.reading_id'
                 }
             },
             practices: {
@@ -57,9 +52,8 @@ class Reading extends db.Model {
                 join: {
                     from: 'reading.id',
                     through: {
-                        from: 'reading_practice.reading_id',
-                        to: 'reading_practice.practice_id',
-                        extra: ['advice']
+                        from: 'application.reading_id',
+                        to: 'application.practice_id'
                     },
                     to: 'practice.id'
                 }

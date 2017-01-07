@@ -9,23 +9,22 @@ class Practice extends db.Model {
 
     static get relationMappings() {
         return {
-            steps: {
+            applications: {
                 relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/Step',
+                modelClass: __dirname + '/Application',
                 join: {
                     from: 'practice.id',
-                    to: 'step.id'
+                    to: 'application.practice_id'
                 }
             },
             readings: {
                 relation: db.Model.ManyToManyRelation,
-                modelClass: __dirname + '/reading',
+                modelClass: __dirname + '/Reading',
                 join: {
                     from: 'practice.id',
                     through: {
-                        from: 'reading_practice.practice_id',
-                        to: 'reading_practice.reading_id',
-                        extra: ['advice']
+                        from: 'application.practice_id',
+                        to: 'application.reading_id',
                     },
                     to: 'reading.id'
                 }
