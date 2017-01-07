@@ -11,8 +11,8 @@ We use the following terms with specific intent.
   Scripture passage around which everything orbits.
 * **Practice**
   Shorthand for _Scripture Engagement Practice_
-* **Step** 
-  Incremental guidance 
+* **Step**
+  Incremental guidance
   about how to apply a practice to a reading
 * **Resource**
   Image, audio, or video.
@@ -30,7 +30,7 @@ We use the following terms with specific intent.
   [Sacred Space](http://www.sacredspace.ie/)
   segments daily prayer into
   _presence_, _freedom_, _consciousness_, etc.)
-* Our intial idea for a __resource__ 
+* Our initial idea for a __resource__
   was more generic than image, audio, or video
   (e.g., links to other web pages).
   Phil clarified that only these three types of resources
@@ -43,35 +43,35 @@ We use the following terms with specific intent.
   (e.g., _Matthew 5.1-12_ or _Luke 2.1-5, 9-11_).
 * A __reading__ has one or more associated __practices__.
 * A __practice__ comprises
-  1. A __summary__ of the practice that can serve as a _quick_,
+    1. A __summary__ of the practice that can serve as a _quick_,
      generic reminder of what the practice entails;
      not tied to a specific reading;
      displayed to the user as an introductory
      page when they choose a practice for a reading;
      user can instruct the system to
      skip this page on a per-practice basis.
-  2. A __description__ of the practice that goes into more detail;
+    2. A __description__ of the practice that goes into more detail;
      corresponds basically to the static descriptions of
      practices currently on Bible Gateway;
      should be widely accessible
      form a "help" button or icon
-  3. The __steps__ that make up the practice;
+    3. The __steps__ that make up the practice;
      steps provide incremental direction to the user
      on how to apply the practice to the reading;
      there may be one or more such steps per practice;
      if there is more than one step,
-     users will be able to advance 
-     at their own pace 
+     users will be able to advance
+     at their own pace
      from one step to the next
      (e.g., using left and right arrow images)
 * A __step__ contains
-  1. Zero or more __resources__
-  1. Arbitrary text detailing the step;
+    1. Zero or more __resources__
+    1. Arbitrary text detailing the step;
      if the step contains one or more resource,
      the text would likely describe how to use the resource
      as part of the practice
      (e.g., "Consider how this painting expresses...").
-* A __resource__ may be re-used arbitrarily 
+* A __resource__ may be re-used arbitrarily
   (in different steps and in different practices);
   when the user initially views the step,
   any resource it contains will be displayed
@@ -79,11 +79,11 @@ We use the following terms with specific intent.
   in a manner graphically connected to its
   associated step;
   users can "expand" the  resource as follows:
-  1. _View an image_ by expanding it on the screen
+    1. _View an image_ by expanding it on the screen
      (e.g., with a "light box" effect)
-  2. _Watch a video_ by expanding it on the screen
+    2. _Watch a video_ by expanding it on the screen
      or making it full screen
-  3. _Hear a song_ by clicking on its icon
+    3. _Hear a song_ by clicking on its icon
 
 ## Applying Practices
 
@@ -102,13 +102,13 @@ For example, the _Singing Scripture_ practice
 for one reading may highlight two songs,
 each discussed and linked in its own step.
 For another reading,
-the same practice may only have 
+the same practice may only have
 one song associated with it,
 and therefore only one step.
 
 ### Tools for Applying Practices
 
-We don't anticipate 
+We don't anticipate
 that _every_ step
 of _every_ practice
 for _every_ reading
@@ -125,7 +125,7 @@ by which authors of content can, for example:
    for each practice.
 
 Before implementing any of these capabilities,
-we need more experience with how content is created. 
+we need more experience with how content is created.
 Such features will _not_ be in the initial release
 of the system.
 
@@ -143,7 +143,7 @@ group-specific resources.
 Interaction between group members on the site
 takes place in the context of a group forum,
 in which group members can post comments.
-In Galilee, 
+In Galilee,
 posts will also allow the user to include
 a resource.
 This design provides a satisfying symmetry:
@@ -177,6 +177,6 @@ when a user creates a new journal entry:
 1. Current reading
 1. If the user is viewing a step of a practice,
    the current practice and step
-   
+
 When a user reviews previous journal entries,
 this information will be accessible.

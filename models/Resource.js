@@ -29,28 +29,16 @@ class Resource extends db.Model {
                     to: 'resource_type.id'
                 }
             },
-            practices: {
+            steps: {
                 relation: db.Model.ManyToManyRelation,
-                modelClass: __dirname + '/Practice',
+                modelClass: __dirname + '/Step',
                 join: {
                     from: 'resource.id',
                     through: {
-                        from: 'practice_resource.resource_id',
-                        to: 'practice_resource.practice_id'
+                        from: 'step_resource.resource_id',
+                        to: 'step_resource.step_id'
                     },
-                    to: 'practice.id'
-                }
-            },
-            collections: {
-                relation: db.Model.ManyToManyRelation,
-                modelClass: __dirname + '/Collection',
-                join: {
-                    from: 'resource.id',
-                    through: {
-                        from: 'collection_resource.resource_id',
-                        to: 'collection_resource.collection_id'
-                    },
-                    to: 'collection.id'
+                    to: 'step.id'
                 }
             }
         }
