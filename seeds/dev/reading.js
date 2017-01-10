@@ -6,23 +6,29 @@ const ReadingDay = require('../../models/ReadingDay');
 
 exports.seed = function (knex, Promise) {
 
+    let today = new Date();
+
     return Promise.all([
-        knex('resource_tag').del(),
+        knex('application_step').del(),
         knex('step_resource').del(),
-        knex('step').del()
+        knex('resource_tag').del()
 
     ]).then(() => Promise.all([
+        knex('tag').del(),
+        knex('step').del(),
         knex('resource').del(),
-        knex('practice').del(),
-        knex('reading').del(),
-        knex('tag').del()
+        knex('application').del()
 
     ])).then(() => Promise.all([
-        knex('resource_type').del(),
+        knex('reading').del(),
+        knex('practice').del(),
+        knex('resource_type').del()
+
+    ])).then(() => Promise.all([
         knex('reading_day').del()
 
     ])).then(() => ReadingDay.query().insertWithRelated({
-        date: '2016-12-28',
+        date: today.toISOString(),
         readings: [
             {
                 seq: 1,

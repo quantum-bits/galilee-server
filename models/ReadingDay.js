@@ -3,25 +3,8 @@
 const db = require('../db');
 
 class ReadingDay extends db.Model {
-    asJson() {
-        return this.readings.map(reading => {
-            return {
-                id: reading.id,
-                title: 'A Reading',
-                description: reading.std_ref,
-                text: reading.text,
-                practices: reading.allPractices(),
-                collections: reading.allCollections(),
-            };
-        });
-    }
-
     static get tableName() {
         return 'reading_day';
-    }
-
-    static get idColumn() {
-        return 'date';
     }
 
     static get relationMappings() {
@@ -30,8 +13,8 @@ class ReadingDay extends db.Model {
                 relation: db.Model.HasManyRelation,
                 modelClass: __dirname + '/Reading',
                 join: {
-                    from: 'reading_day.date',
-                    to: 'reading.for'
+                    from: 'reading_day.id',
+                    to: 'reading.reading_day_id'
                 }
             }
         }
