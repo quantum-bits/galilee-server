@@ -11,22 +11,32 @@ const JWT_SECRET_KEY = 'My Super Secret Key';   // TODO: Store in config file!
 exports.register = function (server, options, next) {
 
     function validate(decoded, request, callback) {
-        server.log('info', 'Validate the user');
-        return callback(null, true);
-    };
+        server.log('info', decoded);
+        if (decoded.hasOwnProperty('user_id')) {
+            User.query()
+                .where('id', decoded.user_id)
+                .then(users => {
+                    if (users.length === 1 && users[0].id === decoded.user_id) {
+                        callback(null, true);
+                    }
+                });
+        } else {
+            callback(null, false);
+        }
+    }
 
-    function createToken(email) {
+    function createToken(email, user_id) {
         return JWT.sign(
             {
-                email: email
+                user_id: user_id
             },
             JWT_SECRET_KEY,
             {
                 algorithm: 'HS256',
-                expiresIn: "1h"
+                expiresIn: "1d"
             }
         );
-    };
+    }
 
     server.auth.strategy('jwt', 'jwt', {
         key: JWT_SECRET_KEY,
@@ -41,24 +51,23 @@ exports.register = function (server, options, next) {
             handler: function (request, reply) {
                 let email = request.payload.email;
                 let password = request.payload.password;
-                const INVALID_MSGE = 'Invalid credentials';
 
-                User
-                    .query()
+                User.query()
                     .where('email', email)
                     .first()
                     .then(user => {
-                        if (user) {
-                            return user.checkPassword(password);
+                        if (user && user.checkPassword(password)) {
+                            delete user.password;       // Don't send password
+                            return reply({
+                                status: 'OK',
+                                id_token: createToken(email, user.id),
+                                user: user
+                            });
                         }
-                        return reply(Boom.badRequest(INVALID_MSGE));
-                    })
-                    .then(isValid => {
-                        if (isValid) {
-                            return reply({id_token: createToken(email)});
-                        } else {
-                            return reply(Boom.badRequest(INVALID_MSGE));
-                        }
+                        return reply({
+                            status: 'FAIL',
+                            message: 'Invalid credentials'
+                        });
                     })
                     .catch(err => Boom.badImplementation(err));
             },
@@ -67,6 +76,7 @@ exports.register = function (server, options, next) {
                 cors: true
             }
         },
+
         {
             method: 'GET',
             path: '/restricted',
@@ -77,6 +87,7 @@ exports.register = function (server, options, next) {
                 auth: 'jwt'
             },
         },
+
         {
             method: 'GET',
             path: '/users',
@@ -90,6 +101,7 @@ exports.register = function (server, options, next) {
                 description: 'Retrieve all users'
             }
         },
+
         {
             method: 'GET',
             path: '/users/{email}',
