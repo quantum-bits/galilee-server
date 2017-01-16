@@ -22,6 +22,7 @@ module.exports = function (callback) {
             {register: require('./plugins/engagement')},
             {register: require('./plugins/reading')},
             {register: require('./plugins/resource')},
+            {register: require('./plugins/user')},
 
             {register: require('vision')},
             {register: require('inert')},

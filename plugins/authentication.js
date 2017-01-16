@@ -84,41 +84,9 @@ exports.register = function (server, options, next) {
                 reply('Got restricted info');
             },
             config: {
+                description: 'Endpoint for testing restricted access',
                 auth: 'jwt'
             },
-        },
-
-        {
-            method: 'GET',
-            path: '/users',
-            handler: function (request, reply) {
-                User
-                    .query()
-                    .then(users => reply(users))
-                    .catch(err => Boom.badImplementation("Can't fetch users", err));
-            },
-            config: {
-                description: 'Retrieve all users'
-            }
-        },
-
-        {
-            method: 'GET',
-            path: '/users/{email}',
-            handler: function (request, reply) {
-                User
-                    .query()
-                    .where('email', request.params.email)
-                    .first()
-                    .then(user => {
-                        if (user) {
-                            reply(user);
-                        } else {
-                            reply(Boom.notFound(`No user with ID ${request.params.email}`));
-                        }
-                    })
-                    .catch(err => Boom.badImplementation(err));
-            }
         }
     ]);
 

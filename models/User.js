@@ -51,6 +51,14 @@ class User extends db.Model {
                     },
                     to: 'group.id'
                 }
+            },
+            journal_entries: {
+                relation: db.Model.HasManyRelation,
+                modelClass: __dirname + '/JournalEntry',
+                join: {
+                    from: 'user.id',
+                    to: 'journal_entry.user_id'
+                }
             }
         }
     }

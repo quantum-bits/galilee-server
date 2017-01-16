@@ -1,11 +1,14 @@
 'use strict';
 
 const User = require('../../models/User');
+const loremIpsum = require('lorem-ipsum')
+
 
 exports.seed = function (knex, Promise) {
     return Promise.all([
         knex('membership').del(),
         knex('user_permission').del(),
+        knex('journal_entry').del()
 
     ]).then(() => Promise.all([
         knex('permission').del(),
@@ -58,6 +61,18 @@ exports.seed = function (knex, Promise) {
                     organization: {
                         "#ref": "TU",
                     }
+                }
+            ],
+            journal_entries: [
+                {
+                    title: 'My thoughts on the readings from today',
+                    entry: loremIpsum(),
+                    timestamp: "2017-01-11T05:00:00.000Z"
+                },
+                {
+                    title: 'My other reflections on some more readings from today',
+                    entry: loremIpsum(),
+                    timestamp: "2017-01-13T05:00:00.000Z"
                 }
             ]
         },
