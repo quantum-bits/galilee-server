@@ -23,8 +23,8 @@ exports.seed = function (knex, Promise) {
         {
             email: 'teacher@example.com',
             password: 'password',
-            first_name: 'Penny',
-            last_name: 'Lane',
+            firstName: 'Penny',
+            lastName: 'Lane',
             version: {
                 code: 'NKJV',
                 title: 'New King James Version'
@@ -48,8 +48,8 @@ exports.seed = function (knex, Promise) {
         {
             email: 'student@example.com',
             password: 'password',
-            first_name: 'Ferris',
-            last_name: 'Wheeler',
+            firstName: 'Ferris',
+            lastName: 'Wheeler',
             version: {
                 '#id': 'version-esv',
                 code: 'ESV',
@@ -79,8 +79,8 @@ exports.seed = function (knex, Promise) {
         {
             email: 'admin@example.com',
             password: 'password',
-            first_name: 'Royal',
-            last_name: 'Payne',
+            firstName: 'Royal',
+            lastName: 'Payne',
             version: {
                 '#ref': 'version-esv'
             },

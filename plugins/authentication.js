@@ -59,13 +59,14 @@ exports.register = function (server, options, next) {
                         if (user && user.checkPassword(password)) {
                             delete user.password;       // Don't send password
                             return reply({
-                                status: 'OK',
+                                ok: true,
+                                message: 'Authenticated successfully',
                                 id_token: createToken(email, user.id),
                                 user: user
                             });
                         }
                         return reply({
-                            status: 'FAIL',
+                            ok: false,
                             message: 'Invalid credentials'
                         });
                     })

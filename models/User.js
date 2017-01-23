@@ -24,7 +24,7 @@ class User extends db.Model {
                 relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/Version',
                 join: {
-                    from: 'user.preferred_version_id',
+                    from: 'user.preferredVersionId',
                     to: 'version.id'
                 }
             },

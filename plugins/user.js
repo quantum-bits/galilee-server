@@ -96,8 +96,8 @@ exports.register = function (server, options, next) {
                     .insert({
                         email: request.payload.email,
                         password: request.payload.password,
-                        first_name: request.payload.first_name,
-                        last_name: request.payload.last_name
+                        firstName: request.payload.firstName,
+                        lastName: request.payload.lastName
                     })
                     .then(user => {
                         return reply({

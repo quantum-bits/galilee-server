@@ -6,11 +6,11 @@ exports.up = function (knex, Promise) {
             table.increments('id');
             table.string('email').notNullable();
             table.string('password').notNullable();
-            table.string('first_name').notNullable();
-            table.string('last_name').notNullable();
-            table.dateTime('joined_on').defaultTo(knex.raw('NOW()'));
+            table.string('firstName').notNullable();
+            table.string('lastName').notNullable();
+            table.dateTime('joinedOn').defaultTo(knex.raw('NOW()'));
             table.boolean('enabled').defaultTo(true);
-            table.integer('preferred_version_id').references('version.id')
+            table.integer('preferredVersionId').references('version.id')
         }),
 
         knex.schema.createTableIfNotExists('organization', table => {

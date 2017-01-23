@@ -14,7 +14,7 @@ class Version extends db.Model {
                 modelClass: __dirname + '/User',
                 join: {
                     from: 'version.id',
-                    to: 'user.preferred_version_id'
+                    to: 'user.preferredVersionId'
                 }
             }
         }
