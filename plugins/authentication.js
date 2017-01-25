@@ -54,6 +54,7 @@ exports.register = function (server, options, next) {
 
                 User.query()
                     .where('email', email)
+                    .eager('permissions')
                     .first()
                     .then(user => {
                         if (user && user.checkPassword(password)) {
