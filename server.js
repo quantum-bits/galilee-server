@@ -20,6 +20,7 @@ module.exports = function (callback) {
 
             {register: require('./plugins/bible_gateway')},
             {register: require('./plugins/engagement')},
+            {register: require('./plugins/journal')},
             {register: require('./plugins/reading')},
             {register: require('./plugins/resource')},
             {register: require('./plugins/user')},

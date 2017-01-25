@@ -5,7 +5,6 @@ const Joi = require('Joi');
 
 const User = require('../models/User');
 const Permission = require('../models/Permission');
-const JournalEntry = require('../models/JournalEntry');
 
 exports.register = function (server, options, next) {
 
@@ -59,32 +58,6 @@ exports.register = function (server, options, next) {
             },
             config: {
                 description: 'Fetch all permission types'
-            }
-        },
-
-        {
-            method: 'GET',
-            path: '/users/{email}/journal-entries',
-            handler: function (request, reply) {
-                JournalEntry.query()
-                    .select('journal_entry.id', 'timestamp', 'title', 'entry')
-                    .innerJoin('user', 'journal_entry.user_id', 'user.id')
-                    .where('email', request.params.email)
-                    .then(entries => {
-                        return reply({
-                            ok: true,
-                            entries: entries
-                        });
-                    })
-                    .catch(err => {
-                        return reply({
-                            ok: false,
-                            error: err
-                        });
-                    })
-            },
-            config: {
-                description: 'Return journal entries for user'
             }
         },
 

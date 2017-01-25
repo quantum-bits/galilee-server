@@ -59,6 +59,14 @@ class User extends db.Model {
                     from: 'user.id',
                     to: 'journal_entry.user_id'
                 }
+            },
+            tags: {
+                relation: db.Model.HasManyRelation,
+                modelClass: __dirname + '/UserTag',
+                join: {
+                    from: 'user.id',
+                    to: 'user_tag.user_id'
+                }
             }
         }
     }

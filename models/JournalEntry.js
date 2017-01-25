@@ -16,6 +16,18 @@ class JournalEntry extends db.Model {
                     from: 'journal_entry.user_id',
                     to: 'user.id'
                 }
+            },
+            tags: {
+                relation: db.Model.ManyToManyRelation,
+                modelClass: __dirname + '/UserTag',
+                join: {
+                    from: 'journal_entry.id',
+                    through: {
+                        from: 'journal_entry_tag.journal_entry_id',
+                        to:   'journal_entry_tag.user_tag_id'
+                    },
+                    to: 'user_tag.id'
+                }
             }
         }
     }

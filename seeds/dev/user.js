@@ -63,16 +63,25 @@ exports.seed = function (knex, Promise) {
                     }
                 }
             ],
+            tags: [
+                {'#id': 'tag-discipleship', text: 'discipleship'},
+                {'#id': 'tag-spirituality', text: 'spirituality'}
+            ],
             journal_entries: [
                 {
                     title: 'My thoughts on the readings from today',
                     entry: loremIpsum(),
-                    timestamp: "2017-01-11T05:00:00.000Z"
+                    timestamp: "2017-01-11T05:00:00.000Z",
+                    tags: [{'#ref': 'tag-discipleship'}]
                 },
                 {
                     title: 'My other reflections on some more readings from today',
                     entry: loremIpsum(),
-                    timestamp: "2017-01-13T05:00:00.000Z"
+                    timestamp: "2017-01-13T05:00:00.000Z",
+                    tags: [
+                        {'#ref': 'tag-discipleship'},
+                        {'#ref': 'tag-spirituality'}
+                    ]
                 }
             ]
         },
