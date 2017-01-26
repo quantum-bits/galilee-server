@@ -2,36 +2,68 @@
 
 const Boom = require('boom');
 const Joi = require('Joi');
+const _ = require('lodash');
 
 const User = require('../models/User');
 const Permission = require('../models/Permission');
 
+/**
+ * Joi schema for user payload.
+ */
+const userPayloadSchema = {
+    email: Joi.string().email(),
+    password: Joi.string().min(6),
+    firstName: Joi.string(),
+    lastName: Joi.string()
+}
+
+/**
+ * Filter password field from user objet.
+ * @param user
+ */
+function filteredUser(user) {
+    return _.omit(user, ['password'])
+}
+
 exports.register = function (server, options, next) {
+
+    // Do we have a user with the given e-mail address?
+    server.method('userExists', (request, reply) => {
+        User.query()
+            .where('email', request.payload.email)
+            .first()
+            .then(user => {
+                reply(user !== undefined);
+            })
+            .catch(err => Boom.badImplementation("Can't fetch user", err));
+    });
 
     server.route([
         {
             method: 'GET',
             path: '/users',
-            handler: function (request, reply) {
-                User
-                    .query()
-                    .eager('permissions')
-                    .then(users => reply(users))
-                    .catch(err => Boom.badImplementation("Can't fetch users", err));
-            },
             config: {
                 description: 'Retrieve all users'
+            },
+            handler: function (request, reply) {
+                User.query()
+                    .eager('[permissions, version]')
+                    .map(user => filteredUser(user))
+                    .then(users => reply(users))
+                    .catch(err => Boom.badImplementation("Can't fetch users", err));
             }
         },
 
         {
             method: 'GET',
-            path: '/users/{email}',
+            path: '/users/{uid}',
+            config: {
+                description: 'Retrieve user with given user ID'
+            },
             handler: function (request, reply) {
-                User
-                    .query()
-                    .where('email', request.params.email)
-                    .eager('permissions')
+                User.query()
+                    .where('id', request.params.uid)
+                    .eager('[permissions, version]')
                     .first()
                     .then(user => {
                         if (user) {
@@ -41,30 +73,70 @@ exports.register = function (server, options, next) {
                         }
                     })
                     .catch(err => Boom.badImplementation(err));
-            },
+            }
+        },
+
+        {
+            method: 'PUT',
+            path: '/users/{uid}',
             config: {
-                description: 'Retrieve user with given e-mail address'
+                description: 'Update an existing user',
+                pre: ['userExists'],
+                validate: {
+                    params: {
+                        uid: Joi.number().min(1)
+                    },
+                    payload: userPayloadSchema
+                }
+            },
+            handler: (request, reply) => {
+                if (!request.pre.userExists) {
+                    return reply({
+                        ok: false,
+                        message: "No such user"
+                    });
+                }
+                console.log('PARAMS', request.params, request.payload);
+                User.query()
+                    .updateAndFetchById(request.params.uid, request.payload)
+                    .eager('[permissions, version]')
+                    .then(user => reply({
+                        ok: true,
+                        message: 'User data updated',
+                        user: filteredUser(user)
+                    }))
+                    .catch(err => Boom.badImplementation(err));
             }
         },
 
         {
             method: 'GET',
             path: '/users/permissions',
-            handler: function (request, reply) {
-                Permission
-                    .query()
-                    .then(results => reply(results))
-                    .catch(err => Boom.badImplementation(err));
-            },
             config: {
                 description: 'Fetch all permission types'
+            },
+            handler: function (request, reply) {
+                Permission.query()
+                    .then(results => reply(results))
+                    .catch(err => Boom.badImplementation(err));
             }
         },
 
         {
             method: 'POST',
             path: '/users/signup',
+            config: {
+                description: 'Sign up a new user',
+                pre: ['userExists'],
+                validate: {payload: userPayloadSchema}
+            },
             handler: function (request, reply) {
+                if (request.pre.userExists) {
+                    return reply({
+                        ok: false,
+                        message: "The e-mail address you've supplied is already in use."
+                    });
+                }
                 User.query()
                     .insert({
                         email: request.payload.email,
@@ -75,20 +147,12 @@ exports.register = function (server, options, next) {
                     .then(user => {
                         return reply({
                             ok: true,
-                            user: user
+                            message: 'New user created successfully',
+                            user: filteredUser(user)
                         })
                     })
-                    .catch(err => {
-                        return reply({
-                            ok: false,
-                            error: err
-                        })
-                    });
-            },
-            config: {
-                description: 'Sign up a new user'
+                    .catch(err => Boom.badImplementation(err));
             }
-
         }
     ]);
 

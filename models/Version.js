@@ -2,7 +2,7 @@
 
 const db = require('../db');
 
-class Version extends db.Model {
+module.exports = class Version extends db.Model {
     static get tableName() {
         return 'version';
     }
@@ -20,5 +20,3 @@ class Version extends db.Model {
         }
     }
 }
-
-module.exports = Version;

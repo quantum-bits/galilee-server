@@ -13,7 +13,7 @@ function hashPassword(password) {
         .catch(err => Boom.badRequest('Password processing'));
 }
 
-class User extends db.Model {
+module.exports = class User extends db.Model {
     static get tableName() {
         return 'user';
     }
@@ -87,5 +87,3 @@ class User extends db.Model {
         return hashPassword(this.password).then(hash => this.password = hash);
     }
 }
-
-module.exports = User;

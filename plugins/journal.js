@@ -11,12 +11,12 @@ exports.register = function (server, options, next) {
     server.route([
         {
             method: 'GET',
-            path: '/journals/{email}',
+            path: '/journals/{uid}',
             handler: function (request, reply) {
                 JournalEntry.query()
                     .select('journal_entry.id', 'timestamp', 'title', 'entry')
                     .innerJoin('user', 'journal_entry.user_id', 'user.id')
-                    .where('email', request.params.email)
+                    .where('user.id', request.params.uid)
                     .eager('tags')
                     .then(entries => {
                         return reply({
