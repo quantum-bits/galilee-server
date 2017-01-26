@@ -43,7 +43,8 @@ exports.register = function (server, options, next) {
             method: 'GET',
             path: '/users',
             config: {
-                description: 'Retrieve all users'
+                description: 'Retrieve all users',
+                auth: 'jwt'
             },
             handler: function (request, reply) {
                 User.query()
@@ -58,7 +59,8 @@ exports.register = function (server, options, next) {
             method: 'GET',
             path: '/users/{uid}',
             config: {
-                description: 'Retrieve user with given user ID'
+                description: 'Retrieve user with given user ID',
+                auth: 'jwt'
             },
             handler: function (request, reply) {
                 User.query()
@@ -87,7 +89,8 @@ exports.register = function (server, options, next) {
                         uid: Joi.number().min(1)
                     },
                     payload: userPayloadSchema
-                }
+                },
+                auth: 'jwt'
             },
             handler: (request, reply) => {
                 if (!request.pre.userExists) {
@@ -113,7 +116,8 @@ exports.register = function (server, options, next) {
             method: 'GET',
             path: '/users/permissions',
             config: {
-                description: 'Fetch all permission types'
+                description: 'Fetch all permission types',
+                auth: 'jwt'
             },
             handler: function (request, reply) {
                 Permission.query()

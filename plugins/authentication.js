@@ -77,18 +77,6 @@ exports.register = function (server, options, next) {
                 description: 'Authenticate user',
                 cors: true
             }
-        },
-
-        {
-            method: 'GET',
-            path: '/restricted',
-            handler: function (request, reply) {
-                reply('Got restricted info');
-            },
-            config: {
-                description: 'Endpoint for testing restricted access',
-                auth: 'jwt'
-            },
         }
     ]);
 

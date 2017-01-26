@@ -12,6 +12,9 @@ exports.register = function (server, options, next) {
         {
             method: 'GET',
             path: '/journals/{uid}',
+            config: {
+                description: 'Return journal entries for user'
+            },
             handler: function (request, reply) {
                 JournalEntry.query()
                     .select('journal_entry.id', 'timestamp', 'title', 'entry')
@@ -30,9 +33,28 @@ exports.register = function (server, options, next) {
                             error: err
                         });
                     })
-            },
+            }
+        },
+
+        {
+            method: 'GET',
+            path: '/journals/{uid}/tags',
             config: {
-                description: 'Return journal entries for user'
+                description: 'Return all tags for user',
+                auth: 'jwt'
+            },
+            handler: function(request, reply) {
+                User.query()
+                    .where('id', request.params.uid)
+                    .first()
+                    .eager('tags')
+                    .then(user => {
+                        reply({
+                            ok: true,
+                            tags: user.tags
+                        });
+                    })
+                    .catch(err => Boom.badImplementation(err));
             }
         }
     ]);
