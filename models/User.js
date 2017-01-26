@@ -71,9 +71,9 @@ module.exports = class User extends db.Model {
     }
 
     // Check the users's password against the parameter.
-    // Returns a promise with and 'isValid' value.
+    // Returns a promise with an 'isValid' value.
     checkPassword(password) {
-        return bcrypt.compare(password, this.password);
+        return bcrypt.compare(password, this.password)
     }
 
     // Encrypt the password before insertion into the database.

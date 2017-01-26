@@ -13,6 +13,13 @@ module.exports = function (callback) {
         }
     });
 
+    // Check that the user in the JWT matches the user in the URL.
+    server.method('userMatches', (request, reply) => {
+        let credId = +(request.auth.credentials.id);
+        let reqId = +(request.params.id);
+        reply(credId === reqId);
+    });
+
     server.register(
         [
             {register: require('hapi-auth-jwt2')},
