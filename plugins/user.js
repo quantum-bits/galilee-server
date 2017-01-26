@@ -15,7 +15,7 @@ const userPayloadSchema = {
     password: Joi.string().min(6),
     firstName: Joi.string(),
     lastName: Joi.string()
-}
+};
 
 /**
  * Filter password field from user objet.
@@ -109,8 +109,7 @@ exports.register = function (server, options, next) {
             method: 'GET',
             path: '/users/permissions',
             config: {
-                description: 'Fetch all permission types',
-                auth: 'jwt'
+                description: 'Fetch all permission types'
             },
             handler: function (request, reply) {
                 Permission.query()
