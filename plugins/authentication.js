@@ -48,6 +48,10 @@ exports.register = function (server, options, next) {
         {
             method: 'POST',
             path: '/authenticate',
+            config: {
+                description: 'Authenticate user',
+                cors: true
+            },
             handler: function (request, reply) {
                 let email = request.payload.email;
                 let password = request.payload.password;
@@ -58,24 +62,16 @@ exports.register = function (server, options, next) {
                     .first()
                     .then(user => {
                         if (user && user.checkPassword(password)) {
-                            delete user.password;       // Don't send password
-                            return reply({
-                                ok: true,
-                                message: 'Authenticated successfully',
+                            delete user.password;       // Don't send password.
+                            reply({
                                 id_token: createToken(email, user.id),
                                 user: user
                             });
+                        } else {
+                            reply(Boom.unauthorized('Authentication failed'));
                         }
-                        return reply({
-                            ok: false,
-                            message: 'Invalid credentials'
-                        });
                     })
-                    .catch(err => Boom.badImplementation(err));
-            },
-            config: {
-                description: 'Authenticate user',
-                cors: true
+                    .catch(err => reply(Boom.badImplementation(err)));
             }
         }
     ]);

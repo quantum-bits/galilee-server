@@ -21,18 +21,8 @@ exports.register = function (server, options, next) {
                     .innerJoin('user', 'journal_entry.user_id', 'user.id')
                     .where('user.id', request.params.uid)
                     .eager('tags')
-                    .then(entries => {
-                        return reply({
-                            ok: true,
-                            entries: entries
-                        });
-                    })
-                    .catch(err => {
-                        return reply({
-                            ok: false,
-                            error: err
-                        });
-                    })
+                    .then(entries => reply(entries))
+                    .catch(err => reply(Boom.badImplementation(err)));
             }
         },
 
@@ -48,13 +38,8 @@ exports.register = function (server, options, next) {
                     .where('id', request.params.uid)
                     .first()
                     .eager('tags')
-                    .then(user => {
-                        reply({
-                            ok: true,
-                            tags: user.tags
-                        });
-                    })
-                    .catch(err => Boom.badImplementation(err));
+                    .then(user => reply(user.tags))
+                    .catch(err => reply(Boom.badImplementation(err)));
             }
         }
     ]);

@@ -21,7 +21,7 @@ const userPayloadSchema = {
  * Filter password field from user objet.
  * @param user
  */
-function filteredUser(user) {
+function filterPassword(user) {
     return _.omit(user, ['password'])
 }
 
@@ -35,7 +35,7 @@ exports.register = function (server, options, next) {
             .then(user => {
                 reply(user !== undefined);
             })
-            .catch(err => Boom.badImplementation("Can't fetch user", err));
+            .catch(err => reply(Boom.badImplementation(err)));
     });
 
     server.route([
@@ -49,44 +49,44 @@ exports.register = function (server, options, next) {
             handler: function (request, reply) {
                 User.query()
                     .eager('[permissions, version]')
-                    .map(user => filteredUser(user))
+                    .map(user => filterPassword(user))
                     .then(users => reply(users))
-                    .catch(err => Boom.badImplementation("Can't fetch users", err));
+                    .catch(err => reply(Boom.badImplementation(err)));
             }
         },
 
         {
             method: 'GET',
-            path: '/users/{uid}',
+            path: '/users/{id}',
             config: {
                 description: 'Retrieve user with given user ID',
                 auth: 'jwt'
             },
             handler: function (request, reply) {
                 User.query()
-                    .where('id', request.params.uid)
+                    .where('id', request.params.id)
                     .eager('[permissions, version]')
                     .first()
                     .then(user => {
                         if (user) {
-                            reply(user);
+                            reply(filterPassword(user));
                         } else {
-                            reply(Boom.notFound(`No user with ID ${request.params.email}`));
+                            reply(Boom.notFound(`No user with ID ${request.params.id}`));
                         }
                     })
-                    .catch(err => Boom.badImplementation(err));
+                    .catch(err => reply(Boom.badImplementation(err)));
             }
         },
 
         {
             method: 'PUT',
-            path: '/users/{uid}',
+            path: '/users/{id}',
             config: {
                 description: 'Update an existing user',
                 pre: ['userExists'],
                 validate: {
                     params: {
-                        uid: Joi.number().min(1)
+                        id: Joi.number().min(1)
                     },
                     payload: userPayloadSchema
                 },
@@ -94,21 +94,14 @@ exports.register = function (server, options, next) {
             },
             handler: (request, reply) => {
                 if (!request.pre.userExists) {
-                    return reply({
-                        ok: false,
-                        message: "No such user"
-                    });
+                    reply(Boom.notFound(`No user with ID ${request.params.id}`));
+                } else {
+                    User.query()
+                        .updateAndFetchById(request.params.id, request.payload)
+                        .eager('[permissions, version]')
+                        .then(user => reply(filterPassword(user)))
+                        .catch(err => reply(Boom.badImplementation(err)));
                 }
-                console.log('PARAMS', request.params, request.payload);
-                User.query()
-                    .updateAndFetchById(request.params.uid, request.payload)
-                    .eager('[permissions, version]')
-                    .then(user => reply({
-                        ok: true,
-                        message: 'User data updated',
-                        user: filteredUser(user)
-                    }))
-                    .catch(err => Boom.badImplementation(err));
             }
         },
 
@@ -122,7 +115,7 @@ exports.register = function (server, options, next) {
             handler: function (request, reply) {
                 Permission.query()
                     .then(results => reply(results))
-                    .catch(err => Boom.badImplementation(err));
+                    .catch(err => reply(Boom.badImplementation(err)));
             }
         },
 
@@ -136,26 +129,18 @@ exports.register = function (server, options, next) {
             },
             handler: function (request, reply) {
                 if (request.pre.userExists) {
-                    return reply({
-                        ok: false,
-                        message: "The e-mail address you've supplied is already in use."
-                    });
-                }
-                User.query()
-                    .insert({
-                        email: request.payload.email,
-                        password: request.payload.password,
-                        firstName: request.payload.firstName,
-                        lastName: request.payload.lastName
-                    })
-                    .then(user => {
-                        return reply({
-                            ok: true,
-                            message: 'New user created successfully',
-                            user: filteredUser(user)
+                    reply(Boom.conflict('E-mail address already in use.'));
+                } else {
+                    User.query()
+                        .insert({
+                            email: request.payload.email,
+                            password: request.payload.password,
+                            firstName: request.payload.firstName,
+                            lastName: request.payload.lastName
                         })
-                    })
-                    .catch(err => Boom.badImplementation(err));
+                        .then(user => reply(filterPassword(user)))
+                        .catch(err => reply(Boom.badImplementation(err)));
+                }
             }
         }
     ]);

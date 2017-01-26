@@ -29,6 +29,11 @@ exports.seed = function (knex, Promise) {
 
     ])).then(() => ReadingDay.query().insertWithRelated({
         date: today.toISOString(),
+        questions: [
+            { seq: 1, question: 'What is your name?' },
+            { seq: 2, question: 'What is your quest?' },
+            { seq: 3, question: 'What is your favorite color?' }
+        ],
         readings: [
             {
                 seq: 1,

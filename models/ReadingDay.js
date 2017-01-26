@@ -16,7 +16,16 @@ class ReadingDay extends db.Model {
                     from: 'reading_day.id',
                     to: 'reading.reading_day_id'
                 }
+            },
+            questions: {
+                relation: db.Model.HasManyRelation,
+                modelClass: __dirname + '/DailyQuestion',
+                join: {
+                    from: 'reading_day.id',
+                    to: 'daily_question.reading_day_id'
+                }
             }
+
         }
     }
 }

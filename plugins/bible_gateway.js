@@ -160,82 +160,92 @@ exports.register = function (server, options, next) {
         }
     ]);
 
-    server.route({
-        method: 'POST',
-        path: '/bg/authenticate',
-        handler: function (request, reply) {
-            server.methods.bg_authenticate(request.payload.username, request.payload.password, (err, result) => {
-                if (err) {
-                    return reply(err);
+    server.route([
+        {
+            method: 'POST',
+            path: '/bg/authenticate',
+            config: {
+                description: 'Authenticate against the BG API',
+                validate: {
+                    payload: {
+                        username: Joi.string().required().description('BG user name'),
+                        password: Joi.string().required().description('BG password')
+                    }
                 }
-                return reply(result);
-            });
+            },
+            handler: function (request, reply) {
+                server.methods.bg_authenticate(request.payload.username, request.payload.password, (err, result) => {
+                    if (err) {
+                        reply(err);
+                    } else {
+                        reply(result);
+                    }
+                });
+            }
         },
-        config: {
-            description: 'Authenticate against the BG API',
-            validate: {
-                payload: {
-                    username: Joi.string().required().description('BG user name'),
-                    password: Joi.string().required().description('BG password')
+
+        {
+            method: 'GET',
+            path: '/bg/translations',
+            config: {
+                description: 'Retrieve list of available translations'
+            },
+            handler: function (request, reply) {
+                server.methods.bg_translations((err, result) => {
+                    if (err) {
+                        reply(err);
+                    } else {
+                        reply(result);
+                    }
+                });
+            }
+        },
+
+        {
+            method: 'GET',
+            path: '/bg/translations/{version}',
+            config: {
+                description: 'Retrieve version information',
+                validate: {
+                    params: {
+                        version: Joi.string().required()
+                    }
                 }
+            },
+            handler: function (request, reply) {
+                server.methods.bg_version_info(request.params.version, (err, result) => {
+                    if (err) {
+                        reply(err);
+                    } else {
+                        reply(result);
+                    }
+                })
+            }
+        },
+
+        {
+            method: 'GET',
+            path: '/bg/translations/{version}/{osis}',
+            config: {
+                description: 'Fetch scripture passage',
+                validate: {
+                    params: {
+                        version: Joi.string().required(),
+                        osis: Joi.string().required()
+                    }
+                }
+            },
+            handler: function (request, reply) {
+                server.methods.bg_passage(request.params.version, request.params.osis, (err, result) => {
+                    if (err) {
+                        reply(err);
+                    } else {
+                        reply(result);
+                    }
+                })
             }
         }
-    });
-
-    server.route({
-        method: 'GET',
-        path: '/bg/translations',
-        handler: function (request, reply) {
-            server.methods.bg_translations((err, result) => {
-                if (err) {
-                    return reply(err);
-                }
-                return reply(result);
-            });
-        }
-    });
-
-    server.route({
-        method: 'GET',
-        path: '/bg/translations/{version}',
-        handler: function (request, reply) {
-            server.methods.bg_version_info(request.params.version, (err, result) => {
-                if (err) {
-                    return reply(err);
-                }
-                return reply(result);
-            })
-        },
-        config: {
-            validate: {
-                params: {
-                    version: Joi.string().required()
-                }
-            }
-        }
-    });
-
-    server.route({
-        method: 'GET',
-        path: '/bg/translations/{version}/{osis}',
-        handler: function(request, reply) {
-            server.methods.bg_passage(request.params.version, request.params.osis, (err, result) => {
-                if (err) {
-                    return reply(err);
-                }
-                return reply(result);
-            })
-        },
-        config: {
-            validate: {
-                params: {
-                    version: Joi.string().required(),
-                    osis: Joi.string().required()
-                }
-            }
-        }
-    });
-
+    ]);
 
     next();
 };

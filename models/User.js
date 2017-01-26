@@ -2,15 +2,14 @@
 
 const db = require('../db');
 
-const Boom = require('boom');
 const Promise = require('bluebird');
 const bcrypt = Promise.promisifyAll(require('bcrypt'));
 
 // Hash the password; return a promise containing the hashed password.
 function hashPassword(password) {
-    return bcrypt.genSalt(10)
-        .then(salt => bcrypt.hash(password, salt))
-        .catch(err => Boom.badRequest('Password processing'));
+    return bcrypt
+        .genSalt(10)
+        .then(salt => bcrypt.hash(password, salt));
 }
 
 module.exports = class User extends db.Model {

@@ -17,6 +17,13 @@ exports.up = function (knex, Promise) {
             table.string('std_ref');
             table.string('osis_ref');
             table.text('passage');
+        }),
+
+        knex.schema.createTableIfNotExists('daily_question', table => {
+            table.increments('id');
+            table.integer('reading_day_id').references('reading_day.id');
+            table.integer('seq');
+            table.string('question');
         })
 
     ]);
