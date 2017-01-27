@@ -16,7 +16,6 @@ function filterPassword(user) {
 }
 
 exports.register = function (server, options, next) {
-
     /**
      * Does a pertinent user exist?
      * Try searching by email first, then by user ID.
@@ -24,10 +23,10 @@ exports.register = function (server, options, next) {
     server.method('userExists', (request, reply) => {
         // Construct WHERE clause.
         let whereClause = null;
-        if (request.payload.hasOwnProperty('email')) {
-            whereClause = {email: request.payload.email};
-        } else if (request.params.hasOwnProperty('id')) {
+        if (request.params.hasOwnProperty('id')) {
             whereClause = {id: request.params.id};
+        } else if (request.payload.hasOwnProperty('email')) {
+            whereClause = {email: request.payload.email};
         }
 
         // Run the query.
@@ -90,6 +89,8 @@ exports.register = function (server, options, next) {
             }
         },
 
+        // TODO: These PATCH handlers are painfully non-DRY.
+
         {
             method: 'PATCH',
             path: '/users/{id}/name',
@@ -113,7 +114,68 @@ exports.register = function (server, options, next) {
                 } else if (!request.pre.userMatches) {
                     reply(Boom.unauthorized("Can't update a different user"));
                 } else {
-                    console.log(request.params, request.payload);
+                    User.query()
+                        .context(request.payload)
+                        .patchAndFetchById(request.params.id, request.payload)
+                        .then(user => reply(filterPassword(user)))
+                        .catch(err => reply(Boom.badImplementation(err)));
+                }
+            }
+        },
+
+        {
+            method: 'PATCH',
+            path: '/users/{id}/email',
+            config: {
+                description: 'Update user email',
+                pre: ['userExists', 'userMatches'],
+                validate: {
+                    params: {
+                        id: Joi.number().integer().min(1).required()
+                    },
+                    payload: {
+                        email: Joi.string().email().required()
+                    }
+                },
+                auth: 'jwt'
+            },
+            handler: (request, reply) => {
+                if (!request.pre.userExists) {
+                    reply(Boom.notFound(`No user with ID ${request.params.id}`));
+                } else if (!request.pre.userMatches) {
+                    reply(Boom.unauthorized("Can't update a different user"));
+                } else {
+                    User.query()
+                        .context(request.payload)
+                        .patchAndFetchById(request.params.id, request.payload)
+                        .then(user => reply(filterPassword(user)))
+                        .catch(err => reply(Boom.badImplementation(err)));
+                }
+            }
+        },
+
+        {
+            method: 'PATCH',
+            path: '/users/{id}/password',
+            config: {
+                description: 'Update user password',
+                pre: ['userExists', 'userMatches'],
+                validate: {
+                    params: {
+                        id: Joi.number().integer().min(1).required()
+                    },
+                    payload: {
+                        password: Joi.string().min(6).required()
+                    }
+                },
+                auth: 'jwt'
+            },
+            handler: (request, reply) => {
+                if (!request.pre.userExists) {
+                    reply(Boom.notFound('No user with that ID'));
+                } else if (!request.pre.userMatches) {
+                    reply(Boom.unauthorized("Can't update a different user"));
+                } else {
                     User.query()
                         .context(request.payload)
                         .patchAndFetchById(request.params.id, request.payload)
