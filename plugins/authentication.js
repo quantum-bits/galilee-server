@@ -11,21 +11,23 @@ const JWT_SECRET_KEY = 'My Super Secret Key';   // TODO: Store in config file!
 exports.register = function (server, options, next) {
 
     function validate(decoded, request, callback) {
-        console.log("DECODED", decoded);
+        console.log("JWT", decoded);
         if (decoded.hasOwnProperty('user_id')) {
             User.query()
                 .where('id', decoded.user_id)
                 .first()
                 .then(user => {
                     if (user) {
+                        console.log("VALID USER");
                         callback(null, true, user);
                     } else {
+                        console.log("INVALID USER");
                         callback(null, false);
                     }
                 })
                 .catch(err => callback(err, false));
         } else {
-            // Authentication failed.
+            console.log("INVALID JWT");
             callback(null, false);
         }
     }

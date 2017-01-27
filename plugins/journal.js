@@ -14,7 +14,12 @@ exports.register = function (server, options, next) {
             path: '/entries/{id}',
             config: {
                 description: 'Return journal entry having ID',
-                auth: 'jwt'
+                auth: 'jwt',
+                validate: {
+                    params: {
+                        id: Joi.number().integer()
+                    }
+                }
             },
             handler: function (request, reply) {
             }
@@ -26,7 +31,12 @@ exports.register = function (server, options, next) {
             config: {
                 description: 'Return journal entries for user',
                 auth: 'jwt',
-                pre: ['userMatches']
+                pre: ['userMatches'],
+                validate: {
+                    params: {
+                        id: Joi.number().integer().min(1).required()
+                    }
+                }
             },
             handler: function (request, reply) {
                 if (request.pre.userMatches) {
@@ -49,9 +59,14 @@ exports.register = function (server, options, next) {
             config: {
                 description: 'Return all tags for user',
                 auth: 'jwt',
-                pre: ['userMatches']
+                pre: ['userMatches'],
+                validate: {
+                    params: {
+                        id: Joi.number().integer()
+                    }
+                }
             },
-            handler: function(request, reply) {
+            handler: function (request, reply) {
                 if (request.pre.userMatches) {
                     User.query()
                         .where('id', request.params.id)

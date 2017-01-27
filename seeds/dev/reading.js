@@ -21,6 +21,7 @@ exports.seed = function (knex, Promise) {
 
     ])).then(() => Promise.all([
         knex('reading').del(),
+        knex('daily_question').del(),
         knex('practice').del(),
         knex('resource_type').del()
 

@@ -83,6 +83,10 @@ module.exports = class User extends db.Model {
 
     // Encrypt the password before updating to the database.
     $beforeUpdate(opt, queryContext) {
-        return hashPassword(this.password).then(hash => this.password = hash);
+        // Only want to do this if there is actually a password to hash. This will
+        // not be the case, for example, when patching a User to change the name.
+        if (this.hasOwnProperty('password')) {
+            return hashPassword(this.password).then(hash => this.password = hash);
+        }
     }
 }

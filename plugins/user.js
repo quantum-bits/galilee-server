@@ -8,16 +8,6 @@ const User = require('../models/User');
 const Permission = require('../models/Permission');
 
 /**
- * Joi schema for user payload.
- */
-const userPayloadSchema = {
-    email: Joi.string().email(),
-    password: Joi.string().min(6),
-    firstName: Joi.string(),
-    lastName: Joi.string()
-};
-
-/**
  * Filter password field from user objet.
  * @param user
  */
@@ -27,15 +17,32 @@ function filterPassword(user) {
 
 exports.register = function (server, options, next) {
 
-    // Do we have a user with the given e-mail address?
+    /**
+     * Does a pertinent user exist?
+     * Try searching by email first, then by user ID.
+     */
     server.method('userExists', (request, reply) => {
-        User.query()
-            .where('email', request.payload.email)
-            .first()
-            .then(user => {
-                reply(user !== undefined);
-            })
-            .catch(err => reply(Boom.badImplementation(err)));
+        // Construct WHERE clause.
+        let whereClause = null;
+        if (request.payload.hasOwnProperty('email')) {
+            whereClause = {email: request.payload.email};
+        } else if (request.params.hasOwnProperty('id')) {
+            whereClause = {id: request.params.id};
+        }
+
+        // Run the query.
+        if (whereClause) {
+            User.query()
+                .where(whereClause)
+                .first()
+                .then(user => {
+                    console.log("USER", user);
+                    reply(user !== undefined);
+                })
+                .catch(err => reply(Boom.badImplementation(err)));
+        } else {
+            reply(Boom.badData("Couldn't build WHERE clause"));
+        }
     });
 
     server.route([
@@ -60,45 +67,56 @@ exports.register = function (server, options, next) {
             path: '/users/{id}',
             config: {
                 description: 'Retrieve user with given user ID',
+                pre: ['userMatches'],
                 auth: 'jwt'
             },
             handler: function (request, reply) {
-                User.query()
-                    .where('id', request.params.id)
-                    .eager('[permissions, version]')
-                    .first()
-                    .then(user => {
-                        if (user) {
-                            reply(filterPassword(user));
-                        } else {
-                            reply(Boom.notFound(`No user with ID ${request.params.id}`));
-                        }
-                    })
-                    .catch(err => reply(Boom.badImplementation(err)));
+                if (request.pre.userMatches) {
+                    User.query()
+                        .where('id', request.params.id)
+                        .eager('[permissions, version]')
+                        .first()
+                        .then(user => {
+                            if (user) {
+                                reply(filterPassword(user));
+                            } else {
+                                reply(Boom.notFound(`No user with ID ${request.params.id}`));
+                            }
+                        })
+                        .catch(err => reply(Boom.badImplementation(err)));
+                } else {
+                    reply(Boom.unauthorized("Can't view other users"));
+                }
             }
         },
 
         {
-            method: 'PUT',
-            path: '/users/{id}',
+            method: 'PATCH',
+            path: '/users/{id}/name',
             config: {
-                description: 'Update an existing user',
-                pre: ['userExists'],
+                description: 'Update user name',
+                pre: ['userExists', 'userMatches'],
                 validate: {
                     params: {
-                        id: Joi.number().min(1)
+                        id: Joi.number().integer().min(1).required()
                     },
-                    payload: userPayloadSchema
+                    payload: {
+                        firstName: Joi.string().required(),
+                        lastName: Joi.string().required()
+                    }
                 },
                 auth: 'jwt'
             },
             handler: (request, reply) => {
                 if (!request.pre.userExists) {
-                    reply(Boom.notFound(`No user with ID ${request.params.id}`));
+                    reply(Boom.notFound('No user with that ID'));
+                } else if (!request.pre.userMatches) {
+                    reply(Boom.unauthorized("Can't update a different user"));
                 } else {
+                    console.log(request.params, request.payload);
                     User.query()
-                        .updateAndFetchById(request.params.id, request.payload)
-                        .eager('[permissions, version]')
+                        .context(request.payload)
+                        .patchAndFetchById(request.params.id, request.payload)
                         .then(user => reply(filterPassword(user)))
                         .catch(err => reply(Boom.badImplementation(err)));
                 }
@@ -124,7 +142,14 @@ exports.register = function (server, options, next) {
             config: {
                 description: 'Sign up a new user',
                 pre: ['userExists'],
-                validate: {payload: userPayloadSchema}
+                validate: {
+                    payload: {
+                        email: Joi.string().email().required(),
+                        password: Joi.string().min(6).required(),
+                        firstName: Joi.string().required(),
+                        lastName: Joi.string().required()
+                    }
+                }
             },
             handler: function (request, reply) {
                 if (request.pre.userExists) {
