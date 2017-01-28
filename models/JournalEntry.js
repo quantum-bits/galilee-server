@@ -1,8 +1,9 @@
 'use strict';
 
 const db = require('../db');
+const StampedModel = require('./StampedModel');
 
-class JournalEntry extends db.Model {
+module.exports = class JournalEntry extends StampedModel {
     static get tableName() {
         return 'journal_entry';
     }
@@ -32,5 +33,3 @@ class JournalEntry extends db.Model {
         }
     }
 }
-
-module.exports = JournalEntry;
