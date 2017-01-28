@@ -5,12 +5,13 @@ exports.up = function (knex, Promise) {
         knex.schema.createTableIfNotExists('user', table => {
             table.increments('id');
             table.string('email').notNullable();
+            table.unique('email');
             table.string('password').notNullable();
             table.string('firstName').notNullable();
             table.string('lastName').notNullable();
             table.dateTime('joinedOn').defaultTo(knex.raw('NOW()'));
             table.boolean('enabled').defaultTo(true);
-            table.integer('preferredVersionId').references('version.id')
+            table.integer('preferredVersionId').references('version.id');
         }),
 
         knex.schema.createTableIfNotExists('organization', table => {

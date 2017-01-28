@@ -49,7 +49,6 @@ exports.register = function (server, options, next) {
             handler: function (request, reply) {
                 User.query()
                     .eager('[permissions, version]')
-                    .orderBy('id')
                     .map(user => filterPassword(user))
                     .then(users => reply(users))
                     .catch(err => reply(Boom.badImplementation(err)));
@@ -92,8 +91,8 @@ exports.register = function (server, options, next) {
             config: {
                 description: 'Update user name',
                 pre: [
-                    { assign: 'user', method: 'getUserById(params.id)' },
-                    'userMatches'
+                    'userMatches',
+                    { assign: 'user', method: 'getUserById(params.id)' }
                 ],
                 validate: {
                     params: {
@@ -127,9 +126,8 @@ exports.register = function (server, options, next) {
             config: {
                 description: 'Update user email',
                 pre: [
-                    { assign: 'user', method: 'getUserById(params.id)' },
                     'userMatches',
-                    { assign: 'existingUser', method: 'getUserByEmail(payload.email)' }
+                    { assign: 'user', method: 'getUserById(params.id)' }
                 ],
                 validate: {
                     params: {
@@ -146,10 +144,9 @@ exports.register = function (server, options, next) {
                     reply(Boom.notFound(`No user with ID ${request.params.id}`));
                 } else if (!request.pre.userMatches) {
                     reply(Boom.unauthorized("Can't update a different user"));
-                } else if (request.pre.existingUser && request.pre.existingUser.id != request.params.id) {
-                    reply(Boom.conflict('E-mail address already in use.'));
                 } else {
                     User.query()
+                        .context(request.payload)
                         .patchAndFetchById(request.params.id, request.payload)
                         .then(user => reply(filterPassword(user)))
                         .catch(err => reply(Boom.badImplementation(err)));
@@ -163,8 +160,8 @@ exports.register = function (server, options, next) {
             config: {
                 description: 'Update user password',
                 pre: [
-                    { assign: 'user', method: 'getUserById(params.id)' },
-                    'userMatches'
+                    'userMatches',
+                    { assign: 'user', method: 'getUserById(params.id)' }
                 ],
                 validate: {
                     params: {
@@ -236,8 +233,68 @@ exports.register = function (server, options, next) {
                         .catch(err => reply(Boom.badImplementation(err)));
                 }
             }
+        },
+
+        {
+            method: 'GET',
+            path: '/foo/{a1}/{a2}',
+            config: {
+                pre: [
+                    {assign: 'user1', method: 'getUserByEmail(params.a1)'},
+                    {assign: 'user2', method: 'getUserById(params.a2)'},
+                    {
+                        assign: 'alpha',
+                        method: function (request, reply) {
+                            console.log("ALPHA", request.params);
+                            reply({func: 'alpha'});
+                        }
+                    },
+                    {
+                        assign: 'beta',
+                        method: function (request, reply) {
+                            console.log("BETA", request.params);
+                            reply({func: 'beta'});
+                        }
+                    },
+                    function gamma(request, reply) {
+                        console.log("GAMMA", request.params);
+                        reply({func: 'gamma'});
+                    },
+                    'fooCalback(params.a1, params.a2)',
+                    'fooSync(params.a1, params.a2)',
+                    {
+                        assign: 'insideCallback',
+                        method: 'fooCalback(params.a1, params.a2)'
+                    },
+                    {
+                        assign: 'insideSync',
+                        method: 'fooSync(params.a1, params.a2)'
+                    }
+                ]
+            },
+            handler: function (request, reply) {
+                reply(
+                    {
+                        ok: true,
+                        presult: request.pre
+                    });
+            }
         }
     ]);
+
+    server.method('fooCalback', function (arg1, arg2, next) {
+        console.log("ARG1", arg1);
+        console.log("ARG2", arg2);
+        next(null, `${arg1} and ${arg2}`);
+    });
+
+    server.method('fooSync',
+        function (arg1, arg2) {
+            console.log("ARG1", arg1);
+            console.log("ARG2", arg2);
+            return `${arg1} and ${arg2}`;
+        },
+        {callback: false});
 
     next();
 };
