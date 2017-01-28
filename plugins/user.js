@@ -2,18 +2,10 @@
 
 const Boom = require('boom');
 const Joi = require('Joi');
-const _ = require('lodash');
 
 const User = require('../models/User');
-const Permission = require('../models/Permission');
-
-/**
- * Filter password field from user objet.
- * @param user
- */
-function filterPassword(user) {
-    return _.omit(user, ['password'])
-}
+const Config = require('../models/Config');
+const Version = require('../models/Version');
 
 exports.register = function (server, options, next) {
 
@@ -29,10 +21,11 @@ exports.register = function (server, options, next) {
                 User.query()
                     .where('id', request.auth.credentials.id)
                     .eager('[permissions, version]')
+                    .omit(['password'])
                     .first()
                     .then(user => {
                         if (user) {
-                            reply(filterPassword(user));
+                            reply(user);
                         } else {
                             reply(Boom.notFound(`No user with ID ${request.params.id}`));
                         }
@@ -57,7 +50,8 @@ exports.register = function (server, options, next) {
             handler: (request, reply) => {
                 User.query()
                     .patchAndFetchById(request.auth.credentials.id, request.payload)
-                    .then(user => reply(filterPassword(user)))
+                    .omit(['password'])
+                    .then(user => reply(user))
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         },
@@ -83,7 +77,8 @@ exports.register = function (server, options, next) {
                 } else {
                     User.query()
                         .patchAndFetchById(request.auth.credentials.id, request.payload)
-                        .then(user => reply(filterPassword(user)))
+                        .omit(['password'])
+                        .then(user => reply(user))
                         .catch(err => reply(Boom.badImplementation(err)));
                 }
             }
@@ -105,7 +100,8 @@ exports.register = function (server, options, next) {
                 User.query()
                     .context(request.payload)
                     .patchAndFetchById(request.auth.credentials.id, request.payload)
-                    .then(user => reply(filterPassword(user)))
+                    .omit(['password'])
+                    .then(user => reply(user))
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         },
@@ -144,20 +140,30 @@ exports.register = function (server, options, next) {
                 if (request.pre.user) {
                     reply(Boom.conflict('E-mail address already in use.'));
                 } else {
-                    User.query()
-                        .insert({
-                            email: request.payload.email,
-                            password: request.payload.password,
-                            firstName: request.payload.firstName,
-                            lastName: request.payload.lastName
+                    Config.query()
+                        .findById('default-version')
+                        .then(config => {
+                            Version.query()
+                                .where('code', config.value)
+                                .first()
+                                .then(version => {
+                                    User.query()
+                                        .insertAndFetch({
+                                            email: request.payload.email,
+                                            password: request.payload.password,
+                                            firstName: request.payload.firstName,
+                                            lastName: request.payload.lastName,
+                                            preferredVersionId: version.id
+                                        })
+                                        .omit(['password'])
+                                        .then(user => reply(user))
+                                        .catch(err => reply(Boom.badImplementation(err)));
+                                })
                         })
-                        .then(user => reply(filterPassword(user)))
-                        .catch(err => reply(Boom.badImplementation(err)));
                 }
             }
         }
-    ])
-    ;
+    ]);
 
     next();
 }

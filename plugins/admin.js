@@ -5,6 +5,7 @@ const Joi = require('Joi');
 const _ = require('lodash');
 
 const User = require('../models/User');
+const JournalEntry = require('../models/JournalEntry');
 
 exports.register = function (server, options, next) {
 
@@ -13,13 +14,27 @@ exports.register = function (server, options, next) {
             method: 'GET',
             path: '/admin/users',
             config: {
-                description: 'Retrieve all users'
+                description: 'All users'
             },
             handler: function (request, reply) {
                 User.query()
                     .eager('[permissions, version]')
                     .orderBy('id')
                     .then(users => reply(users))
+                    .catch(err => reply(Boom.badImplementation(err)));
+            }
+        },
+
+        {
+            method: 'GET',
+            path: '/admin/entries',
+            config: {
+                description: 'All entries'
+            },
+            handler: function (request, reply) {
+                JournalEntry.query()
+                    .orderBy('id')
+                    .then(entries => reply(entries))
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         }

@@ -13,16 +13,14 @@ exports.register = function (server, options, next) {
             method: 'GET',
             path: '/entries',
             config: {
-                description: 'Get all entries for a user',
+                description: 'All entries for current user',
                 auth: 'jwt'
             },
             handler: function (request, reply) {
-                JournalEntry.query()
-                    .select('journal_entry.id', 'updated_at', 'title', 'entry')
-                    .innerJoin('user', 'journal_entry.user_id', 'user.id')
-                    .where('user.id', request.auth.credentials.id)
-                    .eager('tags')
-                    .then(entries => reply(entries))
+                User.query()
+                    .findById(request.auth.credentials.id)
+                    .eager('journal_entries')
+                    .then(user => reply(user.journal_entries))
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         },
@@ -31,7 +29,7 @@ exports.register = function (server, options, next) {
             method: 'POST',
             path: '/entries',
             config: {
-                description: 'Create a new journal entry',
+                description: 'New entry for current user',
                 auth: 'jwt',
                 validate: {
                     payload: {
@@ -42,7 +40,7 @@ exports.register = function (server, options, next) {
             },
             handler: function (request, reply) {
                 JournalEntry.query()
-                    .insert({
+                    .insertAndFetch({
                         user_id: request.auth.credentials.id,
                         title: request.payload.title,
                         entry: request.payload.entry
@@ -96,8 +94,8 @@ exports.register = function (server, options, next) {
             handler: function (request, reply) {
                 User.query()
                     .where('id', request.auth.credentials.id)
-                    .eager('tags')
                     .first()
+                    .eager('tags')
                     .then(user => reply(user.tags))
                     .catch(err => reply(Boom.badImplementation(err)));
             }

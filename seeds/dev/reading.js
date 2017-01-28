@@ -28,7 +28,7 @@ exports.seed = function (knex, Promise) {
     ])).then(() => Promise.all([
         knex('reading_day').del()
 
-    ])).then(() => ReadingDay.query().insertWithRelated({
+    ])).then(() => ReadingDay.query().insertGraph({
         date: today.toISOString(),
         questions: [
             { seq: 1, question: 'What is your name?' },

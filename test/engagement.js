@@ -15,7 +15,7 @@ lab.experiment('Test engagement endpoints', () => {
                 return Promise.all([
                     Practice
                         .query()
-                        .insertWithRelated({
+                        .insertGraph({
                             title: "Lectio Divina",
                             description: "Description of Lectio Divina",
                             details: [
@@ -36,7 +36,7 @@ lab.experiment('Test engagement endpoints', () => {
 
                     Practice
                         .query()
-                        .insertWithRelated({
+                        .insertGraph({
                             title: "Praying Scripture",
                             description: "Description of Praying Scripture",
                             details: [
