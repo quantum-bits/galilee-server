@@ -5,11 +5,13 @@ const Joi = require('Joi');
 
 const User = require('../models/User');
 const Config = require('../models/Config');
+const Permission = require('../models/Permission');
 const Version = require('../models/Version');
 
 exports.register = function (server, options, next) {
 
     server.route([
+
         {
             method: 'GET',
             path: '/users',
@@ -98,7 +100,6 @@ exports.register = function (server, options, next) {
             },
             handler: (request, reply) => {
                 User.query()
-                    .context(request.payload)
                     .patchAndFetchById(request.auth.credentials.id, request.payload)
                     .omit(['password'])
                     .then(user => reply(user))
@@ -140,33 +141,25 @@ exports.register = function (server, options, next) {
                 if (request.pre.user) {
                     reply(Boom.conflict('E-mail address already in use.'));
                 } else {
-                    Config.query()
-                        .findById('default-version')
-                        .then(config => {
-                            Version.query()
-                                .where('code', config.value)
-                                .first()
-                                .then(version => {
-                                    User.query()
-                                        .insertAndFetch({
-                                            email: request.payload.email,
-                                            password: request.payload.password,
-                                            firstName: request.payload.firstName,
-                                            lastName: request.payload.lastName,
-                                            preferredVersionId: version.id
-                                        })
-                                        .omit(['password'])
-                                        .then(user => reply(user))
-                                        .catch(err => reply(Boom.badImplementation(err)));
-                                })
-                        })
+                    Config.defaultVersion()
+                        .then(version => User.query()
+                            .insertAndFetch({
+                                email: request.payload.email,
+                                password: request.payload.password,
+                                firstName: request.payload.firstName,
+                                lastName: request.payload.lastName,
+                                preferredVersionId: version.id
+                            })
+                            .omit(['password'])
+                            .then(user => reply(user))
+                            .catch(err => reply(Boom.badImplementation(err))));
                 }
             }
         }
+
     ]);
 
     next();
-}
-;
+};
 
 exports.register.attributes = {name: 'user', version: '0.0.1'};
