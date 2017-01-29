@@ -1,7 +1,7 @@
 'use strict';
 
 const User = require('../../models/User');
-const loremIpsum = require('lorem-ipsum');
+const faker = require('faker');
 
 exports.seed = function (knex, Promise) {
     return Promise.all([
@@ -73,13 +73,13 @@ exports.seed = function (knex, Promise) {
                 ],
                 journal_entries: [
                     {
-                        title: 'My thoughts on the readings from today',
-                        entry: loremIpsum(),
+                        title: faker.lorem.sentence(),
+                        entry: faker.lorem.paragraphs(),
                         tags: [{'#ref': 'tag-discipleship'}]
                     },
                     {
-                        title: 'My other reflections on some more readings from today',
-                        entry: loremIpsum(),
+                        title: faker.lorem.sentence(),
+                        entry: faker.lorem.paragraphs(),
                         tags: [
                             {'#ref': 'tag-discipleship'},
                             {'#ref': 'tag-spirituality'}
