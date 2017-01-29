@@ -4,6 +4,7 @@ const Debug = require('debug');
 const debug = Debug('seed:debug');
 const log = Debug('seed:log');
 
+const random = require('random-js')();
 const faker = require('faker');
 const _ = require('lodash');
 
@@ -61,20 +62,9 @@ function seedUsers() {
             firstName: faker.name.firstName(),
             lastName: faker.name.lastName(),
             joinedOn: faker.date.past(2),
-            preferredVersionId: faker.random.arrayElement(versionObjects).id
+            preferredVersionId: random.pick(versionObjects).id
         })
     ))
-}
-
-/**
- * Randomly return true a times out of n.
- * @param a
- * @param n
- * @returns {boolean}
- */
-function chanceIn(a, n) {
-    let val = faker.random.number({min: 1, max: n});
-    return (val <= a);
 }
 
 function seedJournalEntries() {
@@ -83,27 +73,45 @@ function seedJournalEntries() {
     // The map method will wait for all the promises returned by the insert operation.
     return User.query().map(user => {
 
-        // Generate a random number of journal entries for this user.
-        let count = faker.random.number({min: 1, max: 10});
-        log("Create %d journal entries for user %d", count, user.id);
+        // Generate a list of randomly many random tags for this user.
+        let user_tags = _.times(random.integer(3, 10), n => faker.random.word());
+        log("Tags are %o", user_tags);
 
-        return Promise.all(_.times(count, n => {
+        // Generate a random number of journal entries for this user.
+        let entry_count = random.integer(3, 15);
+        log("Create %d journal entries for user %d", entry_count, user.id);
+
+        return Promise.all(_.times(entry_count, n => {
+            // Set create and update dates for an entry.
+            // Sometimes make the update date different.
             let create_date = faker.date.past(2);
             let update_date = create_date;
-            if (chanceIn(2, 5)) {
+            if (random.bool(2, 5)) {
                 update_date = faker.date.between(create_date, today);
             }
+
+            // Sample the user's tags for this particular entry.
+            let entry_tags = random.sample(user_tags, random.integer(0, Math.min(user_tags.length, 5)));
+
+            // Insert the object graph. The graph thing is way cool.
             return user.$relatedQuery('journal_entries')
-                .insert({
+                .insertGraph({
                     title: faker.lorem.sentence(),
                     entry: faker.lorem.paragraphs(),
                     created_at: create_date,
-                    updated_at: update_date
+                    updated_at: update_date,
+                    tags: entry_tags.map(tag => {
+                        return {
+                            user_id: user.id,
+                            text: tag
+                        };
+                    })
                 });
         }));
     });
 }
 
+// Seed All the Things.
 exports.seed = function (knex, Promise) {
     return seedVersions().then(() => {
         return seedUsers();
