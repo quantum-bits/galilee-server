@@ -2,11 +2,43 @@
 
 const Boom = require('boom');
 const Joi = require('Joi');
+const _ = require('lodash');
+const moment = require('moment');
 
 const User = require('../models/User');
+const UserTag = require('../models/UserTag');
 const JournalEntry = require('../models/JournalEntry');
+const JournalEntryTag = require('../models/JournalEntryTag');
 
 exports.register = function (server, options, next) {
+
+    // Get statistics on all the user's tags.
+    server.method('getTagStats', function (user_id, next) {
+        JournalEntryTag.query()
+            .select('user_tag.id as user_tag_id', 'user_tag.tag')
+            .count('user_tag.id as uses')
+            .join('user_tag', 'user_tag_id', 'user_tag.id')
+            .where('user_tag.user_id', user_id)
+            .groupBy('user_tag.id')
+            .orderBy('uses', 'desc')
+            .then(tags => {
+                // In PostgreSQL, count returns bigint, which knex render as a string.
+                tags.forEach(tag => {
+                    tag.uses = +tag.uses
+                });
+                return next(null, tags);
+            }).catch(err => next(err, null));
+    });
+
+    // Get statistics on all the user's journal entries.
+    server.method('getJournalStats', function (user_id, next) {
+        JournalEntry.query()
+            .select('updated_at')
+            .where('user_id', user_id)
+            .map(entry => moment(entry.updated_at).format('YYYY-MM-DD'))
+            .then(entries => next(null, _.countBy(entries)))
+            .catch(err => next(err, null));
+    });
 
     function fetchJournalEntries(user_id, offset = 0, limit = null) {
         let builder = JournalEntry.query()
@@ -55,30 +87,19 @@ exports.register = function (server, options, next) {
             path: '/entries/meta',
             config: {
                 description: 'Journal metadata for user',
-                auth: 'jwt'
+                auth: 'jwt',
+                pre: [
+                    {assign: 'tagStats', method: 'getTagStats(auth.credentials.id)'},
+                    {assign: 'journalStats', method: 'getJournalStats(auth.credentials.id)'}
+                ]
             },
             handler: function (request, reply) {
+                let allTags = _.map(request.pre.tagStats, entry => entry.tag);
+                let frequentTags = _.take(allTags, 3);
                 reply({
-                    mostUsedTags: ['thoughts', 'reflections', 'prayer'],
-                    allUsedTags: ['thoughts', 'reflections', 'prayer', 'friends', 'doctrine', 'predestination'],
-                    calendarJournalEntries: [
-                        {
-                            dateString: "2017-01-13",
-                            numberEntries: 2
-                        },
-                        {
-                            dateString: "2017-01-11",
-                            numberEntries: 1
-                        },
-                        {
-                            dateString: "2017-01-09",
-                            numberEntries: 4
-                        },
-                        {
-                            dateString: "2016-12-24",
-                            numberEntries: 4
-                        }
-                    ],
+                    mostUsedTags: frequentTags,
+                    allUsedTags: allTags.sort(),
+                    calendarJournalEntries: request.pre.journalStats
                 });
             }
         },

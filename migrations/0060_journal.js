@@ -17,7 +17,7 @@ exports.up = function (knex, Promise) {
         knex.schema.createTableIfNotExists('user_tag', table => {
             table.increments('id');
             table.integer('user_id').references('user.id');
-            table.string('text');
+            table.string('tag');
         }),
 
         knex.schema.createTableIfNotExists('journal_entry_tag', table => {

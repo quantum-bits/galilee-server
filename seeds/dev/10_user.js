@@ -68,8 +68,8 @@ exports.seed = function (knex, Promise) {
                     }
                 ],
                 tags: [
-                    {'#id': 'tag-discipleship', text: 'discipleship'},
-                    {'#id': 'tag-spirituality', text: 'spirituality'}
+                    {'#id': 'tag-discipleship', tag: 'discipleship'},
+                    {'#id': 'tag-spirituality', tag: 'spirituality'}
                 ],
                 journal_entries: [
                     {

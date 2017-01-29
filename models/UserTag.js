@@ -9,7 +9,15 @@ module.exports = class UserTag extends db.Model {
 
     static get relationMappings() {
         return {
-            jounal_entries: {
+            user: {
+                relation: db.Model.BelongsToOneRelation,
+                modelClass: __dirname + '/User',
+                join: {
+                    from: 'user_tag.user_id',
+                    to: 'user.id'
+                }
+            },
+            journal_entries: {
                 relation: db.Model.ManyToManyRelation,
                 modelClass: __dirname + '/JournalEntry',
                 join: {
