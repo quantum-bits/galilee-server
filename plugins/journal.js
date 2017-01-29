@@ -8,20 +8,78 @@ const JournalEntry = require('../models/JournalEntry');
 
 exports.register = function (server, options, next) {
 
+    function fetchJournalEntries(user_id, offset = 0, limit = null) {
+        let builder = JournalEntry.query()
+            .where('user_id', user_id)
+            .orderBy('updated_at')
+            .offset(offset);
+
+        if (limit) {
+            builder = builder.limit(limit);
+        }
+
+        return builder;
+    }
+
     server.route([
+
         {
             method: 'GET',
             path: '/entries',
             config: {
-                description: 'All entries for current user',
+                description: 'Journal entries for user',
+                auth: 'jwt',
+                validate: {
+                    query: {
+                        offset: Joi.number().integer().min(0).default(0).description('Offset; default 0'),
+                        limit: Joi.number().integer().min(1).description('Limit; no default')
+                    }
+                }
+            },
+            handler: function (request, reply) {
+                let offset = request.query.offset;
+                let limit = request.query.limit;
+
+                fetchJournalEntries(request.auth.credentials.id, offset, limit)
+                    .then(entries => reply({
+                        startIndex: offset,
+                        count: entries.length,
+                        journalEntries: entries
+                    }))
+                    .catch(err => reply(Boom.badImplementation(err)));
+            }
+        },
+
+        {
+            method: 'GET',
+            path: '/entries/meta',
+            config: {
+                description: 'Journal metadata for user',
                 auth: 'jwt'
             },
             handler: function (request, reply) {
-                User.query()
-                    .findById(request.auth.credentials.id)
-                    .eager('journal_entries')
-                    .then(user => reply(user.journal_entries))
-                    .catch(err => reply(Boom.badImplementation(err)));
+                reply({
+                    mostUsedTags: ['thoughts', 'reflections', 'prayer'],
+                    allUsedTags: ['thoughts', 'reflections', 'prayer', 'friends', 'doctrine', 'predestination'],
+                    calendarJournalEntries: [
+                        {
+                            dateString: "2017-01-13",
+                            numberEntries: 2
+                        },
+                        {
+                            dateString: "2017-01-11",
+                            numberEntries: 1
+                        },
+                        {
+                            dateString: "2017-01-09",
+                            numberEntries: 4
+                        },
+                        {
+                            dateString: "2016-12-24",
+                            numberEntries: 4
+                        }
+                    ],
+                });
             }
         },
 
@@ -59,7 +117,8 @@ exports.register = function (server, options, next) {
                 validate: {
                     params: {
                         id: Joi.number().integer().min(1).required()
-                    },
+                    }
+                    ,
                     payload: {
                         title: Joi.string().required(),
                         entry: Joi.string().required()
@@ -90,7 +149,8 @@ exports.register = function (server, options, next) {
             config: {
                 description: 'Return all tags for user',
                 auth: 'jwt'
-            },
+            }
+            ,
             handler: function (request, reply) {
                 User.query()
                     .where('id', request.auth.credentials.id)
@@ -103,6 +163,6 @@ exports.register = function (server, options, next) {
     ]);
 
     next();
-};
+}
 
 exports.register.attributes = {name: 'journal', version: '0.0.1'};
