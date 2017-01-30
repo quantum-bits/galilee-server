@@ -31,27 +31,40 @@ exports.register = function (server, options, next) {
     });
 
     // Get statistics on all the user's journal entries.
-    server.method('getJournalStats', function (user_id, next) {
+    server.method('getJournalStats', function (userId, next) {
         JournalEntry.query()
             .select('updated_at')
-            .where('user_id', user_id)
+            .where('user_id', userId)
             .map(entry => moment(entry.updated_at).format('YYYY-MM-DD'))
             .then(entries => next(null, _.countBy(entries)))
             .catch(err => next(err, null));
     });
 
-    function fetchJournalEntries(user_id, offset = 0, limit = null) {
-        let builder = JournalEntry.query()
-            .where('user_id', user_id)
-            .orderBy('updated_at')
+    // Return journal entries for a user. Offset defaults to the first entry.
+    // Limit defaults to unlimited.
+    server.method('fetchJournalEntries', function (userId, offset = 0, limit = null, next) {
+        // Comment query elements.
+        let queryBuilder = JournalEntry.query()
+            .where('user_id', userId)
+            .omit(['user_id'])
+            .eager('tags')
+            .orderBy('updated_at', 'desc')
             .offset(offset);
 
+        // Maybe add limit clause.
         if (limit) {
-            builder = builder.limit(limit);
+            queryBuilder = queryBuilder.limit(limit);
         }
 
-        return builder;
-    }
+        // Run the query and postprocess the results.
+        queryBuilder
+            .map(entry => {
+                entry.tags = entry.tags.map(elt => elt.tag);
+                return entry;
+            })
+            .then(entries => next(null, entries))
+            .catch(err => next(err, null));
+    });
 
     server.route([
 
@@ -61,6 +74,12 @@ exports.register = function (server, options, next) {
             config: {
                 description: 'Journal entries for user',
                 auth: 'jwt',
+                pre: [
+                    {
+                        assign: 'entries',
+                        method: 'fetchJournalEntries(auth.credentials.id,query.offset,query.limit)'
+                    }
+                ],
                 validate: {
                     query: {
                         offset: Joi.number().integer().min(0).default(0).description('Offset; default 0'),
@@ -69,16 +88,11 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                let offset = request.query.offset;
-                let limit = request.query.limit;
-
-                fetchJournalEntries(request.auth.credentials.id, offset, limit)
-                    .then(entries => reply({
-                        startIndex: offset,
-                        count: entries.length,
-                        journalEntries: entries
-                    }))
-                    .catch(err => reply(Boom.badImplementation(err)));
+                reply({
+                    startIndex: request.query.offset,
+                    count: request.pre.entries.length,
+                    journalEntries: request.pre.entries
+                });
             }
         },
 
