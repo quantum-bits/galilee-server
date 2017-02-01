@@ -15,8 +15,8 @@ class Step extends db.Model {
                 join: {
                     from: 'step.id',
                     through: {
-                        from: 'application_step.step_id',
-                        to: 'application_step.application_id'
+                        from: 'applicationStep.stepId',
+                        to: 'applicationStep.applicationId'
                     },
                     to: 'application.id'
                 }
@@ -27,8 +27,8 @@ class Step extends db.Model {
                 join: {
                     from: 'step.id',
                     through: {
-                        from: 'step_resource.step_id',
-                        to: 'step_resource.resource_id'
+                        from: 'stepResource.stepId',
+                        to: 'stepResource.resourceId'
                     },
                     to: 'resource.id'
                 }

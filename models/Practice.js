@@ -14,7 +14,7 @@ class Practice extends db.Model {
                 modelClass: __dirname + '/Application',
                 join: {
                     from: 'practice.id',
-                    to: 'application.practice_id'
+                    to: 'application.practiceId'
                 }
             },
             readings: {
@@ -23,8 +23,8 @@ class Practice extends db.Model {
                 join: {
                     from: 'practice.id',
                     through: {
-                        from: 'application.practice_id',
-                        to: 'application.reading_id',
+                        from: 'application.practiceId',
+                        to: 'application.readingId',
                     },
                     to: 'reading.id'
                 }

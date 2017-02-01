@@ -84,46 +84,46 @@ function seedJournalEntries() {
     return User.query().map(user => {
 
         // Generate the random number of journal entries for this user.
-        let entry_count = random.integer(MIN_ENTRIES_PER_USER, MAX_ENTRIES_PER_USER);
+        let entryCount = random.integer(MIN_ENTRIES_PER_USER, MAX_ENTRIES_PER_USER);
 
         // Generate a list of randomly many, unique, random tags for this user.
-        let user_tags = _.uniq(_.times(random.integer(MIN_TAGS_PER_USER, MAX_TAGS_PER_USER), n => faker.random.word()));
-        log("Tags are %o", user_tags);
+        let userTags = _.uniq(_.times(random.integer(MIN_TAGS_PER_USER, MAX_TAGS_PER_USER), n => faker.random.word()));
+        log("Tags are %o", userTags);
 
         // Insert the user's tag list into the database.
-        return Promise.all(user_tags.map(tag =>
+        return Promise.all(userTags.map(tag =>
             UserTag.query().insert({
-                user_id: user.id,
+                userId: user.id,
                 tag: tag
             })
-        )).then(user_tag_objects => {
+        )).then(userTagObjects => {
 
             // Create multiple journal entries for this user.
-            return Promise.all(_.times(entry_count, n => {
+            return Promise.all(_.times(entryCount, n => {
                 // Set entry's create and update dates.
-                let create_date = faker.date.recent(JOINED_DAYS_AGO);
-                let update_date = create_date;
+                let createDate = faker.date.recent(JOINED_DAYS_AGO);
+                let updateDate = createDate;
                 if (random.bool(2, 5)) {
                     // Sometimes change the update date.
-                    update_date = faker.date.between(create_date, today);
+                    updateDate = faker.date.between(createDate, today);
                 }
 
                 // Insert one journal entry.
-                return user.$relatedQuery('journal_entries').insert({
+                return user.$relatedQuery('journalEntries').insert({
                     title: faker.lorem.sentence(),
                     entry: faker.lorem.paragraphs(),
-                    created_at: create_date,
-                    updated_at: update_date
-                }).then(journal_entry => {
+                    createdAt: createDate,
+                    updatedAt: updateDate
+                }).then(journalEntry => {
                     // Sample the user's tag objects to use for this entry.
-                    let entry_tag_objects =
+                    let entryTagObjects =
                         random.sample(
-                            user_tag_objects,
-                            random.integer(0, Math.min(user_tag_objects.length, MAX_TAGS_PER_ENTRY)));
+                            userTagObjects,
+                            random.integer(0, Math.min(userTagObjects.length, MAX_TAGS_PER_ENTRY)));
 
                     // Relate the journal entry to the tags.
-                    return Promise.all(entry_tag_objects.map(tag_object =>
-                        journal_entry.$relatedQuery('tags').relate(tag_object)));
+                    return Promise.all(entryTagObjects.map(tagObject =>
+                        journalEntry.$relatedQuery('tags').relate(tagObject)));
                 });
             }));
         });

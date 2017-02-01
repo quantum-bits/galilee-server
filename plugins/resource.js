@@ -14,7 +14,7 @@ const Config = require('../models/Config');
 
 exports.register = function (server, options, next) {
 
-    const extension_re = /^\.(?:gif|jpe?g|png)$/;
+    const extensionRe = /^\.(?:gif|jpe?g|png)$/;
 
     server.route([
 
@@ -51,15 +51,15 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                const unique_id = uuid.v4();
+                const uniqueId = uuid.v4();
 
                 Collection.query()
                     .insert({
-                        id: unique_id,
+                        id: uniqueId,
                         title: request.payload.title,
                         description: request.payload.description
                     })
-                    .then(() => reply({collectionId: unique_id}))
+                    .then(() => reply({collectionId: uniqueId}))
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         },
@@ -98,7 +98,7 @@ exports.register = function (server, options, next) {
                 const uploadName = path.basename(request.payload.file.filename);
 
                 const uploadExtension = path.extname(uploadName);
-                if (!extension_re.test(uploadExtension)) {
+                if (!extensionRe.test(uploadExtension)) {
                     return reply(Boom.badData('Invalid file type'));
                 }
 
@@ -107,28 +107,28 @@ exports.register = function (server, options, next) {
                 Config.query()
                     .where('key', 'upload-root').first()
                     .then(result => {
-                        const upload_root = result.value;
-                        const unique_id = uuid.v4();
-                        const destination = path.join(__dirname, upload_root,
-                            unique_id.substr(0, 2),
-                            unique_id + uploadExtension);
-                        const dest_dir = path.dirname(destination);
+                        const uploadRoot = result.value;
+                        const uniqueId = uuid.v4();
+                        const destination = path.join(__dirname, uploadRoot,
+                            uniqueId.substr(0, 2),
+                            uniqueId + uploadExtension);
+                        const destDir = path.dirname(destination);
 
-                        fs.mkdir(dest_dir, 0o750, err => {
+                        fs.mkdir(destDir, 0o750, err => {
                             fs.rename(uploadPath, destination, err => {
                                 if (err) {
                                     return reply(Boom.badImplementation("Can't rename uploaded file", err));
                                 }
 
                                 Resource.query().insert({
-                                    id: unique_id,
+                                    id: uniqueId,
                                     caption: request.payload.caption,
-                                    copyright_year: request.payload.year,
-                                    copyright_owner: request.payload.owner,
+                                    copyrightYear: request.payload.year,
+                                    copyrightOwner: request.payload.owner,
                                     details: {
                                         filename: uploadName
                                     },
-                                    resource_type_id: request.payload.typeId
+                                    resourceTypeId: request.payload.typeId
                                 }).then(resource => {
                                     return resource
                                         .$relatedQuery('collections')
@@ -136,7 +136,7 @@ exports.register = function (server, options, next) {
                                 }).then(() => {
                                     return reply({
                                         status: 'ok',
-                                        resourceId: unique_id
+                                        resourceId: uniqueId
                                     });
                                 }).catch(err => reply(Boom.badImplementation('Problem with upload', err)));
                             });     // rename

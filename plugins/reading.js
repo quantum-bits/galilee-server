@@ -15,11 +15,11 @@ exports.register = function (server, options, next) {
 
     // Normalize the date parameter.
     server.method('normalizeDate', (request, reply) => {
-        let query_date = request.params.date;
-        if (query_date === 'today') {
-            query_date = todaysDate();
+        let queryDate = request.params.date;
+        if (queryDate === 'today') {
+            queryDate = todaysDate();
         }
-        reply(query_date);
+        reply(queryDate);
     });
 
     server.route([
@@ -35,20 +35,20 @@ exports.register = function (server, options, next) {
                     .where('date', request.pre.normalizeDate)
                     .first()
                     .eager('[readings.applications.[practice,steps.resources],questions]')
-                    .then(reading_day => {
+                    .then(readingDay => {
                         console.log("THEN");
-                        if (!reading_day) {
+                        if (!readingDay) {
                             reply(Boom.notFound(`No reading data for '${request.pre.normalizeDate}'`));
                         } else {
                             // Massage questions into simple list of strings.
-                            reading_day.questions = reading_day.questions.map(obj => obj.question)
+                            readingDay.questions = readingDay.questions.map(obj => obj.question)
 
                             // Fetch scripture text from Bible Gateway.
                             let promises = [];
-                            reading_day.readings.map(reading => {
+                            readingDay.readings.map(reading => {
                                 server.log('info', JSON.stringify(reading, null, 2));
                                 let p = new Promise((resolve, reject) => {
-                                    server.methods.bg_passage('NKJV', reading.osis_ref, (err, result) => {
+                                    server.methods.bgPassage('NKJV', reading.osisRef, (err, result) => {
                                         if (err) {
                                             reading.text = `Bible Gateway error '${err}'`;
                                         } else {
@@ -62,7 +62,7 @@ exports.register = function (server, options, next) {
 
                             // Wait for Bible Gateway to complete and respond to client.
                             Promise.all(promises).then(res => {
-                                reply(reading_day);
+                                reply(readingDay);
                             });
                         }
                     })
@@ -82,11 +82,11 @@ exports.register = function (server, options, next) {
                     .where('date', request.pre.normalizeDate)
                     .first()
                     .eager('questions')
-                    .then(reading_day => {
-                        if (!reading_day) {
+                    .then(readingDay => {
+                        if (!readingDay) {
                             reply(Boom.notFound('No reading for this date'));
                         } else {
-                            reply(reading_day.questions.map(obj => obj.question));
+                            reply(readingDay.questions.map(obj => obj.question));
                         }
                     })
                     .catch(err => reply(Boom.badImplementation(err)));
@@ -119,14 +119,14 @@ exports.register = function (server, options, next) {
                 description: 'Raise an error intentionally'
             },
             handler: function (request, reply) {
-                let a_promise;
+                let aPromise;
                 if (request.params.maybe == 'OK') {
-                    a_promise = Promise.resolve('This is good');
+                    aPromise = Promise.resolve('This is good');
                 } else {
-                    a_promise = Promise.reject('This is bad');
+                    aPromise = Promise.reject('This is bad');
                 }
 
-                a_promise
+                aPromise
                     .then(() => {
                         console.log("WORKED");
                         reply({so: 'it worked'});

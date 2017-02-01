@@ -15,8 +15,8 @@ class Permission extends db.Model {
                 join: {
                     from: 'permission.id',
                     through: {
-                        from: 'user_permission.version_id',
-                        to: 'user_permission.user_id'
+                        from: 'userPermission.versionId',
+                        to: 'userPermission.userId'
                     },
                     to: 'user.id'
                 }

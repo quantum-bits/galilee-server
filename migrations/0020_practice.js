@@ -11,8 +11,8 @@ exports.up = function (knex, Promise) {
 
         knex.schema.createTableIfNotExists('application', table => {
             table.increments('id');
-            table.integer('reading_id').references('reading.id');
-            table.integer('practice_id').references('practice.id');
+            table.integer('readingId').references('reading.id');
+            table.integer('practiceId').references('practice.id');
         }),
 
         knex.schema.createTableIfNotExists('step', table => {
@@ -21,10 +21,10 @@ exports.up = function (knex, Promise) {
             table.text('description').notNullable();
         }),
 
-        knex.schema.createTableIfNotExists('application_step', table => {
-            table.integer('application_id').references('application.id');
-            table.integer('step_id').references('step.id');
-            table.primary(['step_id', 'application_id']);
+        knex.schema.createTableIfNotExists('applicationStep', table => {
+            table.integer('applicationId').references('application.id');
+            table.integer('stepId').references('step.id');
+            table.primary(['stepId', 'applicationId']);
         })
     ])
 };

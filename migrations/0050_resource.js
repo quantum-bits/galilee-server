@@ -4,7 +4,7 @@ exports.up = function (knex, Promise) {
 
     return Promise.all([
 
-        knex.schema.createTableIfNotExists('resource_type', table => {
+        knex.schema.createTableIfNotExists('resourceType', table => {
             table.increments('id');
             table.string('title').notNullable();
             table.string('icon');
@@ -12,18 +12,18 @@ exports.up = function (knex, Promise) {
 
         knex.schema.createTableIfNotExists('resource', table => {
             table.uuid('id').primary();
-            table.integer('user_id').references('user.id');
+            table.integer('userId').references('user.id');
             table.text('caption').notNullable();
-            table.string('copyright_year');
-            table.string('copyright_owner');
+            table.string('copyrightYear');
+            table.string('copyrightOwner');
             table.jsonb('details');
-            table.integer('resource_type_id').references('resource_type.id');
+            table.integer('resourceTypeId').references('resourceType.id');
         }),
 
-        knex.schema.createTableIfNotExists('step_resource', table => {
-            table.integer('step_id').references('step.id');
-            table.uuid('resource_id').references('resource.id');
-            table.primary(['step_id', 'resource_id']);
+        knex.schema.createTableIfNotExists('stepResource', table => {
+            table.integer('stepId').references('step.id');
+            table.uuid('resourceId').references('resource.id');
+            table.primary(['stepId', 'resourceId']);
         }),
 
         knex.schema.createTableIfNotExists('tag', table => {
@@ -31,21 +31,21 @@ exports.up = function (knex, Promise) {
             table.string('title').notNullable();
         }),
 
-        knex.schema.createTableIfNotExists('resource_tag', table => {
-            table.uuid('resource_id').references('resource.id');
-            table.integer('tag_id').references('tag.id');
-            table.primary(['resource_id', 'tag_id']);
+        knex.schema.createTableIfNotExists('resourceTag', table => {
+            table.uuid('resourceId').references('resource.id');
+            table.integer('tagId').references('tag.id');
+            table.primary(['resourceId', 'tagId']);
         })
     ])
 };
 
 exports.down = function (knex, Promise) {
     return Promise.all([
-        knex.schema.dropTableIfExists('reading_collection'),
-        knex.schema.dropTableIfExists('step_resource'),
-        knex.schema.dropTableIfExists('resource_tag'),
+        knex.schema.dropTableIfExists('readingCollection'),
+        knex.schema.dropTableIfExists('stepResource'),
+        knex.schema.dropTableIfExists('resourceTag'),
         knex.schema.dropTableIfExists('tag'),
         knex.schema.dropTableIfExists('resource'),
-        knex.schema.dropTableIfExists('resource_type')
+        knex.schema.dropTableIfExists('resourceType')
     ])
 };

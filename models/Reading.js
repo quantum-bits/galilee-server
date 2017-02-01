@@ -9,12 +9,12 @@ class Reading extends db.Model {
 
     static get relationMappings() {
         return {
-            reading_day: {
+            readingDay: {
                 relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/ReadingDay',
                 join: {
-                    from: 'reading.reading_day_id',
-                    to: 'reading_day.id'
+                    from: 'reading.readingDayId',
+                    to: 'readingDay.id'
                 }
             },
             applications: {
@@ -22,7 +22,7 @@ class Reading extends db.Model {
                 modelClass: __dirname + '/Application',
                 join: {
                     from: 'reading.id',
-                    to: 'application.reading_id'
+                    to: 'application.readingId'
                 }
             },
             practices: {
@@ -31,8 +31,8 @@ class Reading extends db.Model {
                 join: {
                     from: 'reading.id',
                     through: {
-                        from: 'application.reading_id',
-                        to: 'application.practice_id'
+                        from: 'application.readingId',
+                        to: 'application.practiceId'
                     },
                     to: 'practice.id'
                 }

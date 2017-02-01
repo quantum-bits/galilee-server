@@ -8,8 +8,8 @@ class Collection extends db.Model {
             return {
                 description: resource.description,
                 url: resource.url,
-                copyright_year: resource.copyright_year,
-                copyright_owner: resource.copyright_owner,
+                copyrightYear: resource.copyrightYear,
+                copyrightOwner: resource.copyrightOwner,
                 tags: resource.tags.map(tag => tag.title)
             }
         })
@@ -27,8 +27,8 @@ class Collection extends db.Model {
                 join: {
                     from: 'collection.id',
                     through: {
-                        from: 'collection_resource.collection_id',
-                        to: 'collection_resource.resource_id'
+                        from: 'collectionResource.collectionId',
+                        to: 'collectionResource.resourceId'
                     },
                     to: 'resource.id'
                 }
@@ -39,8 +39,8 @@ class Collection extends db.Model {
                 join: {
                     from: 'collection.id',
                     through: {
-                        from: 'reading_collection.collection_id',
-                        to: 'reading_collection.reading_id',
+                        from: 'readingCollection.collectionId',
+                        to: 'readingCollection.readingId',
                         extra: ['advice']
                     },
                     to: 'reading.id'

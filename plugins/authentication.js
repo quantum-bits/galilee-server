@@ -12,9 +12,9 @@ exports.register = function (server, options, next) {
 
     function validate(decoded, request, callback) {
         console.log("JWT", decoded);
-        if (decoded.hasOwnProperty('user_id')) {
+        if (decoded.hasOwnProperty('userId')) {
             User.query()
-                .where('id', decoded.user_id)
+                .where('id', decoded.userId)
                 .first()
                 .then(user => {
                     if (user) {
@@ -32,9 +32,9 @@ exports.register = function (server, options, next) {
         }
     }
 
-    function createToken(email, user_id) {
+    function createToken(email, userId) {
         return JWT.sign(
-            {user_id: user_id},
+            {userId: userId},
             JWT_SECRET_KEY,
             {algorithm: 'HS256', expiresIn: "1d"}
         );
@@ -70,7 +70,7 @@ exports.register = function (server, options, next) {
                                     if (isValid) {
                                         delete user.password;       // Don't send password.
                                         reply({
-                                            id_token: createToken(email, user.id),
+                                            idToken: createToken(email, user.id),
                                             user: user
                                         });
                                     } else {

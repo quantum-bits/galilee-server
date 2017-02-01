@@ -13,7 +13,7 @@ class Group extends db.Model {
                 relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/Organization',
                 join: {
-                    from: 'group.organization_id',
+                    from: 'group.organizationId',
                     to: 'organization.id'
                 }
             },
@@ -23,8 +23,8 @@ class Group extends db.Model {
                 join: {
                     from: 'group.id',
                     through: {
-                        from: 'membership.group_id',
-                        to: 'membership.user_id'
+                        from: 'membership.groupId',
+                        to: 'membership.userId'
                     },
                     to: 'user.id'
                 }

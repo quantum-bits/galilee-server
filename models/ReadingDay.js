@@ -4,7 +4,7 @@ const db = require('../db');
 
 class ReadingDay extends db.Model {
     static get tableName() {
-        return 'reading_day';
+        return 'readingDay';
     }
 
     static get relationMappings() {
@@ -13,16 +13,16 @@ class ReadingDay extends db.Model {
                 relation: db.Model.HasManyRelation,
                 modelClass: __dirname + '/Reading',
                 join: {
-                    from: 'reading_day.id',
-                    to: 'reading.reading_day_id'
+                    from: 'readingDay.id',
+                    to: 'reading.readingDayId'
                 }
             },
             questions: {
                 relation: db.Model.HasManyRelation,
                 modelClass: __dirname + '/DailyQuestion',
                 join: {
-                    from: 'reading_day.id',
-                    to: 'daily_question.reading_day_id'
+                    from: 'readingDay.id',
+                    to: 'dailyQuestion.readingDayId'
                 }
             }
 

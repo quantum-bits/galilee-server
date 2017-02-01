@@ -14,7 +14,7 @@ class Organization extends db.Model {
                 modelClass: __dirname + '/Group',
                 join: {
                     from: 'organization.id',
-                    to: 'group.organization_id'
+                    to: 'group.organizationId'
                 }
             }
         }

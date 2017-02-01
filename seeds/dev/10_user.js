@@ -5,13 +5,13 @@ const faker = require('faker');
 
 exports.seed = function (knex, Promise) {
     return Promise.all([
-        knex('journal_entry_tag').del(),
-        knex('user_tag').del()
+        knex('journalEntryTag').del(),
+        knex('userTag').del()
 
     ]).then(() => Promise.all([
         knex('membership').del(),
-        knex('user_permission').del(),
-        knex('journal_entry').del()
+        knex('userPermission').del(),
+        knex('journalEntry').del()
 
     ])).then(() => Promise.all([
         knex('permission').del(),
@@ -71,7 +71,7 @@ exports.seed = function (knex, Promise) {
                     {'#id': 'tag-discipleship', tag: 'discipleship'},
                     {'#id': 'tag-spirituality', tag: 'spirituality'}
                 ],
-                journal_entries: [
+                journalEntries: [
                     {
                         title: faker.lorem.sentence(),
                         entry: faker.lorem.paragraphs(),

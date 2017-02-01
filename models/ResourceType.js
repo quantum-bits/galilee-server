@@ -4,7 +4,7 @@ const db = require('../db');
 
 class ResourceType extends db.Model {
     static get tableName() {
-        return 'resource_type';
+        return 'resourceType';
     }
     
     static get relationMappings() {
@@ -13,8 +13,8 @@ class ResourceType extends db.Model {
                 relation: db.Model.HasManyRelation,
                 modelClass: __dirname + '/Resource',
                 join: {
-                    from: 'resource_type.id',
-                    to: 'resource.resource_type_id'
+                    from: 'resourceType.id',
+                    to: 'resource.resourceTypeId'
                 }
             }
         }

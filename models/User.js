@@ -33,8 +33,8 @@ module.exports = class User extends db.Model {
                 join: {
                     from: 'user.id',
                     through: {
-                        from: 'user_permission.user_id',
-                        to: 'user_permission.permission_id'
+                        from: 'userPermission.userId',
+                        to: 'userPermission.permissionId'
                     },
                     to: 'permission.id'
                 }
@@ -45,18 +45,18 @@ module.exports = class User extends db.Model {
                 join: {
                     from: 'user.id',
                     through: {
-                        from: 'membership.user_id',
-                        to: 'membership.group_id'
+                        from: 'membership.userId',
+                        to: 'membership.groupId'
                     },
                     to: 'group.id'
                 }
             },
-            journal_entries: {
+            journalEntries: {
                 relation: db.Model.HasManyRelation,
                 modelClass: __dirname + '/JournalEntry',
                 join: {
                     from: 'user.id',
-                    to: 'journal_entry.user_id'
+                    to: 'journalEntry.userId'
                 }
             },
             tags: {
@@ -64,7 +64,7 @@ module.exports = class User extends db.Model {
                 modelClass: __dirname + '/UserTag',
                 join: {
                     from: 'user.id',
-                    to: 'user_tag.user_id'
+                    to: 'userTag.userId'
                 }
             }
         }

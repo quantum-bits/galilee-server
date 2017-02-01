@@ -3,8 +3,8 @@
 /**
  * Set-up code for HAPI testing.  Use it like this:
  *
- * import { init_test, expect, server, db } from './support';
- * lab = exports.lab = init_test();
+ * import { initTest, expect, server, db } from './support';
+ * lab = exports.lab = initTest();
  *
  * lab.experiment(...);
  *
@@ -22,7 +22,7 @@ exports.expect = Code.expect;
 const Server = require('../server');
 exports.server = null;
 
-exports.init_test = function() {
+exports.initTest = function() {
     const lab = Lab.script();
 
     lab.before((done) => {

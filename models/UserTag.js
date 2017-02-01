@@ -4,7 +4,7 @@ const db = require('../db');
 
 module.exports = class UserTag extends db.Model {
     static get tableName() {
-        return 'user_tag';
+        return 'userTag';
     }
 
     static get relationMappings() {
@@ -13,20 +13,20 @@ module.exports = class UserTag extends db.Model {
                 relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/User',
                 join: {
-                    from: 'user_tag.user_id',
+                    from: 'userTag.userId',
                     to: 'user.id'
                 }
             },
-            journal_entries: {
+            journalEntries: {
                 relation: db.Model.ManyToManyRelation,
                 modelClass: __dirname + '/JournalEntry',
                 join: {
-                    from: 'user_tag.id',
+                    from: 'userTag.id',
                     through :{
-                        from: 'journal_entry_tag.user_tag_id',
-                        to:   'journal_entry_tag.journal_entry_id'
+                        from: 'journalEntryTag.userTagId',
+                        to:   'journalEntryTag.journalEntryId'
                     },
-                    to: 'journal_entry.id'
+                    to: 'journalEntry.id'
                 }
             }
         }

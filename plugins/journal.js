@@ -13,13 +13,13 @@ const JournalEntryTag = require('../models/JournalEntryTag');
 exports.register = function (server, options, next) {
 
     // Get statistics on all the user's tags.
-    server.method('getTagStats', function (user_id, next) {
+    server.method('getTagStats', function (userId, next) {
         JournalEntryTag.query()
-            .select('user_tag.id as user_tag_id', 'user_tag.tag')
-            .count('user_tag.id as uses')
-            .join('user_tag', 'user_tag_id', 'user_tag.id')
-            .where('user_tag.user_id', user_id)
-            .groupBy('user_tag.id')
+            .select('userTag.id as userTagId', 'userTag.tag')
+            .count('userTag.id as uses')
+            .join('userTag', 'userTagId', 'userTag.id')
+            .where('userTag.userId', userId)
+            .groupBy('userTag.id')
             .orderBy('uses', 'desc')
             .then(tags => {
                 // In PostgreSQL, count returns bigint, which knex render as a string.
@@ -33,9 +33,9 @@ exports.register = function (server, options, next) {
     // Get statistics on all the user's journal entries.
     server.method('getJournalStats', function (userId, next) {
         JournalEntry.query()
-            .select('updated_at')
-            .where('user_id', userId)
-            .map(entry => moment(entry.updated_at).format('YYYY-MM-DD'))
+            .select('updatedAt')
+            .where('userId', userId)
+            .map(entry => moment(entry.updatedAt).format('YYYY-MM-DD'))
             .then(entries => next(null, _.countBy(entries)))
             .catch(err => next(err, null));
     });
@@ -45,10 +45,10 @@ exports.register = function (server, options, next) {
     server.method('fetchJournalEntries', function (userId, offset = 0, limit = null, next) {
         // Comment query elements.
         let queryBuilder = JournalEntry.query()
-            .where('user_id', userId)
-            .omit(['user_id'])
+            .where('userId', userId)
+            .omit(['userId'])
             .eager('tags')
-            .orderBy('updated_at', 'desc')
+            .orderBy('updatedAt', 'desc')
             .offset(offset);
 
         // Maybe add limit clause.
@@ -134,7 +134,7 @@ exports.register = function (server, options, next) {
             handler: function (request, reply) {
                 JournalEntry.query()
                     .insertAndFetch({
-                        user_id: request.auth.credentials.id,
+                        userId: request.auth.credentials.id,
                         title: request.payload.title,
                         entry: request.payload.entry
                     })
@@ -166,7 +166,7 @@ exports.register = function (server, options, next) {
                     .then(entry => {
                         if (!entry) {
                             reply(Boom.notFound('No such journal entry'));
-                        } else if (entry.user_id !== request.auth.credentials.id) {
+                        } else if (entry.userId !== request.auth.credentials.id) {
                             reply(Boom.unauthorized("Can't access this entry"));
                         } else {
                             entry.$query()

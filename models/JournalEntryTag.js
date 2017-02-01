@@ -4,24 +4,24 @@ const db = require('../db');
 
 module.exports = class JournalEntryTag extends db.Model {
     static get tableName() {
-        return 'journal_entry_tag';
+        return 'journalEntryTag';
     }
 
     static get relationMappings() {
         return {
-            user_tag: {
+            userTag: {
                 relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/UserTag',
                 join: {
-                    from: 'journal_entry_tag.user_tag_id',
-                    to: 'user_tag.id'
+                    from: 'journalEntryTag.userTagId',
+                    to: 'userTag.id'
                 }
             },
-            journal_entry: {
+            journalEntry: {
                 relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/JournalEntry',
                 join: {
-                    from: 'journal_entry_tag.journal_entry_id',
+                    from: 'journalEntryTag.journalEntryId',
                     to: 'journal.id'
                 }
             }

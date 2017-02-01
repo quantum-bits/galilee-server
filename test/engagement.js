@@ -1,13 +1,13 @@
 'use strict';
 
-import {init_test, expect, server, db} from './support';
-const lab = exports.lab = init_test();
+import {initTest, expect, server, db} from './support';
+const lab = exports.lab = initTest();
 
 const Practice = require('../models/Practice');
 
 lab.experiment('Test engagement endpoints', () => {
 
-    let test_practices = null;
+    let testPractices = null;
 
     lab.beforeEach(done => {
         return db.knex.raw('TRUNCATE public.practice CASCADE')
@@ -60,7 +60,7 @@ lab.experiment('Test engagement endpoints', () => {
                 })
             })
             .then(practices => {
-                test_practices = practices;
+                testPractices = practices;
             })
     });
 
@@ -80,17 +80,17 @@ lab.experiment('Test engagement endpoints', () => {
     });
 
     lab.test('Fetch an existing practice', done => {
-        const practice_id = test_practices[0].id;
+        const practiceId = testPractices[0].id;
 
         server.inject(
             {
                 method: 'GET',
-                url: `/practices/${practice_id}`
+                url: `/practices/${practiceId}`
             }, res => {
                 const response = JSON.parse(res.payload);
                 console.log("RES", JSON.stringify(response, null, 4));
                 expect(res.statusCode).to.equal(200);
-                expect(response.id).to.equal(practice_id);
+                expect(response.id).to.equal(practiceId);
                 expect(response.details).to.have.length(3);
                 done();
             });

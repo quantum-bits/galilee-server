@@ -5,7 +5,7 @@ const StampedModel = require('./StampedModel');
 
 module.exports = class JournalEntry extends StampedModel {
     static get tableName() {
-        return 'journal_entry';
+        return 'journalEntry';
     }
 
     static get relationMappings() {
@@ -14,7 +14,7 @@ module.exports = class JournalEntry extends StampedModel {
                 relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/User',
                 join: {
-                    from: 'journal_entry.user_id',
+                    from: 'journalEntry.userId',
                     to: 'user.id'
                 }
             },
@@ -22,12 +22,12 @@ module.exports = class JournalEntry extends StampedModel {
                 relation: db.Model.ManyToManyRelation,
                 modelClass: __dirname + '/UserTag',
                 join: {
-                    from: 'journal_entry.id',
+                    from: 'journalEntry.id',
                     through: {
-                        from: 'journal_entry_tag.journal_entry_id',
-                        to:   'journal_entry_tag.user_tag_id'
+                        from: 'journalEntryTag.journalEntryId',
+                        to:   'journalEntryTag.userTagId'
                     },
-                    to: 'user_tag.id'
+                    to: 'userTag.id'
                 }
             }
         }

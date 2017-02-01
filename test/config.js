@@ -1,7 +1,7 @@
 'use strict';
 
-import {init_test, expect, db} from './support';
-const lab = exports.lab = init_test();
+import {initTest, expect, db} from './support';
+const lab = exports.lab = initTest();
 
 const Config = require('../models/Config');
 

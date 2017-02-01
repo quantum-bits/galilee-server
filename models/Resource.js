@@ -15,8 +15,8 @@ class Resource extends db.Model {
                 join: {
                     from: 'resource.id',
                     through: {
-                        from: 'resource_tag.resource_id',
-                        to: 'resource_tag.tag_id'
+                        from: 'resourceTag.resourceId',
+                        to: 'resourceTag.tagId'
                     },
                     to: 'tag.id'
                 }
@@ -25,8 +25,8 @@ class Resource extends db.Model {
                 relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/ResourceType',
                 join: {
-                    from: 'resource.resource_type_id',
-                    to: 'resource_type.id'
+                    from: 'resource.resourceTypeId',
+                    to: 'resourceType.id'
                 }
             },
             steps: {
@@ -35,8 +35,8 @@ class Resource extends db.Model {
                 join: {
                     from: 'resource.id',
                     through: {
-                        from: 'step_resource.resource_id',
-                        to: 'step_resource.step_id'
+                        from: 'stepResource.resourceId',
+                        to: 'stepResource.stepId'
                     },
                     to: 'step.id'
                 }

@@ -15,8 +15,8 @@ class Tag extends db.Model {
                 join: {
                     from: 'tag.id',
                     through :{
-                        from: 'resource_tag.tag_id',
-                        to: 'resource_tag.resource_id'
+                        from: 'resourceTag.tagId',
+                        to: 'resourceTag.resourceId'
                     },
                     to: 'resource.id'
                 }

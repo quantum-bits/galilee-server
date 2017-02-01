@@ -114,7 +114,7 @@ exports.register = function (server, options, next) {
             });
     }
 
-    function bg_passage(version, osis, next) {
+    function bgPassage(version, osis, next) {
         get_access_token()
             .then(token => {
                 if (!token) {
@@ -154,8 +154,8 @@ exports.register = function (server, options, next) {
             options: {}
         },
         {
-            name: 'bg_passage',
-            method: bg_passage,
+            name: 'bgPassage',
+            method: bgPassage,
             options: {}
         }
     ]);
@@ -236,7 +236,7 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                server.methods.bg_passage(request.params.version, request.params.osis, (err, result) => {
+                server.methods.bgPassage(request.params.version, request.params.osis, (err, result) => {
                     if (err) {
                         reply(err);
                     } else {

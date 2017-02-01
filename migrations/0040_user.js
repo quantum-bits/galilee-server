@@ -22,18 +22,18 @@ exports.up = function (knex, Promise) {
 
         knex.schema.createTableIfNotExists('group', table => {
             table.increments('id');
-            table.integer('organization_id').references('organization.id');
+            table.integer('organizationId').references('organization.id');
             table.string('name');
             table.boolean('enabled').defaultTo(true);
-            table.dateTime('created_at').defaultTo(knex.raw('NOW()'));
+            table.dateTime('createdAt').defaultTo(knex.raw('NOW()'));
         }),
 
         knex.schema.createTableIfNotExists('membership', table => {
-            table.integer('group_id').references('group.id');
-            table.integer('user_id').references('user.id');
+            table.integer('groupId').references('group.id');
+            table.integer('userId').references('user.id');
             table.boolean('enabled').defaultTo(true);
-            table.dateTime('created_at').defaultTo(knex.raw('NOW()'));
-            table.primary(['group_id', 'user_id']);
+            table.dateTime('createdAt').defaultTo(knex.raw('NOW()'));
+            table.primary(['groupId', 'userId']);
         }),
 
         knex.schema.createTableIfNotExists('version', table => {
@@ -47,10 +47,10 @@ exports.up = function (knex, Promise) {
             table.string('title').notNullable();
         }),
 
-        knex.schema.createTableIfNotExists('user_permission', table => {
-            table.integer('user_id').references('user.id');
-            table.string('permission_id').references('permission.id');
-            table.primary(['user_id', 'permission_id']);
+        knex.schema.createTableIfNotExists('userPermission', table => {
+            table.integer('userId').references('user.id');
+            table.string('permissionId').references('permission.id');
+            table.primary(['userId', 'permissionId']);
         })
     ]);
 };
@@ -58,7 +58,7 @@ exports.up = function (knex, Promise) {
 exports.down = function (knex, Promise) {
     return knex.schema.dropTableIfExists('version')
         .then(Promise.all([
-            knex.schema.dropTableIfExists('user_permission'),
+            knex.schema.dropTableIfExists('userPermission'),
             knex.schema.dropTableIfExists('permission'),
             knex.schema.dropTableIfExists('user')
         ]))

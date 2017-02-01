@@ -9,9 +9,9 @@ exports.seed = function (knex, Promise) {
     let today = new Date();
 
     return Promise.all([
-        knex('application_step').del(),
-        knex('step_resource').del(),
-        knex('resource_tag').del()
+        knex('applicationStep').del(),
+        knex('stepResource').del(),
+        knex('resourceTag').del()
 
     ]).then(() => Promise.all([
         knex('tag').del(),
@@ -21,12 +21,12 @@ exports.seed = function (knex, Promise) {
 
     ])).then(() => Promise.all([
         knex('reading').del(),
-        knex('daily_question').del(),
+        knex('dailyQuestion').del(),
         knex('practice').del(),
-        knex('resource_type').del()
+        knex('resourceType').del()
 
     ])).then(() => Promise.all([
-        knex('reading_day').del()
+        knex('readingDay').del()
 
     ])).then(() => ReadingDay.query().insertGraph({
         date: today.toISOString(),
@@ -38,8 +38,8 @@ exports.seed = function (knex, Promise) {
         readings: [
             {
                 seq: 1,
-                std_ref: 'Hosea 1.2-10',
-                osis_ref: 'Hos.1.2-Hos.1.10',
+                stdRef: 'Hosea 1.2-10',
+                osisRef: 'Hos.1.2-Hos.1.10',
                 applications: [
                     {
                         practice: {
@@ -90,8 +90,8 @@ exports.seed = function (knex, Promise) {
                                             filename: 'cana.png'
                                         },
                                         caption: 'Wedding at Cana',
-                                        copyright_year: 2006,
-                                        copyright_owner: 'Zondervan',
+                                        copyrightYear: 2006,
+                                        copyrightOwner: 'Zondervan',
                                         tags: [
                                             {
                                                 title: 'Miracle',
@@ -119,8 +119,8 @@ exports.seed = function (knex, Promise) {
                                             filename: 'feeding5000.jpeg'
                                         },
                                         caption: 'Feeding 5,000',
-                                        copyright_year: 2012,
-                                        copyright_owner: 'Zondervan',
+                                        copyrightYear: 2012,
+                                        copyrightOwner: 'Zondervan',
                                         tags: [
                                             {
                                                 "#ref": 'resource-tag-miracle'
@@ -144,8 +144,8 @@ exports.seed = function (knex, Promise) {
             },
             {
                 seq: 2,
-                std_ref: 'Psalm 85',
-                osis_ref: 'Ps.85',
+                stdRef: 'Psalm 85',
+                osisRef: 'Ps.85',
                 applications: [
                     {
                         practice: {
@@ -158,8 +158,8 @@ exports.seed = function (knex, Promise) {
             },
             {
                 seq: 3,
-                std_ref: 'Colossians 2.6-15',
-                osis_ref: 'Col.2.6-Col.2.15'
+                stdRef: 'Colossians 2.6-15',
+                osisRef: 'Col.2.6-Col.2.15'
             }
         ]
     }))

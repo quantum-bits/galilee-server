@@ -13,7 +13,7 @@ class Application extends db.Model {
                 relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/Reading',
                 join: {
-                    from: 'application.reading_id',
+                    from: 'application.readingId',
                     to: 'reading.id'
                 }
             },
@@ -21,7 +21,7 @@ class Application extends db.Model {
                 relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/Practice',
                 join: {
-                    from: 'application.practice_id',
+                    from: 'application.practiceId',
                     to: 'practice.id'
                 }
             },
@@ -31,8 +31,8 @@ class Application extends db.Model {
                 join: {
                     from: 'application.id',
                     through: {
-                        from: 'application_step.application_id',
-                        to: 'application_step.step_id'
+                        from: 'applicationStep.applicationId',
+                        to: 'applicationStep.stepId'
                     },
                     to: 'step.id'
                 }

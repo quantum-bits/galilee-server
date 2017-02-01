@@ -4,26 +4,27 @@ exports.up = function (knex, Promise) {
 
     return Promise.all([
 
-        knex.schema.createTableIfNotExists('journal_entry', table => {
+        knex.schema.createTableIfNotExists('journalEntry', table => {
             table.increments('id');
             table.string('title');
             table.text('entry');
-            table.timestamps(true, true);
-            table.integer('user_id').references('user.id');
-            table.integer('reading_id').references('reading.id');
-            table.integer('step_id').references('step.id');
+            table.integer('userId').references('user.id');
+            table.integer('readingId').references('reading.id');
+            table.integer('stepId').references('step.id');
+            table.timestamp('createdAt').defaultTo(knex.fn.now());
+            table.timestamp('updatedAt').defaultTo(knex.fn.now());
         }),
 
-        knex.schema.createTableIfNotExists('user_tag', table => {
+        knex.schema.createTableIfNotExists('userTag', table => {
             table.increments('id');
-            table.integer('user_id').references('user.id');
+            table.integer('userId').references('user.id');
             table.string('tag');
         }),
 
-        knex.schema.createTableIfNotExists('journal_entry_tag', table => {
-            table.integer('user_tag_id').references('user_tag.id');
-            table.integer('journal_entry_id').references('journal_entry.id');
-            table.primary(['user_tag_id', 'journal_entry_id']);
+        knex.schema.createTableIfNotExists('journalEntryTag', table => {
+            table.integer('userTagId').references('userTag.id');
+            table.integer('journalEntryId').references('journalEntry.id');
+            table.primary(['userTagId', 'journalEntryId']);
         })
     ])
 };
