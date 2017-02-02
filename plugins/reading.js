@@ -3,6 +3,7 @@
 const Boom = require('boom');
 
 const moment = require('moment');
+const _ = require('lodash');
 
 const Reading = require('../models/Reading');
 const ReadingDay = require('../models/ReadingDay');
@@ -20,6 +21,16 @@ exports.register = function (server, options, next) {
             queryDate = todaysDate();
         }
         reply(queryDate);
+    });
+
+    // Get statistics on all the user's journal entries.
+    server.method('getReadingStats', function (next) {
+        Reading.query()
+            .join('readingDay', 'readingDayId', 'readingDay.id')
+            .select('readingDay.date')
+            .map(result => moment(result.date).format('YYYY-MM-DD'))
+            .then(dates => next(null, _.countBy(dates)))
+            .catch(err => next(err, null));
     });
 
     server.route([
@@ -92,6 +103,22 @@ exports.register = function (server, options, next) {
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         },
+
+        {
+            method: 'GET',
+            path: '/readings/meta',
+            config: {
+                description: 'Readings metadata',
+                auth: 'jwt',
+                pre: [
+                    {assign: 'readingStats', method: 'getReadingStats()'}
+                ]
+            },
+            handler: function (request, reply) {
+                reply(request.pre.readingStats);
+            }
+        },
+
 
         {
             method: 'GET',
