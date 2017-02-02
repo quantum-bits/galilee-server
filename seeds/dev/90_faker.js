@@ -155,7 +155,7 @@ function randomReference() {
     };
 }
 
-function randomPractice() {
+function randomPractices() {
     let practiceNames = [
         'Dramatizing Scripture',
         'Hand Copying Scripture',
@@ -172,25 +172,26 @@ function randomPractice() {
         'Storying Scripture'
     ];
 
-    let name = faker.random.arrayElement(practiceNames);
+    // Shuffles in place.
+    random.shuffle(practiceNames);
 
-    return {
+    return _.map(_.take(practiceNames, random.integer(2, 3)), name => ({
         title: name,
         summary: `Summary of ${name}`,
         description: `Description of ${name}`
-    };
+    }));
 }
 
 function randomSteps() {
     return _.times(random.integer(0, 3), n => ({
         seq: n + 1,
-        description: `Step ${n}`
+        description: `Step ${n + 1}`
     }));
 }
 
 function randomApplications() {
-    return _.times(random.integer(2, 4), n => ({
-        practice: randomPractice(),
+    return _.map(randomPractices(), practice => ({
+        practice: practice,
         steps: randomSteps()
     }));
 }
@@ -207,7 +208,14 @@ function randomReadings() {
     });
 }
 
-function seedReadings() {
+function randomQuestions() {
+    return _.times(random.integer(2, 3), n => ({
+        seq: n + 1,
+        question: _.capitalize(faker.lorem.words(random.integer(3, 6)) + '?')
+    }));
+}
+
+function seedReadingDays() {
     const startDate = moment().subtract(30, 'days');
     const endDate = moment().add(30, 'days');
     const range = momentRange.range(startDate, endDate);
@@ -216,6 +224,7 @@ function seedReadings() {
         currentDate => ReadingDay.query()
             .insertGraph({
                 date: currentDate,
+                questions: randomQuestions(),
                 readings: randomReadings()
             })
     ));
@@ -224,11 +233,11 @@ function seedReadings() {
 // Seed All the Things.
 exports.seed = function (knex, Promise) {
     return seedVersions().then(() => {
-        //     return seedUsers();
-        // }).then(() => {
-        //     return seedJournalEntries();
-        // }).then(() => {
-        return seedReadings();
+        return seedUsers();
+    }).then(() => {
+        return seedJournalEntries();
+    }).then(() => {
+        return seedReadingDays();
     }).then(
         () => log("SUCCESS"),
         err => console.error("FAIL", err));
