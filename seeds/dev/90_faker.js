@@ -100,7 +100,7 @@ function seedJournalEntries() {
         return Promise.all(userTags.map(tag =>
             UserTag.query().insert({
                 userId: user.id,
-                tag: tag
+                label: tag
             })
         )).then(userTagObjects => {
 

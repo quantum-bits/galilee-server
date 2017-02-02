@@ -25,7 +25,7 @@ module.exports = class JournalEntry extends StampedModel {
                     from: 'journalEntry.id',
                     through: {
                         from: 'journalEntryTag.journalEntryId',
-                        to:   'journalEntryTag.userTagId'
+                        to: 'journalEntryTag.userTagId'
                     },
                     to: 'userTag.id'
                 }
