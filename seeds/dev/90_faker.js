@@ -7,10 +7,16 @@ const log = Debug('seed:log');
 const random = require('random-js')();
 const faker = require('faker');
 const _ = require('lodash');
+const moment = require('moment');
+const momentRange = require('moment-range').extendMoment(moment);
 
 const User = require('../../models/User');
 const Version = require('../../models/Version');
 const UserTag = require('../../models/UserTag');
+const ReadingDay = require('../../models/ReadingDay');
+
+// Not sure why the extra array wrapped around these data.
+const BibleData = require('../bg_bible_data').data[0];
 
 // Configure seed data generation.
 const JOINED_DAYS_AGO = 60;
@@ -130,12 +136,99 @@ function seedJournalEntries() {
     });
 }
 
+function randomReference() {
+    let book = faker.random.arrayElement(BibleData.books);
+    let chapter = random.integer(1, book.chapters);
+    let startVerse = random.integer(1, book.verses[chapter - 1]);
+    let endVerse = random.integer(startVerse, book.verses[chapter - 1]);
+
+    let stdRef = `${book.display} ${chapter}:${startVerse}`;
+    let osisRef = `${book.osis}.${chapter}.${startVerse}`;
+    if (startVerse < endVerse) {
+        stdRef += `-${endVerse}`;
+        osisRef += `-${book.osis}.${chapter}.${endVerse}`;
+    }
+
+    return {
+        stdRef: stdRef,
+        osisRef: osisRef
+    };
+}
+
+function randomPractice() {
+    let practiceNames = [
+        'Dramatizing Scripture',
+        'Hand Copying Scripture',
+        'The Ignatian Method',
+        'Journaling Scripture',
+        'Lectio Divina',
+        'Manuscript Bible Study',
+        'Memorizing Scripture',
+        'Praying Scripture',
+        'Public Reading of Scripture',
+        'Scripture Engagement Through Visual Art',
+        'Singing Scripture',
+        'Speaking Scripture',
+        'Storying Scripture'
+    ];
+
+    let name = faker.random.arrayElement(practiceNames);
+
+    return {
+        title: name,
+        summary: `Summary of ${name}`,
+        description: `Description of ${name}`
+    };
+}
+
+function randomSteps() {
+    return _.times(random.integer(0, 3), n => ({
+        seq: n + 1,
+        description: `Step ${n}`
+    }));
+}
+
+function randomApplications() {
+    return _.times(random.integer(2, 4), n => ({
+        practice: randomPractice(),
+        steps: randomSteps()
+    }));
+}
+
+function randomReadings() {
+    return _.times(random.integer(2, 3), n => {
+        let ref = randomReference();
+        return {
+            seq: n + 1,
+            stdRef: ref.stdRef,
+            osisRef: ref.osisRef,
+            applications: randomApplications()
+        }
+    });
+}
+
+function seedReadings() {
+    const startDate = moment().subtract(30, 'days');
+    const endDate = moment().add(30, 'days');
+    const range = momentRange.range(startDate, endDate);
+
+    return Promise.all(_.map(Array.from(range.by('days')),
+        currentDate => ReadingDay.query()
+            .insertGraph({
+                date: currentDate,
+                readings: randomReadings()
+            })
+    ));
+}
+
 // Seed All the Things.
 exports.seed = function (knex, Promise) {
     return seedVersions().then(() => {
-        return seedUsers();
-    }).then(() => {
-        return seedJournalEntries();
+        //     return seedUsers();
+        // }).then(() => {
+        //     return seedJournalEntries();
+        // }).then(() => {
+        return seedReadings();
     }).then(
         () => log("SUCCESS"),
         err => console.error("FAIL", err));

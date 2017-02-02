@@ -6,7 +6,7 @@ exports.up = function (knex, Promise) {
 
         knex.schema.createTableIfNotExists('readingDay', table => {
             table.increments('id');
-            table.date('date');
+            table.date('date').unique();
             table.string('name');
         }),
 
