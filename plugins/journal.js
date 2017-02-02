@@ -51,7 +51,18 @@ exports.register = function (server, options, next) {
             .catch(err => next(err, null));
     });
 
-    // Return journal entries for a user. Offset defaults to the first entry.
+    // Count the number of journal entries for a user.
+    server.method('countJournalEntries', function(userId, next) {
+        JournalEntry.query()
+            .where('userId', userId)
+            .count('*')
+            .first()
+            .then(count => next(null, count.count))
+            .catch(err => next(err, null));
+    })
+
+
+            // Return journal entries for a user. Offset defaults to the first entry.
     // Limit defaults to unlimited.
     server.method('fetchJournalEntries', function (userId, offset = 0, limit = null, next) {
         // Comment query elements.
@@ -99,17 +110,11 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                JournalEntry.query()
-                    .where('userId', request.auth.credentials.id)
-                    .count('*')
-                    .first()
-                    .then(count =>
                         reply({
-                            totalEntries: +count.count,
-                            startIndex: request.query.offset,
+                            offset: request.query.offset,
                             count: request.pre.entries.length,
-                            journalEntries: request.pre.entries
-                        }));
+                            entries: request.pre.entries
+                        });
             }
         },
 
@@ -120,6 +125,7 @@ exports.register = function (server, options, next) {
                 description: 'Journal metadata for user',
                 auth: 'jwt',
                 pre: [
+                    {assign: 'totalEntries', method: 'countJournalEntries(auth.credentials.id)'},
                     {assign: 'tagStats', method: 'getTagStats(auth.credentials.id)'},
                     {assign: 'journalStats', method: 'getJournalStats(auth.credentials.id)'}
                 ]
@@ -128,6 +134,7 @@ exports.register = function (server, options, next) {
                 let allTags = _.map(request.pre.tagStats, entry => entry.tag);
                 let frequentTags = _.take(allTags, 3);
                 reply({
+                    totalEntries: request.pre.totalEntries,
                     mostUsedTags: frequentTags,
                     allUsedTags: allTags.sort(),
                     calendarJournalEntries: request.pre.journalStats
