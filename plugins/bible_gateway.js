@@ -14,7 +14,7 @@ exports.register = function (server, options, next) {
      * Delete the access token from the database.
      * @returns {Promise}
      */
-    function delete_access_token() {
+    function deleteAccessToken() {
         return Config.query()
             .delete()
             .where('key', ACCESS_TOKEN_KEY);
@@ -25,7 +25,7 @@ exports.register = function (server, options, next) {
      * @param new_token
      * @returns {Promise}
      */
-    function insert_access_token(new_token) {
+    function insertAccessToken(new_token) {
         return Config.query()
             .insert({key: ACCESS_TOKEN_KEY, value: new_token});
     }
@@ -37,7 +37,7 @@ exports.register = function (server, options, next) {
      * to determine whether or not the system is authenticated with Bible Gateway.
      * @returns {Promise}
      */
-    function get_access_token() {
+    function getAccessToken() {
         return Config.query()
             .where('key', ACCESS_TOKEN_KEY)
             .then(rows => {
@@ -49,8 +49,8 @@ exports.register = function (server, options, next) {
             });
     }
 
-    function bg_authenticate(username, password, next) {
-        delete_access_token().then(() => {
+    function bgAuthenticate(username, password, next) {
+        deleteAccessToken().then(() => {
             Request
                 .post('https://api.biblegateway.com/3/user/authenticate')
                 .type('form')
@@ -62,7 +62,7 @@ exports.register = function (server, options, next) {
                     }
                     const response = JSON.parse(res.text);
                     if (response.hasOwnProperty('authentication')) {
-                        insert_access_token(response.authentication.access_token).then(tuple => {
+                        insertAccessToken(response.authentication.access_token).then(tuple => {
                             return next(null, response);
                         })
                     } else {
@@ -72,8 +72,8 @@ exports.register = function (server, options, next) {
         });
     }
 
-    function bg_translations(next) {
-        get_access_token()
+    function bgTranslations(next) {
+        getAccessToken()
             .then(token => {
                 if (!token) {
                     return next(Boom.unauthorized('Must authenticate first'), null);
@@ -91,8 +91,8 @@ exports.register = function (server, options, next) {
             })
     }
 
-    function bg_version_info(version, next) {
-        get_access_token()
+    function bgVersionInfo(version, next) {
+        getAccessToken()
             .then(token => {
                 if (!token) {
                     return next(Boom.unauthorized('Must authenticate first'), null);
@@ -115,7 +115,7 @@ exports.register = function (server, options, next) {
     }
 
     function bgPassage(version, osis, next) {
-        get_access_token()
+        getAccessToken()
             .then(token => {
                 if (!token) {
                     return next(Boom.unauthorized('Must authenticate first'), null);
@@ -139,18 +139,18 @@ exports.register = function (server, options, next) {
 
     server.method([
         {
-            name: 'bg_authenticate',
-            method: bg_authenticate,
+            name: 'bgAuthenticate',
+            method: bgAuthenticate,
             options: {}
         },
         {
-            name: 'bg_translations',
-            method: bg_translations,
+            name: 'bgTranslations',
+            method: bgTranslations,
             options: {}
         },
         {
-            name: 'bg_version_info',
-            method: bg_version_info,
+            name: 'bgVersionInfo',
+            method: bgVersionInfo,
             options: {}
         },
         {
@@ -174,7 +174,7 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                server.methods.bg_authenticate(request.payload.username, request.payload.password, (err, result) => {
+                server.methods.bgAuthenticate(request.payload.username, request.payload.password, (err, result) => {
                     if (err) {
                         reply(err);
                     } else {
@@ -191,7 +191,7 @@ exports.register = function (server, options, next) {
                 description: 'Retrieve list of available translations'
             },
             handler: function (request, reply) {
-                server.methods.bg_translations((err, result) => {
+                server.methods.bgTranslations((err, result) => {
                     if (err) {
                         reply(err);
                     } else {
@@ -213,7 +213,7 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                server.methods.bg_version_info(request.params.version, (err, result) => {
+                server.methods.bgVersionInfo(request.params.version, (err, result) => {
                     if (err) {
                         reply(err);
                     } else {

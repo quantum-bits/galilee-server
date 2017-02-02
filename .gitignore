@@ -6,3 +6,5 @@ auto/
 .idea/
 node_modules/
 resources/??/*.jpeg
+foo[0-9]
+foo.*

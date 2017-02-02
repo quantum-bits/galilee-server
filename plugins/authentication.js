@@ -70,7 +70,7 @@ exports.register = function (server, options, next) {
                                     if (isValid) {
                                         delete user.password;       // Don't send password.
                                         reply({
-                                            idToken: createToken(email, user.id),
+                                            jwtIdToken: createToken(email, user.id),
                                             user: user
                                         });
                                     } else {

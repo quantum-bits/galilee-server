@@ -30,6 +30,17 @@ exports.register = function (server, options, next) {
             }).catch(err => next(err, null));
     });
 
+    // Get all the user's tags.
+    server.method('getTags', function (userId, next) {
+        server.methods.getTagStats(userId, (err, result) => {
+            if (err) {
+                next(err, null);
+            } else {
+                next(null, result.map(entry => entry.tag));
+            }
+        });
+    });
+
     // Get statistics on all the user's journal entries.
     server.method('getJournalStats', function (userId, next) {
         JournalEntry.query()
@@ -88,11 +99,17 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                reply({
-                    startIndex: request.query.offset,
-                    count: request.pre.entries.length,
-                    journalEntries: request.pre.entries
-                });
+                JournalEntry.query()
+                    .where('userId', request.auth.credentials.id)
+                    .count('*')
+                    .first()
+                    .then(count =>
+                        reply({
+                            totalEntries: +count.count,
+                            startIndex: request.query.offset,
+                            count: request.pre.entries.length,
+                            journalEntries: request.pre.entries
+                        }));
             }
         },
 
@@ -183,16 +200,13 @@ exports.register = function (server, options, next) {
             path: '/tags',
             config: {
                 description: 'Return all tags for user',
-                auth: 'jwt'
-            }
-            ,
+                auth: 'jwt',
+                pre: [
+                    {assign: 'tags', method: 'getTags(auth.credentials.id)'},
+                ]
+            },
             handler: function (request, reply) {
-                User.query()
-                    .where('id', request.auth.credentials.id)
-                    .first()
-                    .eager('tags')
-                    .then(user => reply(user.tags))
-                    .catch(err => reply(Boom.badImplementation(err)));
+                reply(request.pre.tags);
             }
         }
     ]);
