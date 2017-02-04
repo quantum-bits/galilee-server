@@ -4,6 +4,7 @@ const Boom = require('boom');
 const Joi = require('Joi');
 const _ = require('lodash');
 const moment = require('moment');
+const Promise = require('bluebird');
 
 const User = require('../models/User');
 const Tag = require('../models/Tag');
@@ -41,7 +42,7 @@ exports.register = function (server, options, next) {
     });
 
     // Get a list of the user's tags.
-    server.method('getTags', function(userId, next) {
+    server.method('getTags', function (userId, next) {
         Tag.query()
             .where('userId', userId)
             .omit(['userId'])
@@ -184,14 +185,24 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                JournalEntry.query()
-                    .insertAndFetch({
-                        userId: request.auth.credentials.id,
-                        title: request.payload.title,
-                        entry: request.payload.entry
-                    })
-                    .then(entry => reply(entry))
-                    .catch(err => reply(Boom.badImplementation(err)));
+                let insert$ = JournalEntry.query().insert({
+                    userId: request.auth.credentials.id,
+                    title: request.payload.title,
+                    entry: request.payload.entry
+                });
+
+                let relate$ = insert$.then(entry => {
+                    return entry.$relatedQuery('tags')
+                        .relate(request.payload.tags.map(tag => tag.id))
+                });
+
+                Promise.join(insert$, relate$, (entry, relate) => {
+                    return JournalEntry.query()
+                        .findById(entry.id)
+                        .eager('tags');
+                }).then(entry => {
+                    reply(entry);
+                }).catch(err => reply(Boom.badImplementation(err)));
             }
         },
 
