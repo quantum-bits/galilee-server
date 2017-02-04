@@ -12,7 +12,7 @@ module.exports = {
         seeds: {
             directory: './seeds/dev'
         },
-        debug: true
+        // debug: true
     },
 
     staging: {

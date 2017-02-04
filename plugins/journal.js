@@ -61,12 +61,13 @@ exports.register = function (server, options, next) {
     })
 
     server.method('fetchJournalEntry', function (id, next) {
-        console.log("FETCH", id);
         JournalEntry.query()
             .findById(id)
             .eager('tags')
             .omit(Tag, ['userId'])
-            .then(result => next(null, result))
+            .then(result => {
+                return next(null, result);
+            })
             .catch(err => next(err, null));
     });
 
@@ -90,6 +91,23 @@ exports.register = function (server, options, next) {
         queryBuilder
             .then(entries => next(null, entries))
             .catch(err => next(err, null));
+    });
+
+    // Map over a list of tags and store newly created ones (from the UI)
+    // in the database. Return the entire list of tags, ready to be
+    // connected to a journal entry.
+    server.method('resolveTagList', function (userId, tags, next) {
+        Promise.all(tags.map(tag => {
+            if (tag.id < 0) {
+                return Tag.query()
+                    .insertAndFetch({
+                        label: tag.label,
+                        userId: userId
+                    });
+            } else {
+                return tag;
+            }
+        })).then(tags => next(null, tags)).catch(err => next(err, null));
     });
 
     server.route([
@@ -176,6 +194,9 @@ exports.register = function (server, options, next) {
             config: {
                 description: 'New entry for current user',
                 auth: 'jwt',
+                pre: [
+                    {assign: 'allTags', method: 'resolveTagList(auth.credentials.id, payload.tags)'}
+                ],
                 validate: {
                     payload: {
                         title: Joi.string().required(),
@@ -185,18 +206,18 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                let insert$ = JournalEntry.query().insert({
+                let insertPromise = JournalEntry.query().insert({
                     userId: request.auth.credentials.id,
                     title: request.payload.title,
                     entry: request.payload.entry
                 });
 
-                let relate$ = insert$.then(entry => {
+                let relatePromise = insertPromise.then(entry => {
                     return entry.$relatedQuery('tags')
-                        .relate(request.payload.tags.map(tag => tag.id))
+                        .relate(request.pre.allTags.map(tag => tag.id))
                 });
 
-                Promise.join(insert$, relate$, (entry, relate) => {
+                Promise.join(insertPromise, relatePromise, (entry, relate) => {
                     return JournalEntry.query()
                         .findById(entry.id)
                         .eager('tags');
@@ -212,32 +233,52 @@ exports.register = function (server, options, next) {
             config: {
                 description: 'Update a journal entry',
                 auth: 'jwt',
+                pre: [
+                    {assign: 'allTags', method: 'resolveTagList(auth.credentials.id, payload.tags)'},
+                    {assign: 'existingEntry', method: 'fetchJournalEntry(params.id)'}
+                ],
                 validate: {
                     params: {
                         id: Joi.number().integer().min(1).required()
-                    }
-                    ,
+                    },
                     payload: {
                         title: Joi.string().required(),
-                        entry: Joi.string().required()
+                        entry: Joi.string().required(),
+                        tags: Joi.array().required()
                     }
                 }
             },
             handler: function (request, reply) {
-                JournalEntry.query()
-                    .findById(request.params.id)
-                    .then(entry => {
-                        if (!entry) {
-                            reply(Boom.notFound('No such journal entry'));
-                        } else if (entry.userId !== request.auth.credentials.id) {
-                            reply(Boom.unauthorized("Can't access this entry"));
+                let entry = request.pre.existingEntry;
+
+                // Ensure the user owns this entry.
+                if (entry.userId !== request.auth.credentials.id) {
+                    return reply(Boom.unauthorized("Can't access this entry"));
+                }
+
+                // Update fields from the request.
+                entry.$query().patchAndFetch({
+                    title: request.payload.title,
+                    entry: request.payload.entry
+                }).then(() => {
+                    // Toss existing tags; simpler than figuring out
+                    // which should stay and which should go.
+                    return entry.$relatedQuery('tags').unrelate();
+                }).then(() => {
+                    // Add back all the requested tags. New ones
+                    // have already been resolve by resolveTagList
+                    return entry.$relatedQuery('tags')
+                        .relate(request.pre.allTags.map(tag => tag.id));
+                }).then(() => {
+                    // Fetch the complete entry as response.
+                    server.methods.fetchJournalEntry(entry.id, (err, result) => {
+                        if (err) {
+                            reply(Boom.badImplementation(err));
                         } else {
-                            entry.$query()
-                                .patchAndFetch(request.payload)
-                                .then(entry => reply(entry));
+                            reply(result);
                         }
                     })
-                    .catch(err => reply(Boom.badImplementation(err)));
+                }).catch(err => reply(Boom.badImplementation(err)));
             }
         },
 
@@ -250,12 +291,14 @@ exports.register = function (server, options, next) {
                 pre: [
                     {assign: 'tags', method: 'getTags(auth.credentials.id)'},
                 ]
-            },
+            }
+            ,
             handler: function (request, reply) {
                 reply(request.pre.tags);
             }
         }
-    ]);
+    ])
+    ;
 
     next();
 }

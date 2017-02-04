@@ -88,10 +88,6 @@ exports.register = function (server, options, next) {
                         status: Joi.string().valid(['ok']).required(),
                         resourceId: Joi.string().guid().required()
                     }
-                },
-                cors: {
-                    origin: ['http://localhost:4200'],
-                    credentials: true
                 }
             },
             handler: function (request, reply) {

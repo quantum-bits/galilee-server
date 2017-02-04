@@ -47,7 +47,6 @@ exports.register = function (server, options, next) {
                     .first()
                     .eager('[readings.applications.[practice,steps.resources],questions]')
                     .then(readingDay => {
-                        console.log("THEN");
                         if (!readingDay) {
                             reply(Boom.notFound(`No reading data for '${request.pre.normalizeDate}'`));
                         } else {
@@ -57,7 +56,6 @@ exports.register = function (server, options, next) {
                             // Fetch scripture text from Bible Gateway.
                             let promises = [];
                             readingDay.readings.map(reading => {
-                                server.log('info', JSON.stringify(reading, null, 2));
                                 let p = new Promise((resolve, reject) => {
                                     server.methods.bgPassage('NKJV', reading.osisRef, (err, result) => {
                                         if (err) {

@@ -11,23 +11,19 @@ const JWT_SECRET_KEY = 'My Super Secret Key';   // TODO: Store in config file!
 exports.register = function (server, options, next) {
 
     function validate(decoded, request, callback) {
-        console.log("JWT", decoded);
         if (decoded.hasOwnProperty('userId')) {
             User.query()
                 .where('id', decoded.userId)
                 .first()
                 .then(user => {
                     if (user) {
-                        console.log("VALID USER");
                         callback(null, true, user);
                     } else {
-                        console.log("INVALID USER");
                         callback(null, false);
                     }
                 })
                 .catch(err => callback(err, false));
         } else {
-            console.log("INVALID JWT");
             callback(null, false);
         }
     }
@@ -50,10 +46,6 @@ exports.register = function (server, options, next) {
         {
             method: 'POST',
             path: '/authenticate',
-            config: {
-                description: 'Authenticate user',
-                cors: true
-            },
             handler: function (request, reply) {
                 let email = request.payload.email;
                 let password = request.payload.password;
