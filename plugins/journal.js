@@ -156,7 +156,9 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                if (request.pre.entry.userId !== request.auth.credentials.id) {
+                if (!request.pre.entry) {
+                    reply(Boom.notFound("No such entry"))
+                } else if (request.pre.entry.userId !== request.auth.credentials.id) {
                     reply(Boom.unauthorized("You don't own this entry"));
                 } else {
                     reply(request.pre.entry);
@@ -223,6 +225,34 @@ exports.register = function (server, options, next) {
                         .eager('tags');
                 }).then(entry => {
                     reply(entry);
+                }).catch(err => reply(Boom.badImplementation(err)));
+            }
+        },
+
+        {
+            method: 'DELETE',
+            path: '/entries/{id}',
+            config: {
+                description: 'Delete a journal entry',
+                auth: 'jwt',
+                pre: [
+                    {assign: 'entry', method: 'fetchJournalEntry(params.id)'}
+                ],
+                validate: {
+                    params: {
+                        id: Joi.number().integer().min(1).required()
+                    }
+                }
+            },
+            handler: function (request, reply) {
+                if (request.pre.entry.userId !== request.auth.credentials.id) {
+                    return reply(Boom.unauthorized("Can't access this entry"));
+                }
+
+                request.pre.entry.$relatedQuery('tags').unrelate().then(() => {
+                    JournalEntry.query()
+                        .deleteById(request.params.id)
+                        .then(rowsDeleted => reply(rowsDeleted));
                 }).catch(err => reply(Boom.badImplementation(err)));
             }
         },
