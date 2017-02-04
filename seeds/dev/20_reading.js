@@ -94,11 +94,11 @@ exports.seed = function (knex, Promise) {
                                         copyrightOwner: 'Zondervan',
                                         tags: [
                                             {
-                                                title: 'Miracle',
+                                                label: 'Miracle',
                                                 "#id": 'resource-tag-miracle'
                                             },
                                             {
-                                                title: 'Wedding',
+                                                label: 'Wedding',
                                             }
                                         ],
                                         type: {
@@ -126,10 +126,10 @@ exports.seed = function (knex, Promise) {
                                                 "#ref": 'resource-tag-miracle'
                                             },
                                             {
-                                                title: 'Loaves'
+                                                label: 'Loaves'
                                             },
                                             {
-                                                title: 'Fishes'
+                                                label: 'Fishes'
                                             }
                                         ],
                                         type: {

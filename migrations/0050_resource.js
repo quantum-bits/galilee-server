@@ -26,11 +26,6 @@ exports.up = function (knex, Promise) {
             table.primary(['stepId', 'resourceId']);
         }),
 
-        knex.schema.createTableIfNotExists('tag', table => {
-            table.increments('id');
-            table.string('title').notNullable();
-        }),
-
         knex.schema.createTableIfNotExists('resourceTag', table => {
             table.uuid('resourceId').references('resource.id');
             table.integer('tagId').references('tag.id');
@@ -44,7 +39,6 @@ exports.down = function (knex, Promise) {
         knex.schema.dropTableIfExists('readingCollection'),
         knex.schema.dropTableIfExists('stepResource'),
         knex.schema.dropTableIfExists('resourceTag'),
-        knex.schema.dropTableIfExists('tag'),
         knex.schema.dropTableIfExists('resource'),
         knex.schema.dropTableIfExists('resourceType')
     ])

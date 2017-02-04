@@ -6,7 +6,6 @@ const faker = require('faker');
 exports.seed = function (knex, Promise) {
     return Promise.all([
         knex('journalEntryTag').del(),
-        knex('userTag').del()
 
     ]).then(() => Promise.all([
         knex('membership').del(),

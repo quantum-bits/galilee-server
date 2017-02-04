@@ -137,32 +137,6 @@ exports.register = function (server, options, next) {
                     })
                     .catch(err => reply(Boom.badImplementation(err)));
             }
-        },
-
-        {
-            method: 'GET',
-            path: '/toss-cookies/{maybe}',
-            config: {
-                description: 'Raise an error intentionally'
-            },
-            handler: function (request, reply) {
-                let aPromise;
-                if (request.params.maybe == 'OK') {
-                    aPromise = Promise.resolve('This is good');
-                } else {
-                    aPromise = Promise.reject('This is bad');
-                }
-
-                aPromise
-                    .then(() => {
-                        console.log("WORKED");
-                        reply({so: 'it worked'});
-                    })
-                    .catch(err => {
-                        console.log("FAILED");
-                        reply(Boom.badImplementation(err))
-                    });
-            }
         }
 
     ]);

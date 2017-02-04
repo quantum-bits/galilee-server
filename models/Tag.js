@@ -2,28 +2,33 @@
 
 const db = require('../db');
 
-class Tag extends db.Model {
+module.exports = class Tag extends db.Model {
     static get tableName() {
         return 'tag';
     }
 
     static get relationMappings() {
         return {
-            resources: {
+            user: {
+                relation: db.Model.BelongsToOneRelation,
+                modelClass: __dirname + '/User',
+                join: {
+                    from: 'tag.userId',
+                    to: 'user.id'
+                }
+            },
+            journalEntries: {
                 relation: db.Model.ManyToManyRelation,
-                modelClass: __dirname + '/Resource',
+                modelClass: __dirname + '/JournalEntry',
                 join: {
                     from: 'tag.id',
                     through :{
-                        from: 'resourceTag.tagId',
-                        to: 'resourceTag.resourceId'
+                        from: 'journalEntryTag.tagId',
+                        to:   'journalEntryTag.journalEntryId'
                     },
-                    to: 'resource.id'
+                    to: 'journalEntry.id'
                 }
             }
         }
     }
-
 }
-
-module.exports = Tag;

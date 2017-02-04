@@ -15,16 +15,10 @@ exports.up = function (knex, Promise) {
             table.timestamp('updatedAt').defaultTo(knex.fn.now());
         }),
 
-        knex.schema.createTableIfNotExists('userTag', table => {
-            table.increments('id');
-            table.integer('userId').references('user.id');
-            table.string('label');
-        }),
-
         knex.schema.createTableIfNotExists('journalEntryTag', table => {
-            table.integer('userTagId').references('userTag.id');
+            table.integer('tagId').references('tag.id');
             table.integer('journalEntryId').references('journalEntry.id');
-            table.primary(['userTagId', 'journalEntryId']);
+            table.primary(['tagId', 'journalEntryId']);
         })
     ])
 };

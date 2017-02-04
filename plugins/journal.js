@@ -6,20 +6,20 @@ const _ = require('lodash');
 const moment = require('moment');
 
 const User = require('../models/User');
-const UserTag = require('../models/UserTag');
+const Tag = require('../models/Tag');
 const JournalEntry = require('../models/JournalEntry');
 const JournalEntryTag = require('../models/JournalEntryTag');
 
 exports.register = function (server, options, next) {
 
-    // Get all the user's tags.
-    server.method('getTags', function (userId, next) {
+    // Get usage statistics for the user's tags.
+    server.method('getTagStats', function (userId, next) {
         JournalEntryTag.query()
-            .select('userTag.id as userTagId', 'userTag.label')
-            .count('userTag.id as uses')
-            .join('userTag', 'userTagId', 'userTag.id')
-            .where('userTag.userId', userId)
-            .groupBy('userTag.id')
+            .select('tag.id', 'tag.label')
+            .count('tag.id as uses')
+            .join('tag', 'tagId', 'tag.id')
+            .where('tag.userId', userId)
+            .groupBy('tag.id')
             .orderBy('uses', 'desc')
             .then(tags => {
                 // In PostgreSQL, count returns bigint, which knex render as a string.
@@ -40,6 +40,15 @@ exports.register = function (server, options, next) {
             .catch(err => next(err, null));
     });
 
+    // Get a list of the user's tags.
+    server.method('getTags', function(userId, next) {
+        Tag.query()
+            .where('userId', userId)
+            .omit(['userId'])
+            .then(tags => next(null, tags))
+            .catch(err => next(err, null));
+    });
+
     // Count the number of journal entries for a user.
     server.method('countJournalEntries', function (userId, next) {
         JournalEntry.query()
@@ -55,7 +64,7 @@ exports.register = function (server, options, next) {
         JournalEntry.query()
             .findById(id)
             .eager('tags')
-            .omit(UserTag, ['userId'])
+            .omit(Tag, ['userId'])
             .then(result => next(null, result))
             .catch(err => next(err, null));
     });
@@ -67,7 +76,7 @@ exports.register = function (server, options, next) {
         let queryBuilder = JournalEntry.query()
             .where('userId', userId)
             .eager('tags')
-            .omit(UserTag, ['userId'])
+            .omit(Tag, ['userId'])
             .orderBy('updatedAt', 'desc')
             .offset(offset);
 
@@ -144,7 +153,7 @@ exports.register = function (server, options, next) {
                 auth: 'jwt',
                 pre: [
                     {assign: 'totalEntries', method: 'countJournalEntries(auth.credentials.id)'},
-                    {assign: 'tagStats', method: 'getTags(auth.credentials.id)'},
+                    {assign: 'tagStats', method: 'getTagStats(auth.credentials.id)'},
                     {assign: 'journalStats', method: 'getJournalStats(auth.credentials.id)'}
                 ]
             },
@@ -169,7 +178,8 @@ exports.register = function (server, options, next) {
                 validate: {
                     payload: {
                         title: Joi.string().required(),
-                        entry: Joi.string().required()
+                        entry: Joi.string().required(),
+                        tags: Joi.array().required()
                     }
                 }
             },

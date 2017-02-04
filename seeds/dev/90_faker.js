@@ -12,7 +12,7 @@ const momentRange = require('moment-range').extendMoment(moment);
 
 const User = require('../../models/User');
 const Version = require('../../models/Version');
-const UserTag = require('../../models/UserTag');
+const Tag = require('../../models/Tag');
 const ReadingDay = require('../../models/ReadingDay');
 
 // Not sure why the extra array wrapped around these data.
@@ -98,7 +98,7 @@ function seedJournalEntries() {
 
         // Insert the user's tag list into the database.
         return Promise.all(userTags.map(tag =>
-            UserTag.query().insert({
+            Tag.query().insert({
                 userId: user.id,
                 label: tag
             })

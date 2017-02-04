@@ -61,10 +61,10 @@ module.exports = class User extends db.Model {
             },
             tags: {
                 relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/UserTag',
+                modelClass: __dirname + '/Tag',
                 join: {
                     from: 'user.id',
-                    to: 'userTag.userId'
+                    to: 'tag.userId'
                 }
             }
         }
