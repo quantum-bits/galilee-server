@@ -8,27 +8,7 @@ exports.seed = function (knex, Promise) {
 
     let today = new Date();
 
-    return Promise.all([
-        knex('applicationStep').del(),
-        knex('stepResource').del(),
-        knex('resourceTag').del()
-
-    ]).then(() => Promise.all([
-        knex('tag').del(),
-        knex('step').del(),
-        knex('resource').del(),
-        knex('application').del()
-
-    ])).then(() => Promise.all([
-        knex('reading').del(),
-        knex('dailyQuestion').del(),
-        knex('practice').del(),
-        knex('resourceType').del()
-
-    ])).then(() => Promise.all([
-        knex('readingDay').del()
-
-    ])).then(() => ReadingDay.query().insertGraph({
+    return ReadingDay.query().insertGraph({
         date: '2016-02-02',
         questions: [
             { seq: 1, question: 'What is your name?' },
@@ -162,5 +142,5 @@ exports.seed = function (knex, Promise) {
                 osisRef: 'Col.2.6-Col.2.15'
             }
         ]
-    }))
+    })
 };

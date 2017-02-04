@@ -4,24 +4,7 @@ const User = require('../../models/User');
 const faker = require('faker');
 
 exports.seed = function (knex, Promise) {
-    return Promise.all([
-        knex('journalEntryTag').del(),
-
-    ]).then(() => Promise.all([
-        knex('membership').del(),
-        knex('userPermission').del(),
-        knex('journalEntry').del()
-
-    ])).then(() => Promise.all([
-        knex('permission').del(),
-        knex('group').del(),
-        knex('user').del()
-
-    ])).then(() => Promise.all([
-        knex('version').del(),
-        knex('organization').del()
-
-    ])).then(() => User.query().insertGraph(
+    return User.query().insertGraph(
         [
             {
                 email: 'teacher@example.com',
@@ -110,6 +93,5 @@ exports.seed = function (knex, Promise) {
                 ]
             }
 
-        ]))
-        .catch(err => console.log('There was a problem', err));
+        ]).catch(err => console.log('There was a problem', err));
 };
