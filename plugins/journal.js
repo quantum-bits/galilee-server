@@ -73,19 +73,31 @@ exports.register = function (server, options, next) {
 
     // Return journal entries for a user. Offset defaults to the first entry.
     // Limit defaults to unlimited.
-    server.method('fetchJournalEntries', function (userId, offset = 0, limit = null, next) {
-        // Comment query elements.
+    server.method('fetchJournalEntries', function (userId, queryParams, next) {
         let queryBuilder = JournalEntry.query()
             .where('userId', userId)
             .eager('tags')
             .omit(Tag, ['userId'])
             .orderBy('updatedAt', 'desc')
-            .offset(offset);
+            .offset(queryParams.offset || 0);
 
-        // Maybe add limit clause.
-        if (limit) {
-            queryBuilder = queryBuilder.limit(limit);
+        if (queryParams.limit) {
+            queryBuilder.limit(queryParams.limit);
         }
+
+        if (queryParams.date) {
+            console.log("PARAMS", queryParams);
+            queryBuilder.whereRaw(`date_trunc('day', "journalEntry"."updatedAt") = '2017-02-04'`)
+        }
+
+        if (queryParams.tag) {
+            queryBuilder
+                .join('journalEntryTag', 'journalEntryTag.journalEntryId', 'journalEntry.id')
+                .join('tag', 'journalEntryTag.tagId', 'tag.id')
+                .where('tag.id', queryParams.tag);
+        }
+
+        console.log("QUERY", queryBuilder.toString());
 
         // Run the query and postprocess the results.
         queryBuilder
@@ -121,13 +133,15 @@ exports.register = function (server, options, next) {
                 pre: [
                     {
                         assign: 'entries',
-                        method: 'fetchJournalEntries(auth.credentials.id,query.offset,query.limit)'
+                        method: 'fetchJournalEntries(auth.credentials.id, query)'
                     }
                 ],
                 validate: {
                     query: {
                         offset: Joi.number().integer().min(0).default(0).description('Offset; default 0'),
-                        limit: Joi.number().integer().min(1).description('Limit; no default')
+                        limit: Joi.number().integer().min(1).description('Limit; no default'),
+                        date: Joi.date().description('Entries for a given date'),
+                        tag: Joi.number().integer().min(1).description('Entries with a given tag ID')
                     }
                 }
             },
