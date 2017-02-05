@@ -65,9 +65,7 @@ exports.register = function (server, options, next) {
             .findById(id)
             .eager('tags')
             .omit(Tag, ['userId'])
-            .then(result => {
-                return next(null, result);
-            })
+            .then(result => next(null, result))
             .catch(err => next(err, null));
     });
 
@@ -75,7 +73,8 @@ exports.register = function (server, options, next) {
     // Limit defaults to unlimited.
     server.method('fetchJournalEntries', function (userId, queryParams, next) {
         let queryBuilder = JournalEntry.query()
-            .select('journalEntry.id', 'journalEntry.title', 'journalEntry.entry')
+            .select('journalEntry.id', 'journalEntry.title', 'journalEntry.entry',
+                'journalEntry.createdAt', 'journalEntry.updatedAt')
             .where('journalEntry.userId', userId)
             .eager('tags')
             .orderBy('journalEntry.updatedAt', 'desc')
@@ -97,9 +96,7 @@ exports.register = function (server, options, next) {
                 .where('tag.id', queryParams.tag);
         }
 
-        console.log("QUERY", queryBuilder.toString());
-
-        // Run the query and postprocess the results.
+        // Run the query
         queryBuilder
             .then(entries => next(null, entries))
             .catch(err => next(err, null));
@@ -140,7 +137,7 @@ exports.register = function (server, options, next) {
                     query: {
                         offset: Joi.number().integer().min(0).default(0).description('Offset; default 0'),
                         limit: Joi.number().integer().min(1).description('Limit; no default'),
-                        date: Joi.date().description('Entries for a given date'),
+                        date: Joi.string().description('Entries for a given date'),
                         tag: Joi.number().integer().min(1).description('Entries with a given tag ID')
                     }
                 }
@@ -341,8 +338,7 @@ exports.register = function (server, options, next) {
                 reply(request.pre.tags);
             }
         }
-    ])
-    ;
+    ]);
 
     next();
 }

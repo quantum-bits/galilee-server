@@ -46,6 +46,15 @@ exports.register = function (server, options, next) {
         {
             method: 'POST',
             path: '/authenticate',
+            config: {
+                description: 'Authenticate to server',
+                validate: {
+                    payload: {
+                        email: Joi.string().email().required().description('User e-mail address'),
+                        password: Joi.string().min(6).required().description('User password')
+                    }
+                }
+            },
             handler: function (request, reply) {
                 let email = request.payload.email;
                 let password = request.payload.password;
