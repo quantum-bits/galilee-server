@@ -122,8 +122,7 @@ exports.register = function (server, options, next) {
             method: 'GET',
             path: '/readings/{id}',
             handler: function (request, reply) {
-                Reading
-                    .query()
+                Reading.query()
                     .where('id', request.params.id)
                     .first()
                     .then(reading => {

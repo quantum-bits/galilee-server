@@ -51,6 +51,7 @@ exports.register = function (server, options, next) {
                 let password = request.payload.password;
                 console.log("EMAIL", email, "PASS", password);
 
+                // TODO: Refactor to use existing server method (getUserByEmail).
                 User.query()
                     .where('email', email)
                     .eager('permissions')

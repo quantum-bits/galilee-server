@@ -172,7 +172,7 @@ function randomPractices() {
         'Storying Scripture'
     ];
 
-    // Shuffles in place.
+    // Shuffles in place
     random.shuffle(practiceNames);
 
     return _.map(_.take(practiceNames, random.integer(2, 3)), name => ({
@@ -232,13 +232,10 @@ function seedReadingDays() {
 
 // Seed All the Things.
 exports.seed = function (knex, Promise) {
-    return seedVersions().then(() => {
-        return seedUsers();
-    }).then(() => {
-        return seedJournalEntries();
-    }).then(() => {
-        return seedReadingDays();
-    }).then(
-        () => log("SUCCESS"),
-        err => console.error("FAIL", err));
+    return seedVersions()
+        .then(() => seedUsers())
+        .then(() => seedJournalEntries())
+        .then(() => seedReadingDays())
+        .then(() => log("SUCCESS"))
+        .catch(err => console.error("FAIL", err));
 };
