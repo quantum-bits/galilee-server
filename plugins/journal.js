@@ -75,10 +75,10 @@ exports.register = function (server, options, next) {
     // Limit defaults to unlimited.
     server.method('fetchJournalEntries', function (userId, queryParams, next) {
         let queryBuilder = JournalEntry.query()
-            .where('userId', userId)
+            .select('journalEntry.id', 'journalEntry.title', 'journalEntry.entry')
+            .where('journalEntry.userId', userId)
             .eager('tags')
-            .omit(Tag, ['userId'])
-            .orderBy('updatedAt', 'desc')
+            .orderBy('journalEntry.updatedAt', 'desc')
             .offset(queryParams.offset || 0);
 
         if (queryParams.limit) {
@@ -86,13 +86,13 @@ exports.register = function (server, options, next) {
         }
 
         if (queryParams.date) {
-            console.log("PARAMS", queryParams);
-            queryBuilder.whereRaw(`date_trunc('day', "journalEntry"."updatedAt") = '2017-02-04'`)
+            const date = moment(queryParams.date).format('YYYY-MM-DD')
+            queryBuilder.whereRaw(`date_trunc('day', "journalEntry"."updatedAt") = '${date}'`);
         }
 
         if (queryParams.tag) {
             queryBuilder
-                .join('journalEntryTag', 'journalEntryTag.journalEntryId', 'journalEntry.id')
+                .join('journalEntryTag', 'journalEntry.id', 'journalEntryTag.journalEntryId')
                 .join('tag', 'journalEntryTag.tagId', 'tag.id')
                 .where('tag.id', queryParams.tag);
         }
