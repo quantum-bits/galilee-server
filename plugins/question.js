@@ -4,11 +4,20 @@ const Boom = require('boom');
 const Joi = require('Joi');
 
 const moment = require('moment');
-const _ = require('lodash');
 
 const Question = require('../models/Question');
 
 exports.register = function (server, options, next) {
+
+    const idValidator = {
+        id: Joi.number().integer().min(1).required().description('Question ID'),
+    };
+
+    const questionValidators = {
+        readingDayId: Joi.number().integer().min(1).required().description('Reading day ID'),
+        seq: Joi.number().integer().min(0).required().description('Sequence number'),
+        text: Joi.string().required().description('Question text')
+    };
 
     server.method('getQuestion', function (questionId, next) {
         Question.query()
@@ -26,11 +35,7 @@ exports.register = function (server, options, next) {
                 description: 'New daily question',
                 auth: 'jwt',
                 validate: {
-                    payload: {
-                        readingDayId: Joi.number().integer().min(1).required().description('Reading day ID'),
-                        seq: Joi.number().integer().min(0).required().description('Sequence number'),
-                        text: Joi.string().required().description('Question text')
-                    }
+                    payload: questionValidators
                 }
             },
             handler: function (request, reply) {
@@ -56,9 +61,7 @@ exports.register = function (server, options, next) {
                     {assign: 'question', method: 'getQuestion(params.id)'}
                 ],
                 validate: {
-                    params: {
-                        id: Joi.number().integer().min(1).required().description('Question ID'),
-                    }
+                    params: idValidator
                 }
             },
             handler: function (request, reply) {
@@ -80,14 +83,8 @@ exports.register = function (server, options, next) {
                     {assign: 'question', method: 'getQuestion(params.id)'}
                 ],
                 validate: {
-                    params: {
-                        id: Joi.number().integer().min(1).required().description('Question ID'),
-                    },
-                    payload: {
-                        readingDayId: Joi.number().integer().min(1).required().description('Reading day ID'),
-                        seq: Joi.number().integer().min(0).required().description('Sequence number'),
-                        text: Joi.string().required().description('Question text')
-                    }
+                    params: idValidator,
+                    payload: questionValidators
                 }
             },
             handler: function (request, reply) {
@@ -116,9 +113,7 @@ exports.register = function (server, options, next) {
                     {assign: 'question', method: 'getQuestion(params.id)'}
                 ],
                 validate: {
-                    params: {
-                        id: Joi.number().integer().min(1).required().description('Question ID'),
-                    }
+                    params: idValidator
                 }
             },
             handler: function (request, reply) {
@@ -138,4 +133,4 @@ exports.register = function (server, options, next) {
     next();
 };
 
-exports.register.attributes = {name: 'reading', version: '0.0.1'};
+exports.register.attributes = {name: 'question', version: '0.0.1'};
