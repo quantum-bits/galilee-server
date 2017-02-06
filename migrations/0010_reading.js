@@ -6,24 +6,24 @@ exports.up = function (knex, Promise) {
 
         knex.schema.createTableIfNotExists('readingDay', table => {
             table.increments('id');
-            table.date('date').unique();
-            table.string('name');
+            table.date('date').notNullable().unique();
+            table.string('name').nullable();
         }),
 
         knex.schema.createTableIfNotExists('reading', table => {
             table.increments('id');
-            table.integer('readingDayId').references('readingDay.id');
-            table.integer('seq');
-            table.string('stdRef');
-            table.string('osisRef');
+            table.integer('readingDayId').notNullable().references('readingDay.id');
+            table.integer('seq').notNullable();
+            table.string('stdRef').notNullable();
+            table.string('osisRef').notNullable();
             table.text('passage');
         }),
 
         knex.schema.createTableIfNotExists('question', table => {
             table.increments('id');
-            table.integer('readingDayId').references('readingDay.id');
-            table.integer('seq');
-            table.string('text');
+            table.integer('readingDayId').notNullable().references('readingDay.id');
+            table.integer('seq').notNullable();
+            table.string('text').notNullable();
         })
 
     ]);

@@ -10,8 +10,33 @@ const Version = require('../models/Version');
 
 exports.register = function (server, options, next) {
 
+
+    // Fetch a user by e-mail address.
+    server.method('getUserByEmail', function (email, next) {
+        User.query()
+            .where('email', email)
+            .first()
+            .then(user => {
+                next(null, user);
+            })
+            .catch(err => next(err, null));
+    });
+
+    // Fetch a user by ID.
+    server.method('getUserById', function (id, next) {
+        User.query()
+            .where('id', id)
+            .first()
+            .then(user => {
+                console.log("USER", user);
+                next(null, user);
+            })
+            .catch(err => next(err, null));
+    });
+
     server.route([
 
+        // TODO: Refactor to use server method.
         {
             method: 'GET',
             path: '/users',

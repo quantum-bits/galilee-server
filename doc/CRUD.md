@@ -7,9 +7,22 @@ For an endpoint, this is always plural,
 but varies for CRUD methods
 in the corresponding service.
 
+As shown, these methods are perhaps _too_ generic.
+Some may, in practice, require additional arguments,
+(e.g., to resolve foreign key references).
+Consider `resource1`
+that has a foreign key to `resource2`.
+The `create` method for `resource1` might look like:
+```typescript
+createResource1(resource1: Resource1, resource2: Resource2): Observable<Resource1>
+```
+where the table for `resource1` has a `NOT NULL` foreign key
+to the table for `resource2`.
+
 ## Service
 
 * Source file: `resource.service.ts`
+* Class: `ResourceService`
 * Interface:
   Should contain all fields for the resource,
   including those created by the server
@@ -36,7 +49,7 @@ export interface Resource {
 * Reply: `Resource`
 * Service:
 ```typescript
-createResource(payload: Resource): Observable<Resource> 
+createResource(resource: Resource): Observable<Resource> 
 ```
 
 ## Read
@@ -59,7 +72,7 @@ readResource(resourceId: number): Observable<Resource>
 * Reply: `Resource`
 * Service:
 ```typescript
-updateResource(resourceId: number): Observable<Resource>
+updateResource(resourceId: number, resource: Resource): Observable<Resource>
 ```
 
 ## Delete
