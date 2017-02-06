@@ -19,10 +19,10 @@ class ReadingDay extends db.Model {
             },
             questions: {
                 relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/DailyQuestion',
+                modelClass: __dirname + '/Question',
                 join: {
                     from: 'readingDay.id',
-                    to: 'dailyQuestion.readingDayId'
+                    to: 'question.readingDayId'
                 }
             }
 

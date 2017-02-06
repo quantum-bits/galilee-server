@@ -2,9 +2,9 @@
 
 const db = require('../db');
 
-module.exports = class DailyQuestion extends db.Model {
+module.exports = class Question extends db.Model {
     static get tableName() {
-        return 'dailyQuestion';
+        return 'question';
     }
 
     static get relationMappings() {
@@ -13,7 +13,7 @@ module.exports = class DailyQuestion extends db.Model {
                 relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/ReadingDay',
                 join: {
-                    from: 'dailyQuestion.readingDayId',
+                    from: 'question.readingDayId',
                     to: 'readingDay.id'
                 }
             }

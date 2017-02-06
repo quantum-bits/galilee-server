@@ -19,11 +19,11 @@ exports.up = function (knex, Promise) {
             table.text('passage');
         }),
 
-        knex.schema.createTableIfNotExists('dailyQuestion', table => {
+        knex.schema.createTableIfNotExists('question', table => {
             table.increments('id');
             table.integer('readingDayId').references('readingDay.id');
             table.integer('seq');
-            table.string('question');
+            table.string('text');
         })
 
     ]);

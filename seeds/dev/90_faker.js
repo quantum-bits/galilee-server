@@ -211,7 +211,7 @@ function randomReadings() {
 function randomQuestions() {
     return _.times(random.integer(2, 3), n => ({
         seq: n + 1,
-        question: _.capitalize(faker.lorem.words(random.integer(3, 6)) + '?')
+        text: _.capitalize(faker.lorem.words(random.integer(3, 6)) + '?')
     }));
 }
 

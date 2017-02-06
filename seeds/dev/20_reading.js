@@ -11,9 +11,9 @@ exports.seed = function (knex, Promise) {
     return ReadingDay.query().insertGraph({
         date: '2016-02-02',
         questions: [
-            { seq: 1, question: 'What is your name?' },
-            { seq: 2, question: 'What is your quest?' },
-            { seq: 3, question: 'What is your favorite color?' }
+            { seq: 1, text: 'What is your name?' },
+            { seq: 2, text: 'What is your quest?' },
+            { seq: 3, text: 'What is your favorite color?' }
         ],
         readings: [
             {

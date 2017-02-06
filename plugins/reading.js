@@ -8,7 +8,7 @@ const _ = require('lodash');
 
 const Reading = require('../models/Reading');
 const ReadingDay = require('../models/ReadingDay');
-const DailyQuestion = require('../models/DailyQuestion');
+const Question = require('../models/Question');
 
 function todaysDate() {
     return moment().format('YYYY-MM-DD');
@@ -35,6 +35,13 @@ exports.register = function (server, options, next) {
             .catch(err => next(err, null));
     });
 
+    server.method('getQuestion', function (questionId, next) {
+        Question.query()
+            .findById(questionId)
+            .then(question => next(null, question))
+            .catch(err => next(err, null));
+    });
+
     server.route([
         {
             method: 'GET',
@@ -48,13 +55,11 @@ exports.register = function (server, options, next) {
                     .where('date', request.pre.normalizeDate)
                     .first()
                     .eager('[readings.applications.[practice,steps.resources],questions]')
+                    .omit(['readingDayId', 'readingId', 'practiceId'])
                     .then(readingDay => {
                         if (!readingDay) {
                             reply(Boom.notFound(`No reading data for '${request.pre.normalizeDate}'`));
                         } else {
-                            // Massage questions into simple list of strings.
-                            readingDay.questions = readingDay.questions.map(obj => obj.question)
-
                             // Fetch scripture text from Bible Gateway.
                             let promises = [];
                             readingDay.readings.map(reading => {
@@ -89,11 +94,11 @@ exports.register = function (server, options, next) {
                 pre: ['normalizeDate']
             },
             handler: function (request, reply) {
-                DailyQuestion.query()
-                    .select('dailyQuestion.id', 'dailyQuestion.seq', 'dailyQuestion.question')
+                Question.query()
+                    .select('question.id', 'question.seq', 'question.text')
                     .innerJoinRelation('readingDay')
                     .where('readingDay.date', request.pre.normalizeDate)
-                    .orderBy('dailyQuestion.seq')
+                    .orderBy('question.seq')
                     .then(questions => reply(questions))
                     .catch(err => reply(Boom.badImplementation(err)));
             }
@@ -143,14 +148,14 @@ exports.register = function (server, options, next) {
                     payload: {
                         readingDayId: Joi.number().integer().min(1).required().description('Reading day ID'),
                         seq: Joi.number().integer().min(0).required().description('Sequence number'),
-                        question: Joi.string().required().description('Question text')
+                        text: Joi.string().required().description('Question text')
                     }
                 }
             },
             handler: function (request, reply) {
-                DailyQuestion.query()
+                Question.query()
                     .insert({
-                        question: request.payload.question,
+                        text: request.payload.text,
                         seq: request.payload.seq,
                         readingDayId: request.payload.readingDayId
                     })
@@ -166,6 +171,9 @@ exports.register = function (server, options, next) {
             config: {
                 description: 'Fetch a question',
                 auth: 'jwt',
+                pre: [
+                    {assign: 'question', method: 'getQuestion(params.id)'}
+                ],
                 validate: {
                     params: {
                         id: Joi.number().integer().min(1).required().description('Question ID'),
@@ -173,18 +181,76 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                DailyQuestion.query()
-                    .findById(request.params.id)
-                    .then(question => {
-                        if (question) {
-                            reply(question);
-                        } else {
-                            reply(Boom.notFound(`No question with ID ${request.params.id}`));
-                        }
-                    })
-                    .catch(err => reply(Boom.badImplementation(err)))
+                if (request.pre.question) {
+                    reply(request.pre.question);
+                } else {
+                    reply(Boom.notFound(`No question with ID ${request.params.id}`));
+                }
             }
         },
+
+        {
+            method: 'PATCH',
+            path: '/questions/{id}',
+            config: {
+                description: 'Update a question',
+                auth: 'jwt',
+                pre: [
+                    {assign: 'question', method: 'getQuestion(params.id)'}
+                ],
+                validate: {
+                    params: {
+                        id: Joi.number().integer().min(1).required().description('Question ID'),
+                    },
+                    payload: {
+                        readingDayId: Joi.number().integer().min(1).required().description('Reading day ID'),
+                        seq: Joi.number().integer().min(0).required().description('Sequence number'),
+                        text: Joi.string().required().description('Question text')
+                    }
+                }
+            },
+            handler: function (request, reply) {
+                if (request.pre.question) {
+                    request.pre.question.$query()
+                        .updateAndFetch({
+                            text: request.payload.text,
+                            seq: request.payload.seq,
+                            readingDayId: request.payload.readingDayId
+                        })
+                        .then(question => reply(question))
+                        .catch(err => reply(Boom.badImplementation(err)));
+                } else {
+                    reply(Boom.notFound(`No question with ID ${request.params.id}`));
+                }
+            }
+        },
+
+        {
+            method: 'DELETE',
+            path: '/questions/{id}',
+            config: {
+                description: 'Delete a question',
+                auth: 'jwt',
+                pre: [
+                    {assign: 'question', method: 'getQuestion(params.id)'}
+                ],
+                validate: {
+                    params: {
+                        id: Joi.number().integer().min(1).required().description('Question ID'),
+                    }
+                }
+            },
+            handler: function (request, reply) {
+                if (request.pre.question) {
+                    Question.query()
+                        .deleteById(request.params.id)
+                        .then(result => reply(result))
+                        .catch(err => reply(Boom.badImplementation(err)));
+                } else {
+                    reply(Boom.notFound(`No question with ID ${request.params.id}`));
+                }
+            }
+        }
 
     ]);
 

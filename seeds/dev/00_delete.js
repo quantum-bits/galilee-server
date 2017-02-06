@@ -9,7 +9,7 @@ exports.seed = function (knex, Promise) {
         // Not referenced by any foreign key
         knex('applicationStep').del(),
         knex('config').del(),
-        knex('dailyQuestion').del(),
+        knex('question').del(),
         knex('journalEntryTag').del(),
         knex('membership').del(),
         knex('resourceTag').del(),
@@ -36,7 +36,7 @@ exports.seed = function (knex, Promise) {
 
     ])).then(() => Promise.all([
 
-        knex('readingDay').del(),       // FK dailyQuestion, reading
+        knex('readingDay').del(),       // FK question, reading
         knex('version').del(),          // FK user
 
     ])).catch(err => console.log('There was a problem', err));
