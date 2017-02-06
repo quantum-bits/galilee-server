@@ -234,9 +234,8 @@ exports.register = function (server, options, next) {
                     return JournalEntry.query()
                         .findById(entry.id)
                         .eager('tags');
-                }).then(entry => {
-                    reply(entry);
-                }).catch(err => reply(Boom.badImplementation(err)));
+                }).then(entry => reply(entry))
+                    .catch(err => reply(Boom.badImplementation(err)));
             }
         },
 

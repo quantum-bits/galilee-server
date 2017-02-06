@@ -1,12 +1,14 @@
 'use strict';
 
 const Boom = require('boom');
+const Joi = require('Joi');
 
 const moment = require('moment');
 const _ = require('lodash');
 
 const Reading = require('../models/Reading');
 const ReadingDay = require('../models/ReadingDay');
+const DailyQuestion = require('../models/DailyQuestion');
 
 function todaysDate() {
     return moment().format('YYYY-MM-DD');
@@ -87,17 +89,12 @@ exports.register = function (server, options, next) {
                 pre: ['normalizeDate']
             },
             handler: function (request, reply) {
-                ReadingDay.query()
-                    .where('date', request.pre.normalizeDate)
-                    .first()
-                    .eager('questions')
-                    .then(readingDay => {
-                        if (!readingDay) {
-                            reply(Boom.notFound('No reading for this date'));
-                        } else {
-                            reply(readingDay.questions.map(obj => obj.question));
-                        }
-                    })
+                DailyQuestion.query()
+                    .select('dailyQuestion.id', 'dailyQuestion.seq', 'dailyQuestion.question')
+                    .innerJoinRelation('readingDay')
+                    .where('readingDay.date', request.pre.normalizeDate)
+                    .orderBy('dailyQuestion.seq')
+                    .then(questions => reply(questions))
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         },
@@ -134,7 +131,60 @@ exports.register = function (server, options, next) {
                     })
                     .catch(err => reply(Boom.badImplementation(err)));
             }
-        }
+        },
+
+        {
+            method: 'POST',
+            path: '/questions',
+            config: {
+                description: 'New daily question',
+                auth: 'jwt',
+                validate: {
+                    payload: {
+                        readingDayId: Joi.number().integer().min(1).required().description('Reading day ID'),
+                        seq: Joi.number().integer().min(0).required().description('Sequence number'),
+                        question: Joi.string().required().description('Question text')
+                    }
+                }
+            },
+            handler: function (request, reply) {
+                DailyQuestion.query()
+                    .insert({
+                        question: request.payload.question,
+                        seq: request.payload.seq,
+                        readingDayId: request.payload.readingDayId
+                    })
+                    .returning('*')
+                    .then(question => reply(question))
+                    .catch(err => reply(Boom.badImplementation(err)));
+            }
+        },
+
+        {
+            method: 'GET',
+            path: '/questions/{id}',
+            config: {
+                description: 'Fetch a question',
+                auth: 'jwt',
+                validate: {
+                    params: {
+                        id: Joi.number().integer().min(1).required().description('Question ID'),
+                    }
+                }
+            },
+            handler: function (request, reply) {
+                DailyQuestion.query()
+                    .findById(request.params.id)
+                    .then(question => {
+                        if (question) {
+                            reply(question);
+                        } else {
+                            reply(Boom.notFound(`No question with ID ${request.params.id}`));
+                        }
+                    })
+                    .catch(err => reply(Boom.badImplementation(err)))
+            }
+        },
 
     ]);
 
