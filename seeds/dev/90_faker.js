@@ -35,7 +35,7 @@ const versionData = [
     {code: 'NKJV', title: 'New King James Version'},
     {code: 'RSV', title: 'Revised Standard Version'}
 ];
-let versionObjects = [];
+let _versionObjects = [];
 
 function seedVersions() {
     return Promise.all(versionData.map(datum =>
@@ -63,24 +63,78 @@ function seedVersions() {
             // Even if the insert failed, we should be okay, because the
             // catch clause will pick it up.
             debug("Adding %o", version)
-            versionObjects.push(version);
+            _versionObjects.push(version);
         }).catch(err => {
             console.error("ERR", err);
         })
     ));
 }
 
+let _randomOrgs = [];
+function randomOrg() {
+    if (_randomOrgs.length === 0) {
+        _randomOrgs = _.times(5, n => ({
+            _id: `org-${n}`,
+            _used: false,
+            name: faker.company.companyName()
+        }));
+    }
+
+    let org = random.pick(_randomOrgs);
+    if (org._used) {
+        return {
+            "#ref": org._id,
+        };
+    } else {
+        org._used = true;
+        return {
+            "#id": org._id,
+            name: org.name
+        };
+    }
+}
+
+let _randomGroups = null;
+function randomGroup() {
+    if (_randomGroups === null) {
+        _randomGroups = _.times(10, n => ({
+            _id: `group-${n}`,
+            _used: false,
+            name: _.capitalize(faker.lorem.words(random.integer(4, 8)))
+        }));
+    }
+
+    let group = random.pick(_randomGroups);
+    if (group._used) {
+        return {
+            "#ref": group._id
+        };
+    } else {
+        group._used = true;
+        return {
+            "#id": group._id,
+            name: group.name,
+            organization: randomOrg()
+        };
+    }
+}
+
+function randomUser() {
+    return {
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
+        joinedOn: faker.date.recent(JOINED_DAYS_AGO),
+        preferredVersionId: random.pick(_versionObjects).id,
+        groups: _.times(random.integer(1, 2), n => randomGroup())
+    }
+}
+
 function seedUsers() {
-    return Promise.all(_.times(NUM_USERS, n =>
-        User.query().insert({
-            email: faker.internet.email(),
-            password: faker.internet.password(),
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
-            joinedOn: faker.date.recent(JOINED_DAYS_AGO),
-            preferredVersionId: random.pick(versionObjects).id
-        })
-    ))
+    const users = _.times(NUM_USERS, n => randomUser())
+    // debug("USERS %O", users);
+    return User.query().insertGraph(users);
 }
 
 function seedJournalEntries() {
@@ -155,31 +209,53 @@ function randomReference() {
     };
 }
 
+let _practiceObjects = null;
 function randomPractices() {
-    let practiceNames = [
-        'Dramatizing Scripture',
-        'Hand Copying Scripture',
-        'The Ignatian Method',
-        'Journaling Scripture',
-        'Lectio Divina',
-        'Manuscript Bible Study',
-        'Memorizing Scripture',
-        'Praying Scripture',
-        'Public Reading of Scripture',
-        'Scripture Engagement Through Visual Art',
-        'Singing Scripture',
-        'Speaking Scripture',
-        'Storying Scripture'
-    ];
+    if (_practiceObjects === null) {
+        const practiceTitles = [
+            'Dramatizing Scripture',
+            'Hand Copying Scripture',
+            'The Ignatian Method',
+            'Journaling Scripture',
+            'Lectio Divina',
+            'Manuscript Bible Study',
+            'Memorizing Scripture',
+            'Praying Scripture',
+            'Public Reading of Scripture',
+            'Scripture Engagement Through Visual Art',
+            'Singing Scripture',
+            'Speaking Scripture',
+            'Storying Scripture'
+        ];
 
-    // Shuffles in place
-    random.shuffle(practiceNames);
+        _practiceObjects = _.map(practiceTitles, (title, idx) => ({
+            _id: `practice-${idx}`,
+            _used: false,
+            title: title,
+        }));
+    }
 
-    return _.map(_.take(practiceNames, random.integer(2, 3)), name => ({
-        title: name,
-        summary: `Summary of ${name}`,
-        description: `Description of ${name}`
-    }));
+    // Shuffle in place.
+    random.shuffle(_practiceObjects);
+
+    let tmp = _.map(_.take(_practiceObjects, random.integer(2, 3)), pracObj => {
+        if (pracObj._used) {
+            return {
+                "#ref": pracObj._id
+            };
+        } else {
+            pracObj._used = true;
+            return {
+                "#id": pracObj._id,
+                title: pracObj.title,
+                summary: `Summary of ${pracObj.title}`,
+                description: `Description of ${pracObj.title}`
+            };
+        }
+    });
+
+    debug("PRACTICE %O", tmp);
+    return tmp;
 }
 
 function randomSteps() {
@@ -220,14 +296,12 @@ function seedReadingDays() {
     const endDate = moment().add(30, 'days');
     const range = momentRange.range(startDate, endDate);
 
-    return Promise.all(_.map(Array.from(range.by('days')),
-        currentDate => ReadingDay.query()
-            .insertGraph({
-                date: currentDate,
-                questions: randomQuestions(),
-                readings: randomReadings()
-            })
-    ));
+    const readingDays = _.map(Array.from(range.by('days')), currentDate => ({
+        date: currentDate,
+        questions: randomQuestions(),
+        readings: randomReadings()
+    }));
+    return ReadingDay.query().insertGraph(readingDays);
 }
 
 // Seed All the Things.

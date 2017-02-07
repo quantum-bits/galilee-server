@@ -28,3 +28,12 @@ exports.up = function (knex, Promise) {
         })
     ])
 };
+
+exports.down = function (knex, Promise) {
+    return Promise.all([
+        knex.schema.dropTableIfExists('practice'),
+        knex.schema.dropTableIfExists('application'),
+        knex.schema.dropTableIfExists('step'),
+        knex.schema.dropTableIfExists('applicationStep')
+    ])
+};

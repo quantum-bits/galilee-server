@@ -22,7 +22,7 @@ module.exports = function (callback) {
 
             {register: require('./plugins/admin')},
             {register: require('./plugins/bible_gateway')},
-            // {register: require('./plugins/engagement')},
+            {register: require('./plugins/practice')},
             {register: require('./plugins/journal')},
             {register: require('./plugins/question')},
             {register: require('./plugins/reading')},
