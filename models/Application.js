@@ -26,17 +26,13 @@ class Application extends db.Model {
                 }
             },
             steps: {
-                relation: db.Model.ManyToManyRelation,
+                relation: db.Model.HasManyRelation,
                 modelClass: __dirname + '/Step',
                 join: {
                     from: 'application.id',
-                    through: {
-                        from: 'applicationStep.applicationId',
-                        to: 'applicationStep.stepId'
-                    },
-                    to: 'step.id'
+                    to: 'step.applicationId'
                 }
-            },
+            }
         }
     }
 

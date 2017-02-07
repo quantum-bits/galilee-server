@@ -7,7 +7,7 @@
 exports.seed = function (knex, Promise) {
     return Promise.all([
         // Not referenced by any foreign key
-        knex('applicationStep').del(),
+        knex('application').del(),
         knex('config').del(),
         knex('question').del(),
         knex('journalEntryTag').del(),
@@ -18,7 +18,6 @@ exports.seed = function (knex, Promise) {
 
     ]).then(() => Promise.all([
 
-        knex('application').del(),      // FK applicationStep
         knex('group').del(),            // FK membership
         knex('journalEntry').del(),     // FK journalEntryTag
         knex('permission').del(),       // FK userPermission
@@ -31,7 +30,7 @@ exports.seed = function (knex, Promise) {
         knex('organization').del(),     // FK group
         knex('practice').del(),         // FK application
         knex('reading').del(),          // FK application, jounalEntry
-        knex('step').del(),             // FK applicationStep, journalEntry
+        knex('step').del(),             // FK journalEntry
         knex('user').del(),             // FK journalEntry, membership, resource, tag, userPermission
 
     ])).then(() => Promise.all([

@@ -9,15 +9,11 @@ class Step extends db.Model {
 
     static get relationMappings() {
         return {
-            applications: {
-                relation: db.Model.ManyToManyRelation,
+            application: {
+                relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/Application',
                 join: {
-                    from: 'step.id',
-                    through: {
-                        from: 'applicationStep.stepId',
-                        to: 'applicationStep.applicationId'
-                    },
+                    from: 'step.applicationId',
                     to: 'application.id'
                 }
             },

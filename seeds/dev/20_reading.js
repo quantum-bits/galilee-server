@@ -22,6 +22,7 @@ exports.seed = function (knex, Promise) {
                 osisRef: 'Hos.1.2-Hos.1.10',
                 applications: [
                     {
+                        seq: 1,
                         practice: {
                             title: "Praying Scripture",
                             summary: "Summary of Praying Scripture",
@@ -29,6 +30,7 @@ exports.seed = function (knex, Promise) {
                         }
                     },
                     {
+                        seq: 2,
                         practice: {
                             title: "Lectio Divina",
                             summary: "Summary of Lectio Divina",
@@ -54,6 +56,7 @@ exports.seed = function (knex, Promise) {
                         ],
                     },
                     {
+                        seq: 3,
                         practice: {
                             title: "Scripture Engagement Through Visual Art",
                             summary: "Summary of Scripture Engagement Through Visual Art",
@@ -128,6 +131,7 @@ exports.seed = function (knex, Promise) {
                 osisRef: 'Ps.85',
                 applications: [
                     {
+                        seq: 1,
                         practice: {
                             title: "Journaling Scripture",
                             summary: "Summary of Journaling Scripture",

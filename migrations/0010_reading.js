@@ -12,7 +12,7 @@ exports.up = function (knex, Promise) {
 
         knex.schema.createTableIfNotExists('reading', table => {
             table.increments('id');
-            table.integer('readingDayId').notNullable().references('readingDay.id');
+            table.integer('readingDayId').notNullable().references('readingDay.id').onDelete('CASCADE');
             table.integer('seq').notNullable();
             table.string('stdRef').notNullable();
             table.string('osisRef').notNullable();
@@ -21,7 +21,7 @@ exports.up = function (knex, Promise) {
 
         knex.schema.createTableIfNotExists('question', table => {
             table.increments('id');
-            table.integer('readingDayId').notNullable().references('readingDay.id');
+            table.integer('readingDayId').notNullable().references('readingDay.id').onDelete('CASCADE');
             table.integer('seq').notNullable();
             table.string('text').notNullable();
         })

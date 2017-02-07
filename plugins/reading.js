@@ -35,6 +35,20 @@ exports.register = function (server, options, next) {
             .catch(err => next(err, null));
     });
 
+    server.method('getReading', function (readingId, next) {
+        Reading.query()
+            .findById(readingId)
+            .then(reading => next(null, reading))
+            .catch(err => next(err, null));
+    });
+
+    server.method('getReadingDay', function (readingDayId, next) {
+        ReadingDay.query()
+            .findById(readingDayId)
+            .then(readingDay => next(null, readingDay))
+            .catch(err => next(err, null));
+    });
+
     server.route([
         {
             method: 'GET',
@@ -112,10 +126,18 @@ exports.register = function (server, options, next) {
             }
         },
 
-
         {
             method: 'GET',
             path: '/readings/{id}',
+            config: {
+                description: 'Get a single reading',
+                auth: 'jwt',
+                validate: {
+                    params: {
+                        id: Joi.number().integer().required().description('Reading ID')
+                    }
+                }
+            },
             handler: function (request, reply) {
                 Reading.query()
                     .where('id', request.params.id)
@@ -128,6 +150,72 @@ exports.register = function (server, options, next) {
                         }
                     })
                     .catch(err => reply(Boom.badImplementation(err)));
+            }
+        },
+
+        {
+            method: 'POST',
+            path: '/readingdays',
+            config: {
+                description: 'Create reading day',
+                auth: 'jwt',
+                validate: {
+                    payload: {
+                        date: Joi.date().required().description('Date of reading day'),
+                        name: Joi.string().description('Optional day name (e.g., Easter)')
+                    }
+                }
+            },
+            handler: function (request, reply) {
+                ReadingDay.query()
+                    .insert({
+                        date: request.payload.date,
+                        name: request.payload.name || ''
+                    })
+                    .returning('*')
+                    .then(readingDay => reply(readingDay))
+                    .catch(err => reply(Boom.badImplementation(err)));
+            }
+        },
+
+        {
+            method: 'GET',
+            path: '/readingdays',
+            config: {
+                description: 'Get all reading days',
+                auth: 'jwt',
+            },
+            handler: function (request, reply) {
+                ReadingDay.query()
+                    .then(readingDays => reply(readingDays))
+                    .catch(err => reply(Boom.badImplementation(err)));
+            }
+        },
+
+        {
+            method: 'DELETE',
+            path: '/readingdays/{id}',
+            config: {
+                description: 'Get a single reading day',
+                auth: 'jwt',
+                validate: {
+                    params: {
+                        id: Joi.number().integer().required().description('Reading day ID')
+                    }
+                },
+                pre: [
+                    { assign: 'readingDay', method: 'getReadingDay(params.id)' }
+                ]
+            },
+            handler: function (request, reply) {
+                if (request.pre.readingDay) {
+                    ReadingDay.query()
+                        .deleteById(request.params.id)
+                        .then(result => reply(result))
+                        .catch(err => reply(Boom.badImplementation(err)));
+                } else {
+                    reply(Boom.notFound(`No readingDay with ID ${request.params.id}`));
+                }
             }
         }
 

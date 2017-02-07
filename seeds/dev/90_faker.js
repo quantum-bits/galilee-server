@@ -266,8 +266,9 @@ function randomSteps() {
 }
 
 function randomApplications() {
-    return _.map(randomPractices(), practice => ({
+    return _.map(randomPractices(), (practice, index) => ({
         practice: practice,
+        seq: index + 1,
         steps: randomSteps()
     }));
 }

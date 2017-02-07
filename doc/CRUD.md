@@ -63,6 +63,17 @@ createResource(resource: Resource): Observable<Resource>
 readResource(resourceId: number): Observable<Resource>
 ```
 
+## Read All
+
+* Method: `GET`
+* Path: `/resources`
+* Request payload: *none*
+* Reply: `Array<Resource>`
+* Service:
+```typescript
+readAllResources(): Observable<Array<Resource>>
+```
+
 ## Update
 
 * Method: `PATCH`

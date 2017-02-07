@@ -21,7 +21,7 @@ exports.up = function (knex, Promise) {
         }),
 
         knex.schema.createTableIfNotExists('stepResource', table => {
-            table.integer('stepId').references('step.id');
+            table.integer('stepId').references('step.id').onDelete('CASCADE');
             table.uuid('resourceId').references('resource.id');
             table.primary(['stepId', 'resourceId']);
         }),
