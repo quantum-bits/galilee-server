@@ -10,10 +10,12 @@ const _ = require('lodash');
 const moment = require('moment');
 const momentRange = require('moment-range').extendMoment(moment);
 
+const Post = require('../../models/Post');
+const Reading = require('../../models/Reading');
+const ReadingDay = require('../../models/ReadingDay');
+const Tag = require('../../models/Tag');
 const User = require('../../models/User');
 const Version = require('../../models/Version');
-const Tag = require('../../models/Tag');
-const ReadingDay = require('../../models/ReadingDay');
 
 // Not sure why the extra array wrapped around these data.
 const BibleData = require('../bg_bible_data').data[0];
@@ -133,7 +135,6 @@ function randomUser() {
 
 function seedUsers() {
     const users = _.times(NUM_USERS, n => randomUser())
-    // debug("USERS %O", users);
     return User.query().insertGraph(users);
 }
 
@@ -238,7 +239,7 @@ function randomPractices() {
     // Shuffle in place.
     random.shuffle(_practiceObjects);
 
-    let tmp = _.map(_.take(_practiceObjects, random.integer(2, 3)), pracObj => {
+    return _.map(_.take(_practiceObjects, random.integer(2, 3)), pracObj => {
         if (pracObj._used) {
             return {
                 "#ref": pracObj._id
@@ -253,9 +254,6 @@ function randomPractices() {
             };
         }
     });
-
-    debug("PRACTICE %O", tmp);
-    return tmp;
 }
 
 function randomSteps() {
@@ -281,7 +279,7 @@ function randomReadings() {
             stdRef: ref.stdRef,
             osisRef: ref.osisRef,
             applications: randomApplications()
-        }
+        };
     });
 }
 
@@ -305,12 +303,37 @@ function seedReadingDays() {
     return ReadingDay.query().insertGraph(readingDays);
 }
 
+function seedForumPosts() {
+    return Promise.all([
+        // Get all the readings and users.
+        Reading.query(),
+        User.query().eager('groups')
+    ]).then(([readings, users]) => {
+        // For each user with at least one group
+        return Promise.all(users.filter(user => user.groups.length > 0).map(user =>
+            // For a random number of times
+            Promise.all(_.times(random.integer(2, 10), n =>
+                // Create a post for this user.
+                Post.query().insert({
+                    title: random.bool(0.4) ? _.capitalize(faker.lorem.words(random.integer(4, 7))) : '',
+                    content: faker.lorem.paragraphs(random.integer(1, 3)),
+                    userId: user.id,
+                    groupId: random.pick(user.groups).id,
+                    readingId: random.bool(0.75) ? random.pick(readings).id : null
+                })
+            ))
+        ))
+    });
+}
+
 // Seed All the Things.
 exports.seed = function (knex, Promise) {
+    // N.B., order matters in the following promise chain!
     return seedVersions()
         .then(() => seedUsers())
         .then(() => seedJournalEntries())
         .then(() => seedReadingDays())
+        .then(() => seedForumPosts())
         .then(() => log("SUCCESS"))
         .catch(err => console.error("FAIL", err));
 };

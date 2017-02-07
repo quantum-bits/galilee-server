@@ -28,6 +28,14 @@ class Group extends db.Model {
                     },
                     to: 'user.id'
                 }
+            },
+            posts: {
+                relation: db.Model.HasManyRelation,
+                modelClass: __dirname + '/Post',
+                join: {
+                    from: 'group.id',
+                    to: 'post.groupId'
+                }
             }
         }
     }

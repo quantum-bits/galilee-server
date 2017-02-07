@@ -59,6 +59,14 @@ module.exports = class User extends db.Model {
                     to: 'journalEntry.userId'
                 }
             },
+            posts: {
+                relation: db.Model.HasManyRelation,
+                modelClass: __dirname + '/Post',
+                join: {
+                    from: 'user.id',
+                    to: 'post.userId'
+                }
+            },
             tags: {
                 relation: db.Model.HasManyRelation,
                 modelClass: __dirname + '/Tag',

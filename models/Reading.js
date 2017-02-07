@@ -36,6 +36,14 @@ class Reading extends db.Model {
                     },
                     to: 'practice.id'
                 }
+            },
+            posts: {
+                relation: db.Model.HasManyRelation,
+                modelClass: __dirname + '/Post',
+                join: {
+                    from: 'reading.id',
+                    to: 'post.readingId'
+                }
             }
         }
     }
