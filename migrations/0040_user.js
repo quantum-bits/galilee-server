@@ -4,11 +4,11 @@ exports.up = function (knex, Promise) {
     return Promise.all([
         knex.schema.createTableIfNotExists('user', table => {
             table.increments('id');
-            table.string('email').notNullable();
-            table.unique('email');
+            table.string('email').unique().notNullable();
             table.string('password').notNullable();
             table.string('firstName').notNullable();
             table.string('lastName').notNullable();
+            table.string('avatarUrl');
             table.dateTime('joinedOn').defaultTo(knex.raw('NOW()'));
             table.boolean('enabled').defaultTo(true);
             table.integer('preferredVersionId').references('version.id');

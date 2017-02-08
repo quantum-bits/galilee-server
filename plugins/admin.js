@@ -18,7 +18,8 @@ exports.register = function (server, options, next) {
             },
             handler: function (request, reply) {
                 User.query()
-                    .eager('[permissions, version]')
+                    .eager('[permissions, version, groups.organization]')
+                    .omit(['password', 'organizationId'])
                     .orderBy('id')
                     .then(users => reply(users))
                     .catch(err => reply(Boom.badImplementation(err)));

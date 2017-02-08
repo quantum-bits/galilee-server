@@ -6,6 +6,8 @@ const Joi = require('Joi');
 const moment = require('moment');
 
 const Post = require('../models/Post');
+const Group = require('../models/Group');
+const User = require('../models/User');
 
 exports.register = function (server, options, next) {
 
@@ -47,18 +49,36 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                let postQuery = Post.query();
+                let postQuery = null;
 
                 if (request.query.userId) {
-                    postQuery.where('userId', request.query.userId);
+                    postQuery = User.query()
+                        .findById(request.query.userId)
+                        .eager('groups.posts.[user,reading]')
+                        .omit(['groupId', 'userId', 'readingId', 'organizationId'])
+                        .omit(['password', 'joinedOn', 'enabled', 'preferredVersionId', 'email'])
+                        .omit(['createdAt']);
                 } else if (request.query.groupId) {
-                    postQuery.where('groupId', request.query.groupId);
+                    postQuery = Group.query()
+                        .findById(request.query.groupId)
+                        .eager('posts')
+                        .omit(['groupId']);
                 } else {
                     return reply(Boom.badRequest('No search criterion'));
                 }
 
                 postQuery
-                    .then(posts => reply(posts))
+                    .then(results => {
+                        results.groups.forEach(group => {
+                            group.startIndex = 0;
+                            group.count = group.posts.length;
+                            group.groupId = group.id;
+                            delete group.id;
+                            group.groupName = group.name;
+                            delete group.name;
+                        });
+                        reply(results);
+                    })
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         },

@@ -36,7 +36,6 @@ exports.register = function (server, options, next) {
 
     server.route([
 
-        // TODO: Refactor to use server method.
         {
             method: 'GET',
             path: '/users',
@@ -47,8 +46,8 @@ exports.register = function (server, options, next) {
             handler: function (request, reply) {
                 User.query()
                     .where('id', request.auth.credentials.id)
-                    .eager('[permissions, version]')
-                    .omit(['password'])
+                    .eager('[permissions,version,groups.organization]')
+                    .omit(['password', 'organizationId'])
                     .first()
                     .then(user => {
                         if (user) {

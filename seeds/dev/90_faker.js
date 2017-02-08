@@ -124,9 +124,10 @@ function randomGroup() {
 function randomUser() {
     return {
         email: faker.internet.email(),
-        password: faker.internet.password(),
+        password: 'password',
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
+        avatarUrl: faker.internet.avatar(),
         joinedOn: faker.date.recent(JOINED_DAYS_AGO),
         preferredVersionId: random.pick(_versionObjects).id,
         groups: _.times(random.integer(1, 2), n => randomGroup())
