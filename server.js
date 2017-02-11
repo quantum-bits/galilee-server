@@ -1,6 +1,8 @@
 'use strict';
 
 const Hapi = require('hapi');
+const moment = require('moment');
+const nconf = require('nconf');
 
 const User = require('./models/User');
 
@@ -8,11 +10,22 @@ module.exports = function (callback) {
 
     const server = new Hapi.Server();
 
+    // Access the master configuration file.
+    server.app.nconf = nconf.file('./master.conf.json');
+
     server.connection({
         port: 3000,
         routes: {
             cors: true
         }
+    });
+
+    // Normalize the date parameter.
+    server.method('normalizeDate', function (date, next) {
+        if (date === 'today') {
+            date = moment().format('YYYY-MM-DD');
+        }
+        next(null, date);
     });
 
     server.register(

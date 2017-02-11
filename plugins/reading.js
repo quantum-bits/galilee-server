@@ -10,20 +10,7 @@ const Reading = require('../models/Reading');
 const ReadingDay = require('../models/ReadingDay');
 const Question = require('../models/Question');
 
-function todaysDate() {
-    return moment().format('YYYY-MM-DD');
-}
-
 exports.register = function (server, options, next) {
-
-    // Normalize the date parameter.
-    server.method('normalizeDate', (request, reply) => {
-        let queryDate = request.params.date;
-        if (queryDate === 'today') {
-            queryDate = todaysDate();
-        }
-        reply(queryDate);
-    });
 
     // Get statistics on all the user's journal entries.
     server.method('getReadingStats', function (next) {
@@ -55,7 +42,7 @@ exports.register = function (server, options, next) {
             path: '/daily/{date}',
             config: {
                 description: "Get readings for given date (or 'today')",
-                pre: ['normalizeDate']
+                pre: ['normalizeDate(params.date)']
             },
             handler: function (request, reply) {
                 ReadingDay.query()
@@ -71,7 +58,7 @@ exports.register = function (server, options, next) {
                             let promises = [];
                             readingDay.readings.map(reading => {
                                 let p = new Promise((resolve, reject) => {
-                                    server.methods.bgPassage('NKJV', reading.osisRef, (err, result) => {
+                                    server.methods.getPassage('NKJV', reading.osisRef, (err, result) => {
                                         if (err) {
                                             reading.text = `Bible Gateway error '${err}'`;
                                         } else {
@@ -89,24 +76,6 @@ exports.register = function (server, options, next) {
                             });
                         }
                     })
-                    .catch(err => reply(Boom.badImplementation(err)));
-            }
-        },
-
-        {
-            method: 'GET',
-            path: '/daily/{date}/questions',
-            config: {
-                description: "Get questions for given date (or 'today')",
-                pre: ['normalizeDate']
-            },
-            handler: function (request, reply) {
-                Question.query()
-                    .select('question.id', 'question.seq', 'question.text')
-                    .innerJoinRelation('readingDay')
-                    .where('readingDay.date', request.pre.normalizeDate)
-                    .orderBy('question.seq')
-                    .then(questions => reply(questions))
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         },

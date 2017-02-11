@@ -8,3 +8,6 @@ node_modules/
 resources/??/*.jpeg
 foo[0-9]
 foo.*
+
+## Configuration file that MUST NOT be checked in to Git.
+master.conf.json

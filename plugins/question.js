@@ -3,8 +3,6 @@
 const Boom = require('boom');
 const Joi = require('Joi');
 
-const moment = require('moment');
-
 const Question = require('../models/Question');
 
 exports.register = function (server, options, next) {
@@ -47,6 +45,29 @@ exports.register = function (server, options, next) {
                     })
                     .returning('*')
                     .then(question => reply(question))
+                    .catch(err => reply(Boom.badImplementation(err)));
+            }
+        },
+
+        {
+            method: 'GET',
+            path: '/daily/{date}/questions',
+            config: {
+                description: "Get questions for given date (or 'today')",
+                validate: {
+                    params: {
+                        date: Joi.alternatives().try('today', Joi.date().iso())
+                    }
+                },
+                pre: ['normalizeDate(params.date)']
+            },
+            handler: function (request, reply) {
+                Question.query()
+                    .select('question.id', 'question.seq', 'question.text')
+                    .innerJoinRelation('readingDay')
+                    .where('readingDay.date', request.pre.normalizeDate)
+                    .orderBy('question.seq')
+                    .then(questions => reply(questions))
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         },
