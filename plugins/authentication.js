@@ -3,12 +3,13 @@
 const Boom = require('boom');
 const Joi = require('Joi');
 
+const JWT = require('jsonwebtoken');
+
 const User = require('../models/User');
 
-const JWT = require('jsonwebtoken');
-const JWT_SECRET_KEY = 'My Super Secret Key';   // TODO: Store in config file!
-
 exports.register = function (server, options, next) {
+
+    const JWT_SECRET_KEY = server.app.nconf.get('jwt-key');
 
     function validate(decoded, request, callback) {
         if (decoded.hasOwnProperty('userId')) {

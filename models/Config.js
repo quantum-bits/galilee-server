@@ -19,20 +19,6 @@ class Config extends db.Model {
                 .where('code', config.value)
                 .first());
     }
-
-    static _lookup(key) {
-        return this.query()
-            .findById(key)
-            .then(config => config.value);
-    }
-
-    static bgAccessToken() {
-        return this._lookup('bg-access-token');
-    }
-
-    static uploadRoot() {
-        return this._lookup('upload-root');
-    }
 }
 
 module.exports = Config;
