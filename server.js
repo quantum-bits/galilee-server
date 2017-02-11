@@ -70,6 +70,12 @@ module.exports = function (callback) {
             }
         ],
 
+        {
+            routes: {
+                prefix: '/api'
+            }
+        },
+
         err => {
             if (err) {
                 throw(err);
