@@ -75,10 +75,6 @@ exports.register = function (server, options, next) {
                 function fixGroup(group) {
                     group.startIndex = 0;
                     group.count = group.posts.length;
-                    group.groupId = group.id;
-                    delete group.id;
-                    group.groupName = group.name;
-                    delete group.name;
                 }
 
                 if (request.query.userId) {
@@ -88,7 +84,7 @@ exports.register = function (server, options, next) {
                     User.query()
                         .findById(request.query.userId)
                         .eager('groups.posts.[user,reading]')
-                        .omit(['groupId', 'userId', 'readingId', 'organizationId'])
+                        .omit(['userId', 'readingId', 'organizationId'])
                         .omit(['password', 'joinedOn', 'enabled', 'preferredVersionId', 'email'])
                         .omit(['createdAt'])
                         .then(result => {
@@ -102,7 +98,6 @@ exports.register = function (server, options, next) {
                     Group.query()
                         .findById(request.query.groupId)
                         .eager('posts')
-                        .omit(['groupId'])
                         .then(group => {
                             fixGroup(group);
                             reply(group);
