@@ -17,15 +17,6 @@ exports.register = function (server, options, next) {
 
     const idPartialValidator = Joi.number().integer().min(1);
 
-    const postValidators = {
-        title: Joi.string().description('Post title'),
-        content: Joi.string().required().description('Post content'),
-        parentPostId: idPartialValidator.description('ID of parent post'),
-        userId: idPartialValidator.required().description('ID of user who posted'),
-        groupId: idPartialValidator.required().description('ID of group for this post'),
-        readingId: idPartialValidator.description('ID of associated reading')
-    };
-
     server.method('getPost', function (postId, next) {
         Post.query()
             .findById(postId)
@@ -42,15 +33,27 @@ exports.register = function (server, options, next) {
                 description: 'New forum post',
                 auth: 'jwt',
                 validate: {
-                    payload: postValidators
+                    payload: {
+                        title: Joi.string().description('Post title'),
+                        content: Joi.string().required().description('Post content'),
+                        parentPostId: idPartialValidator.description('ID of parent post'),
+                        groupId: idPartialValidator.required().description('ID of group for this post'),
+                        readingId: idPartialValidator.description('ID of associated reading')
+                    }
                 }
             },
             handler: function (request, reply) {
-                Post.query()
-                    .insert(request.params)
-                    .returning('*')
-                    .then(post => reply(post))
-                    .catch(err => reply(Boom.badImplementation(err)));
+                if (!request.auth.credentials.groups.find(group => group.id === request.payload.groupId)) {
+                    reply(Boom.unauthorized('Not part of this group'));
+                } else {
+                    const postData =
+                        Object.assign({}, request.payload, {userId: request.auth.credentials.id});
+                    Post.query()
+                        .insert(postData)
+                        .returning('*')
+                        .then(post => reply(post))
+                        .catch(err => reply(Boom.badImplementation(err)));
+                }
             }
         },
 
@@ -115,10 +118,7 @@ exports.register = function (server, options, next) {
             path: '/posts/{id}',
             config: {
                 description: 'Fetch a post',
-                auth: {
-                    strategy: 'jwt',
-                    access: { scope: 'admin' }
-                },
+                auth: 'jwt',
                 pre: [
                     {assign: 'post', method: 'getPost(params.id)'}
                 ],
@@ -127,10 +127,12 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                if (request.pre.post) {
-                    reply(request.pre.post);
-                } else {
+                if (!request.pre.post) {
                     reply(Boom.notFound(`No post with ID ${request.params.id}`));
+                } else if (request.auth.credentials.id !== request.pre.post.userId) {
+                    reply(Boom.unauthorized('Not authorized to see this post'));
+                } else {
+                    reply(request.pre.post);
                 }
             }
         },
@@ -146,21 +148,22 @@ exports.register = function (server, options, next) {
                 ],
                 validate: {
                     params: idValidator,
-                    payload: postValidators
+                    payload: {
+                        title: Joi.string().description('Post title'),
+                        content: Joi.string().description('Post content'),
+                    }
                 }
             },
             handler: function (request, reply) {
-                if (request.pre.post) {
-                    if (request.pre.post.userId !== request.auth.credentials.id) {
-                        reply(Boom.unauthorized('Not authorized to update this post'));
-                    } else {
-                        request.pre.post.$query()
-                            .updateAndFetch(request.post.payload)
-                            .then(post => reply(post))
-                            .catch(err => reply(Boom.badImplementation(err)));
-                    }
-                } else {
+                if (!request.pre.post) {
                     reply(Boom.notFound(`No post with ID ${request.params.id}`));
+                } else if (request.pre.post.userId !== request.auth.credentials.id) {
+                    reply(Boom.unauthorized('Not authorized to update this post'));
+                } else {
+                    request.pre.post.$query()
+                        .updateAndFetch(request.payload)
+                        .then(post => reply(post))
+                        .catch(err => reply(Boom.badImplementation(err)));
                 }
             }
         },
@@ -179,17 +182,15 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                if (request.pre.post) {
-                    if (request.pre.post.userId !== request.auth.credentials.id) {
-                        reply(Boom.unauthorized('Not authorized to delete this post'));
-                    } else {
-                        Post.query()
-                            .deleteById(request.params.id)
-                            .then(result => reply(result))
-                            .catch(err => reply(Boom.badImplementation(err)));
-                    }
-                } else {
+                if (!request.pre.post) {
                     reply(Boom.notFound(`No post with ID ${request.params.id}`));
+                } else if (request.pre.post.userId !== request.auth.credentials.id) {
+                    reply(Boom.unauthorized('Not authorized to delete this post'));
+                } else {
+                    Post.query()
+                        .deleteById(request.params.id)
+                        .then(result => reply(result))
+                        .catch(err => reply(Boom.badImplementation(err)));
                 }
             }
         }
