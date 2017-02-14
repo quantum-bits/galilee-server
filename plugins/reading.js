@@ -113,6 +113,71 @@ exports.register = function (server, options, next) {
                     reply(request.pre.reading);
                 }
             }
+        },
+
+        {
+            method: 'PATCH',
+            path: '/readings/{id}',
+            config: {
+                description: 'Update reading',
+                auth: {
+                    strategy: 'jwt',
+                    access: {scope: 'admin'}
+                },
+                validate: {
+                    params: {
+                        id: Joi.number().integer().required().description('Reading day ID')
+                    },
+                    payload: {
+                        seq: Joi.number().integer().min(1).description('Sequence number within day'),
+                        stdRef: Joi.string().description('Standard passage reference'),
+                        osisRef: Joi.string().description('OSIS reference')
+                    }
+                },
+                pre: [
+                    {assign: 'reading', method: 'getReading(params.id)'}
+                ]
+            },
+            handler: function(request, reply) {
+                if (!request.pre.reading) {
+                    reply(Boom.notFound(`No reading with ID ${request.params.id}`));
+                } else {
+                    request.pre.reading.$query()
+                        .updateAndFetch(request.payload)
+                        .then(reading => reply(reading))
+                        .catch(err => reply(Boom.badImplementation(err)));
+                }
+            }
+        },
+
+        {
+            method: 'DELETE',
+            path: '/readings/{id}',
+            config: {
+                description: 'Delete a reading',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                },
+                validate: {
+                    params: {
+                        id: Joi.number().integer().required().description('Reading day ID')
+                    }
+                },
+                pre: [
+                    {assign: 'reading', method: 'getReading(params.id)'}
+                ]
+            },
+            handler: function (request, reply) {
+                if (!request.pre.reading) {
+                    reply(Boom.notFound(`No reading with ID ${request.params.id}`));
+                } else {
+                    Reading.query()
+                        .deleteById(request.params.id)
+                        .then(result => reply(result))
+                        .catch(err => reply(Boom.badImplementation(err)));
+                }
+            }
         }
 
     ]);

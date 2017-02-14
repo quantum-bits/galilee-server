@@ -154,7 +154,7 @@ exports.register = function (server, options, next) {
             method: 'PATCH',
             path: '/readingdays/{id}',
             config: {
-                description: 'Create reading day',
+                description: 'Update reading day',
                 auth: {
                     strategy: 'jwt',
                     access: { scope: 'admin' }
@@ -174,7 +174,7 @@ exports.register = function (server, options, next) {
             },
             handler: function (request, reply) {
                 if (!request.pre.readingDay) {
-                    reply(Boom.conflict(`No reading day with ID ${request.params.id}`));
+                    reply(Boom.notFound(`No reading day with ID ${request.params.id}`));
                 } else {
                     request.pre.readingDay.$query()
                         .updateAndFetch(request.payload)
