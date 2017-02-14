@@ -100,7 +100,10 @@ exports.register = function (server, options, next) {
             path: '/readings/{id}',
             config: {
                 description: 'Get a single reading',
-                auth: 'jwt',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                },
                 validate: {
                     params: {
                         id: Joi.number().integer().required().description('Reading ID')
@@ -127,7 +130,10 @@ exports.register = function (server, options, next) {
             path: '/readingdays',
             config: {
                 description: 'Create reading day',
-                auth: 'jwt',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                },
                 validate: {
                     payload: {
                         date: Joi.date().required().description('Date of reading day'),
@@ -152,7 +158,10 @@ exports.register = function (server, options, next) {
             path: '/readingdays',
             config: {
                 description: 'Get all reading days',
-                auth: 'jwt',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                },
             },
             handler: function (request, reply) {
                 ReadingDay.query()
@@ -166,7 +175,10 @@ exports.register = function (server, options, next) {
             path: '/readingdays/{id}',
             config: {
                 description: 'Get a single reading day',
-                auth: 'jwt',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                },
                 validate: {
                     params: {
                         id: Joi.number().integer().required().description('Reading day ID')

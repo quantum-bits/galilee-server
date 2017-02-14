@@ -36,10 +36,29 @@ exports.register = function (server, options, next) {
     server.route([
 
         {
+            method: 'POST',
+            path: '/posts',
+            config: {
+                description: 'New forum post',
+                auth: 'jwt',
+                validate: {
+                    payload: postValidators
+                }
+            },
+            handler: function (request, reply) {
+                Post.query()
+                    .insert(request.params)
+                    .returning('*')
+                    .then(post => reply(post))
+                    .catch(err => reply(Boom.badImplementation(err)));
+            }
+        },
+
+        {
             method: 'GET',
             path: '/posts',
             config: {
-                description: 'Search for posts',
+                description: 'Search for posts by user or group',
                 auth: 'jwt',
                 validate: {
                     query: {
@@ -49,145 +68,135 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                let postQuery = null;
+                // Fix up the group to conform to the application's expectations.
+                function fixGroup(group) {
+                    group.startIndex = 0;
+                    group.count = group.posts.length;
+                    group.groupId = group.id;
+                    delete group.id;
+                    group.groupName = group.name;
+                    delete group.name;
+                }
 
                 if (request.query.userId) {
-                    postQuery = User.query()
+                    if (request.query.userId !== request.auth.credentials.id) {
+                        return reply(Boom.unauthorized("Not authorized to see this user's posts"));
+                    }
+                    User.query()
                         .findById(request.query.userId)
                         .eager('groups.posts.[user,reading]')
                         .omit(['groupId', 'userId', 'readingId', 'organizationId'])
                         .omit(['password', 'joinedOn', 'enabled', 'preferredVersionId', 'email'])
-                        .omit(['createdAt']);
+                        .omit(['createdAt'])
+                        .then(result => {
+                            result.groups.forEach(group => fixGroup(group));
+                            reply(result);
+                        });
                 } else if (request.query.groupId) {
-                    postQuery = Group.query()
+                    if (!request.auth.credentials.groups.find(group => group.id === request.query.groupId)) {
+                        return reply(Boom.unauthorized("Not authorized to see this group's posts"));
+                    }
+                    Group.query()
                         .findById(request.query.groupId)
                         .eager('posts')
-                        .omit(['groupId']);
+                        .omit(['groupId'])
+                        .then(group => {
+                            fixGroup(group);
+                            reply(group);
+                        });
                 } else {
                     return reply(Boom.badRequest('No search criterion'));
                 }
-
-                postQuery
-                    .then(results => {
-                        results.groups.forEach(group => {
-                            group.startIndex = 0;
-                            group.count = group.posts.length;
-                            group.groupId = group.id;
-                            delete group.id;
-                            group.groupName = group.name;
-                            delete group.name;
-                        });
-                        reply(results);
-                    })
-                    .catch(err => reply(Boom.badImplementation(err)));
             }
         },
 
-        /* TODO: Uncomment and complete.
-         {
-         method: 'POST',
-         path: '/posts',
-         config: {
-         description: 'New daily post',
-         auth: 'jwt',
-         validate: {
-         payload: postValidators
-         }
-         },
-         handler: function (request, reply) {
-         Post.query()
-         .insert({
-         text: request.payload.text,
-         seq: request.payload.seq,
-         readingDayId: request.payload.readingDayId
-         })
-         .returning('*')
-         .then(post => reply(post))
-         .catch(err => reply(Boom.badImplementation(err)));
-         }
-         },
+        {
+            method: 'GET',
+            path: '/posts/{id}',
+            config: {
+                description: 'Fetch a post',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                },
+                pre: [
+                    {assign: 'post', method: 'getPost(params.id)'}
+                ],
+                validate: {
+                    params: idValidator
+                }
+            },
+            handler: function (request, reply) {
+                if (request.pre.post) {
+                    reply(request.pre.post);
+                } else {
+                    reply(Boom.notFound(`No post with ID ${request.params.id}`));
+                }
+            }
+        },
 
-         {
-         method: 'GET',
-         path: '/posts/{id}',
-         config: {
-         description: 'Fetch a post',
-         auth: 'jwt',
-         pre: [
-         {assign: 'post', method: 'getPost(params.id)'}
-         ],
-         validate: {
-         params: idValidator
-         }
-         },
-         handler: function (request, reply) {
-         if (request.pre.post) {
-         reply(request.pre.post);
-         } else {
-         reply(Boom.notFound(`No post with ID ${request.params.id}`));
-         }
-         }
-         },
+        {
+            method: 'PATCH',
+            path: '/posts/{id}',
+            config: {
+                description: 'Update a post',
+                auth: 'jwt',
+                pre: [
+                    {assign: 'post', method: 'getPost(params.id)'}
+                ],
+                validate: {
+                    params: idValidator,
+                    payload: postValidators
+                }
+            },
+            handler: function (request, reply) {
+                if (request.pre.post) {
+                    if (request.pre.post.userId !== request.auth.credentials.id) {
+                        reply(Boom.unauthorized('Not authorized to update this post'));
+                    } else {
+                        request.pre.post.$query()
+                            .updateAndFetch(request.post.payload)
+                            .then(post => reply(post))
+                            .catch(err => reply(Boom.badImplementation(err)));
+                    }
+                } else {
+                    reply(Boom.notFound(`No post with ID ${request.params.id}`));
+                }
+            }
+        },
 
-         {
-         method: 'PATCH',
-         path: '/posts/{id}',
-         config: {
-         description: 'Update a post',
-         auth: 'jwt',
-         pre: [
-         {assign: 'post', method: 'getPost(params.id)'}
-         ],
-         validate: {
-         params: idValidator,
-         payload: postValidators
-         }
-         },
-         handler: function (request, reply) {
-         if (request.pre.post) {
-         request.pre.post.$query()
-         .updateAndFetch({
-         text: request.payload.text,
-         seq: request.payload.seq,
-         readingDayId: request.payload.readingDayId
-         })
-         .then(post => reply(post))
-         .catch(err => reply(Boom.badImplementation(err)));
-         } else {
-         reply(Boom.notFound(`No post with ID ${request.params.id}`));
-         }
-         }
-         },
-
-         {
-         method: 'DELETE',
-         path: '/posts/{id}',
-         config: {
-         description: 'Delete a post',
-         auth: 'jwt',
-         pre: [
-         {assign: 'post', method: 'getPost(params.id)'}
-         ],
-         validate: {
-         params: idValidator
-         }
-         },
-         handler: function (request, reply) {
-         if (request.pre.post) {
-         Post.query()
-         .deleteById(request.params.id)
-         .then(result => reply(result))
-         .catch(err => reply(Boom.badImplementation(err)));
-         } else {
-         reply(Boom.notFound(`No post with ID ${request.params.id}`));
-         }
-         }
-         }
-         */
+        {
+            method: 'DELETE',
+            path: '/posts/{id}',
+            config: {
+                description: 'Delete a post',
+                auth: 'jwt',
+                pre: [
+                    {assign: 'post', method: 'getPost(params.id)'}
+                ],
+                validate: {
+                    params: idValidator
+                }
+            },
+            handler: function (request, reply) {
+                if (request.pre.post) {
+                    if (request.pre.post.userId !== request.auth.credentials.id) {
+                        reply(Boom.unauthorized('Not authorized to delete this post'));
+                    } else {
+                        Post.query()
+                            .deleteById(request.params.id)
+                            .then(result => reply(result))
+                            .catch(err => reply(Boom.badImplementation(err)));
+                    }
+                } else {
+                    reply(Boom.notFound(`No post with ID ${request.params.id}`));
+                }
+            }
+        }
 
     ]);
 
     next();
 };
 
-exports.register.attributes = {name: 'post', version: '0.0.1'};
+exports.register.attributes = {name: 'forum', version: '0.0.1'};

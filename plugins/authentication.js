@@ -13,17 +13,15 @@ exports.register = function (server, options, next) {
 
     function validate(decoded, request, callback) {
         if (decoded.hasOwnProperty('userId')) {
-            User.query()
-                .where('id', decoded.userId)
-                .first()
-                .then(user => {
-                    if (user) {
-                        callback(null, true, user);
-                    } else {
-                        callback(null, false);
-                    }
-                })
-                .catch(err => callback(err, false));
+            server.methods.getUserById(decoded.userId, (err, user) => {
+                if (err) {
+                    callback(null, false);
+                } else {
+                    let scopes = user.permissions.map(perm => perm.id.toLowerCase())
+                    let credentials = Object.assign(user, {scope: scopes});
+                    callback(null, true, credentials);
+                }
+            });
         } else {
             callback(null, false);
         }
@@ -54,37 +52,32 @@ exports.register = function (server, options, next) {
                         email: Joi.string().email().required().description('User e-mail address'),
                         password: Joi.string().min(6).required().description('User password')
                     }
-                }
+                },
+                pre: [
+                    {assign: 'user', method: 'getUserByEmail(payload.email)'}
+                ]
             },
             handler: function (request, reply) {
-                let email = request.payload.email;
-                let password = request.payload.password;
-                console.log("EMAIL", email, "PASS", password);
+                const email = request.payload.email;
+                const password = request.payload.password;
+                const user = request.pre.user;
 
-                // TODO: Refactor to use existing server method (getUserByEmail).
-                User.query()
-                    .where('email', email)
-                    .eager('permissions')
-                    .first()
-                    .then(user => {
-                        if (user) {
-                            user.checkPassword(password)
-                                .then(isValid => {
-                                    if (isValid) {
-                                        delete user.password;       // Don't send password.
-                                        reply({
-                                            jwtIdToken: createToken(email, user.id),
-                                            user: user
-                                        });
-                                    } else {
-                                        reply(Boom.unauthorized('Authentication failed'));
-                                    }
+                if (user) {
+                    user.checkPassword(password)
+                        .then(isValid => {
+                            if (isValid) {
+                                delete user.password;       // Don't send password.
+                                reply({
+                                    jwtIdToken: createToken(email, user.id),
+                                    user: user
                                 });
-                        } else {
-                            reply(Boom.unauthorized('Authentication failed'));
-                        }
-                    })
-                    .catch(err => reply(Boom.badImplementation(err)));
+                            } else {
+                                reply(Boom.unauthorized('Authentication failed'));
+                            }
+                        });
+                } else {
+                    reply(Boom.unauthorized('Authentication failed'));
+                }
             }
         }
     ]);

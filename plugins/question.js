@@ -31,7 +31,10 @@ exports.register = function (server, options, next) {
             path: '/questions',
             config: {
                 description: 'New daily question',
-                auth: 'jwt',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                },
                 validate: {
                     payload: questionValidators
                 }
@@ -77,7 +80,10 @@ exports.register = function (server, options, next) {
             path: '/questions/{id}',
             config: {
                 description: 'Fetch a question',
-                auth: 'jwt',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                },
                 pre: [
                     {assign: 'question', method: 'getQuestion(params.id)'}
                 ],
@@ -99,7 +105,10 @@ exports.register = function (server, options, next) {
             path: '/questions/{id}',
             config: {
                 description: 'Update a question',
-                auth: 'jwt',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                },
                 pre: [
                     {assign: 'question', method: 'getQuestion(params.id)'}
                 ],
@@ -129,7 +138,10 @@ exports.register = function (server, options, next) {
             path: '/questions/{id}',
             config: {
                 description: 'Delete a question',
-                auth: 'jwt',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                },
                 pre: [
                     {assign: 'question', method: 'getQuestion(params.id)'}
                 ],

@@ -128,55 +128,57 @@ exports.register = function (server, options, next) {
         });
     });
 
-    server.route(
-        [
-            {
-                method: 'GET',
-                path: '/bg/translations',
-                config: {
-                    description: 'Retrieve list of available translations',
-                    pre: ['getTranslations()']
-                },
-                handler: function (request, reply) {
-                    reply(request.pre.getTranslations);
-                }
-            },
-
-            {
-                method: 'GET',
-                path: '/bg/translations/{version}',
-                config: {
-                    description: 'Retrieve version information',
-                    validate: {
-                        params: {
-                            version: Joi.string().required()
-                        }
+    if (false) {
+        server.route(
+            [
+                {
+                    method: 'GET',
+                    path: '/bg/translations',
+                    config: {
+                        description: 'Retrieve list of available translations',
+                        pre: ['getTranslations()']
                     },
-                    pre: ['getVersionInfo(params.version)']
+                    handler: function (request, reply) {
+                        reply(request.pre.getTranslations);
+                    }
                 },
-                handler: function (request, reply) {
-                    reply(request.pre.getVersionInfo);
-                }
-            },
 
-            {
-                method: 'GET',
-                path: '/bg/translations/{version}/{osis}',
-                config: {
-                    description: 'Fetch scripture passage',
-                    validate: {
-                        params: {
-                            version: Joi.string().required(),
-                            osis: Joi.string().required()
-                        }
+                {
+                    method: 'GET',
+                    path: '/bg/translations/{version}',
+                    config: {
+                        description: 'Retrieve version information',
+                        validate: {
+                            params: {
+                                version: Joi.string().required()
+                            }
+                        },
+                        pre: ['getVersionInfo(params.version)']
                     },
-                    pre: ['getPassage(params.version, params.osis)']
+                    handler: function (request, reply) {
+                        reply(request.pre.getVersionInfo);
+                    }
                 },
-                handler: function (request, reply) {
-                    reply(request.pre.getPassage);
+
+                {
+                    method: 'GET',
+                    path: '/bg/translations/{version}/{osis}',
+                    config: {
+                        description: 'Fetch scripture passage',
+                        validate: {
+                            params: {
+                                version: Joi.string().required(),
+                                osis: Joi.string().required()
+                            }
+                        },
+                        pre: ['getPassage(params.version, params.osis)']
+                    },
+                    handler: function (request, reply) {
+                        reply(request.pre.getPassage);
+                    }
                 }
-            }
-        ]);
+            ]);
+    }
 
     next();
 };

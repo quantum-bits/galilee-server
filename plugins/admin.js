@@ -14,7 +14,11 @@ exports.register = function (server, options, next) {
             method: 'GET',
             path: '/admin/users',
             config: {
-                description: 'All users'
+                description: 'All users',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                }
             },
             handler: function (request, reply) {
                 User.query()
@@ -30,7 +34,11 @@ exports.register = function (server, options, next) {
             method: 'GET',
             path: '/admin/entries',
             config: {
-                description: 'All entries'
+                description: 'All entries',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                }
             },
             handler: function (request, reply) {
                 JournalEntry.query()

@@ -128,10 +128,7 @@ exports.register = function (server, options, next) {
                 description: 'Journal entries for user',
                 auth: 'jwt',
                 pre: [
-                    {
-                        assign: 'entries',
-                        method: 'fetchJournalEntries(auth.credentials.id, query)'
-                    }
+                    {assign: 'entries', method: 'fetchJournalEntries(auth.credentials.id, query)'}
                 ],
                 validate: {
                     query: {

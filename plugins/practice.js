@@ -20,7 +20,10 @@ exports.register = function (server, options, next) {
             path: '/practices',
             config: {
                 description: 'Get all practices',
-                auth: 'jwt'
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                },
             },
             handler: function (request, reply) {
                 Practice.query()
@@ -34,7 +37,10 @@ exports.register = function (server, options, next) {
             path: '/practices/{id}',
             config: {
                 description: 'Get a single practice',
-                auth: 'jwt',
+                auth: {
+                    strategy: 'jwt',
+                    access: { scope: 'admin' }
+                },
                 pre: [
                     {assign: 'practice', method: 'readPractice(params.id)'}
                 ],

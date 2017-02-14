@@ -28,6 +28,26 @@ module.exports = function (callback) {
         next(null, date);
     });
 
+    // Fetch a user with arbitrary object as where clause.
+    function fetchUser(whereClause, next) {
+        User.query()
+            .where(whereClause)
+            .eager('[permissions,groups]')
+            .first()
+            .then(user => next(null, user))
+            .catch(err => next(err, null));
+    }
+
+    // Fetch a user by e-mail address.
+    server.method('getUserByEmail', function (email, next) {
+        fetchUser({'email': email}, next);
+    });
+
+    // Fetch a user by ID.
+    server.method('getUserById', function (id, next) {
+        fetchUser({'id': id}, next);
+    });
+
     server.register(
         [
             {register: require('hapi-auth-jwt2')},
