@@ -60,6 +60,7 @@ module.exports = function (callback) {
             {register: require('./plugins/journal')},
             {register: require('./plugins/question')},
             {register: require('./plugins/reading')},
+            {register: require('./plugins/reading_day')},
             // {register: require('./plugins/resource')},
             {register: require('./plugins/user')},
 
