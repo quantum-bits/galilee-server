@@ -9,7 +9,7 @@ const User = require('../models/User');
 
 exports.register = function (server, options, next) {
 
-    const JWT_SECRET_KEY = server.app.nconf.get('jwt-key');
+    const JWT_SECRET_KEY = server.settings.app.nconf.get('jwt-key');
 
     function validate(decoded, request, callback) {
         if (decoded.hasOwnProperty('userId')) {

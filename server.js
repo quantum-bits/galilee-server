@@ -8,10 +8,11 @@ const User = require('./models/User');
 
 module.exports = function (callback) {
 
-    const server = new Hapi.Server();
-
-    // Access the master configuration file.
-    server.app.nconf = nconf.file('./master.conf.json');
+    const server = new Hapi.Server({
+        app: {
+            nconf: nconf.file('./master.conf.json')
+        }
+    });
 
     server.connection({
         port: 3000,
@@ -61,6 +62,7 @@ module.exports = function (callback) {
             {register: require('./plugins/question')},
             {register: require('./plugins/reading')},
             {register: require('./plugins/reading_day')},
+            {register: require('./plugins/application')},
             // {register: require('./plugins/resource')},
             {register: require('./plugins/user')},
 
