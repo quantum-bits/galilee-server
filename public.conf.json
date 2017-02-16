@@ -1,0 +1,54 @@
+{
+  "development": {
+    "db": {
+      "client": "pg",
+      "connection": {
+        "database": "galilee",
+        "host": "localhost",
+        "charset": "utf8"
+      },
+      "seeds": {
+        "directory": "./seeds/dev"
+      },
+      "debug": false
+    },
+    "hapi": {
+      "port": 3000
+    }
+  },
+  "staging": {
+    "db": {
+      "client": "pg",
+      "connection": {
+        "database": "galilee",
+        "host": "localhost",
+        "charset": "utf8"
+      },
+      "seeds": {
+        "directory": "./seeds/dev"
+      },
+      "pool": {
+        "min": 2,
+        "max": 10
+      }
+    },
+    "hapi": {
+      "port": 443
+    }
+  },
+  "production": {
+    "db": {
+      "client": "postgresql",
+      "connection": {
+        "database": "galilee"
+      },
+      "pool": {
+        "min": 2,
+        "max": 10
+      }
+    },
+    "hapi": {
+      "port": 443
+    }
+  }
+}

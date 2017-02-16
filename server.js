@@ -9,12 +9,12 @@ module.exports = function (callback) {
 
     const server = new Hapi.Server({
         app: {
-            config: require('./server_config')
+            config: require('./master-config')
         }
     });
 
     server.connection({
-        port: 3000,
+        port: server.settings.app.config.get('hapi:port'),
         routes: {
             cors: true
         }

@@ -11,7 +11,7 @@ Create a Postgres database:
 * Password: `pass`
 
 If these values are not to your liking,
-update the contents of `knexfile.js`
+update the contents of `*.conf.json`
 to correspond to your preferences.
 
 == Create the Schema

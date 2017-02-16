@@ -1,8 +1,8 @@
 "use strict";
 
-const data_sources = require('./knexfile');
+const config = require('./master-config');
 
-const knex = exports.knex = require('knex')(data_sources.development);
+const knex = exports.knex = require('knex')(config.get('development:db'));
 
 const Model = exports.Model = require('objection').Model;
 Model.knex(knex);
