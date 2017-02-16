@@ -66,8 +66,8 @@ class AuthenticationService {
 exports.register = function (server, options, next) {
 
     const authService = new AuthenticationService(
-        server.settings.app.nconf.get('bg:username'),
-        server.settings.app.nconf.get('bg:password'));
+        server.settings.app.config.get('bg:username'),
+        server.settings.app.config.get('bg:password'));
 
     server.method('getTranslations', function (next) {
         authService.authenticate((err, result) => {

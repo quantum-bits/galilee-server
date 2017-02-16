@@ -1,12 +1,14 @@
+const config = require('./server_config');
+
 module.exports = {
 
     development: {
         client: 'pg',
         connection: {
-            host: 'localhost',
-            user: 'galilee',
-            password: 'pass',
             database: 'galilee',
+            host: 'localhost',
+            user: config.get('pg:development:user'),
+            password: config.get('pg:development:password'),
             charset: 'utf8'
         },
         seeds: {
@@ -18,32 +20,31 @@ module.exports = {
     staging: {
         client: 'postgresql',
         connection: {
-            database: 'my_db',
-            user: 'username',
-            password: 'password'
+            database: 'galilee',
+            host: 'localhost',
+            user: config.get('pg:staging:user'),
+            password: config.get('pg:staging:password'),
+            charset: 'utf8'
+        },
+        seeds: {
+            directory: './seeds/dev'
         },
         pool: {
             min: 2,
             max: 10
-        },
-        migrations: {
-            tableName: 'knex_migrations'
         }
     },
 
     production: {
         client: 'postgresql',
         connection: {
-            database: 'my_db',
-            user: 'username',
-            password: 'password'
+            database: 'galilee',
+            user: config.get('pg:production:user'),
+            password: config.get('pg:production:password'),
         },
         pool: {
             min: 2,
             max: 10
-        },
-        migrations: {
-            tableName: 'knex_migrations'
         }
     }
 

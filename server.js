@@ -2,7 +2,6 @@
 
 const Hapi = require('hapi');
 const moment = require('moment');
-const nconf = require('nconf');
 
 const User = require('./models/User');
 
@@ -10,7 +9,7 @@ module.exports = function (callback) {
 
     const server = new Hapi.Server({
         app: {
-            nconf: nconf.file('./master.conf.json')
+            config: require('./server_config')
         }
     });
 
