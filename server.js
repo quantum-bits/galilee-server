@@ -1,6 +1,7 @@
 'use strict';
 
 const Hapi = require('hapi');
+const Path = require('path');
 const moment = require('moment');
 
 const User = require('./models/User');
@@ -16,7 +17,10 @@ module.exports = function (callback) {
     server.connection({
         port: server.settings.app.config.get('hapi:port'),
         routes: {
-            cors: true
+            cors: true,
+            files: {
+                relativeTo: Path.join(__dirname, 'public')
+            }
         }
     });
 
@@ -50,6 +54,10 @@ module.exports = function (callback) {
 
     server.register(
         [
+            {register: require('inert')},       // Static files
+            {register: require('vision')},      // Templates (needed by tv)
+            {register: require('lout')},        // API documentation
+
             {register: require('hapi-auth-jwt2')},
             {register: require('./plugins/authentication')},
 
@@ -65,12 +73,8 @@ module.exports = function (callback) {
             // {register: require('./plugins/resource')},
             {register: require('./plugins/user')},
 
-            {register: require('vision')},
-            {register: require('inert')},
-            {register: require('lout')},
-
             {
-                register: require('tv'),
+                register: require('tv'),        // Documentation
                 options: {
                     host: 'localhost',
                     port: 2020
@@ -78,7 +82,7 @@ module.exports = function (callback) {
             },
 
             {
-                register: require('blipp'),
+                register: require('blipp'),     // Route listing
                 options: {
                     showStart: true,
                     showAuth: true
@@ -86,7 +90,7 @@ module.exports = function (callback) {
             },
 
             {
-                register: require('good'),
+                register: require('good'),      // Logging
                 options: {
                     reporters: {
                         console: [
@@ -120,4 +124,15 @@ module.exports = function (callback) {
         }
     );
 
+    server.route({
+        method: 'GET',
+        path: '/{param*}',
+        handler: {
+            directory: {
+                path: '.',
+                redirectToSlash: true,
+                index: true
+            }
+        }
+    });
 };
