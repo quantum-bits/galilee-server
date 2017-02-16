@@ -1,0 +1,114 @@
+#+TITLE: Galilee Lab Notebook
+#+AUTHOR: Tom Nurkkala
+
+* PostgreSQL Configuration
+** Tutorials
+- [[https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-centos-7][Setup Tutorial (Digital Ocean)]]
+- [[https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units][Systemctl Tutorial (Digital Ocean)]]
+** Debugging
+1. Use the log file:
+   #+BEGIN_EXAMPLE
+   tail -f /var/lib/pgsql/9.6/data/pg_log/postgresql-Thu.log
+   #+END_EXAMPLE
+** Postgres.App (Mac)
+*** Data directory
+- =~/Library/Application Support/Posgres/var-9.5=
+**** =postgresql.conf=
+- I have fiddled with timezone parameters;
+  I don't know that this is right
+  - ~timezone = 'UTC'~
+  - ~log_timezone = 'US/Eastern'~
+- The =listen_addresses= parameter is set to it's default (=localhost=)
+**** =pg_hba.conf=
+- =hba= = "host-based authentication"
+- Uses =trust= method for all local connections and for =127.0.0.1/32=
+#+BEGIN_EXAMPLE
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+local   all             all                                     trust
+host    all             all             127.0.0.1/32            trust
+host    all             all             ::1/128                 trust
+#+END_EXAMPLE
+- =local=: connection attempts using Unix-domain sockets
+- =host=: connection attempts made using TCP/IP (SSL or non-SSL)
+- =trust=: allow the connection unconditionally
+**** =pg_ident.conf=
+- Factory defaults
+** Postgres 9.6 (=galilee=)
+- OS: CentOS 7
+*** Data Directory
+**** =/var/lib/pgsql/9.6/data=
+- Time zone was set to =US/East-Indiana= at install time;
+  I did not set this. Was it determined by inspecting CentOS?
+- =listen_address= also set to default (=localhost=)
+**** =pg_hba.conf=
+#+BEGIN_EXAMPLE
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+local   all             all                                     peer
+host    all             all             127.0.0.1/32            ident
+host    all             all             ::1/128                 ident
+#+END_EXAMPLE
+- =peer=: obtain the client's OS user name and check if it matches the
+  requested database user name; only available for local connections
+- =ident=: obtain the OS user name of the client by contacting the ident server
+  (e.g., =identd=) on the client and check if it matches the requested database
+  user name.  Only on TCP/IP connections. When specified for local connections,
+  peer authentication used instead.
+**** =pg_ident.conf=
+- Factory defaults
+** Commands
+- Determine location of important files in the file system:
+  #+BEGIN_EXAMPLE
+  SELECT name, setting
+  FROM pg_settings
+  WHERE category = 'File Locations';
+  #+END_EXAMPLE
+- Show information about database roles; from the pgsql documentation
+  on =rolpassword=: password (possibly encrypted); null if none.
+  If the password is encrypted, begin with =md5=
+  followed by a 32-character hexadecimal MD5 hash.
+  #+BEGIN_EXAMPLE
+  SELECT *
+  FROM pg_authid;
+  #+END_EXAMPLE
+** Setting up PGSQL for =galilee= User
+
+Ran the following commands as normal user (=tnurkkala=)
+- =sudo -u postgres createuser --login --pwprompt galilee=
+  1. =--login= allows login
+  2. =--pwprompt= issues prompt for new user's password
+- =sudo -u postgres createdb --owner=galilee galilee=
+- =sudo systemctl restart postgresql-9.6=
+- Added these lines to the =pg_hba.conf= file:
+  #+BEGIN_EXAMPLE
+  # TYPE  DATABASE    USER       ADDRESS      METHOD
+  # [nurk 2017-02-16]
+  local   galilee     galilee                 md5
+  host    galilee     galilee    localhost    md5
+  #+END_EXAMPLE
+  Note that these /must/ go before the default entries in =pg_hba=;
+  permissions are processed /in file order/.
+  The first line allows the =galilee= user to connect from the =galilee= host
+  using password authentication.
+  The second line allows a network connection using ssh port forwarding
+  with a password. The forwarded port shows up at address =localhost=.
+  Here are the relevant lines from =~/.ssh/config=:
+  #+BEGIN_EXAMPLE
+  Host galilee-proxy
+    HostName        galilee.cse.taylor.edu
+    ProxyJump       john
+    LocalForward    5434    localhost:5432
+  #+END_EXAMPLE
+  Note that the local port is different from the standard PGSQL port
+  because I'm probably also running PGSQL on my local machine.
+- =psql --username=galilee --password=
+  1. Can be run as any user (e.g., =tnurkkala=)
+* Network Information
+| Host                   | IP               |                   |
+|------------------------+------------------+-------------------|
+| john.cse.taylor.edu    | 10.120.1.24/16   | 192.195.249.24/24 |
+| galilee.cse.taylor.edu | 10.120.160.40/16 | 192.195.249.57/24 |
+- When I connect from my Mac at home, I show up on =john= as =68.45.120.149=,
+  which must be my IP address assigned by Comcast
+- When I =ssh= to =john= and /then/ to =galilee=,
+  my IP addres (reported by =who=) is =10.120.1.24= (IP address for =john=).
+  Same deal with =ssh= via =galilee-proxy=, which uses =ProxyJump= through =john=.
