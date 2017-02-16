@@ -1,7 +1,7 @@
 'use strict';
 
 const Boom = require('boom');
-const Joi = require('Joi');
+const Joi = require('joi');
 const _ = require('lodash');
 const moment = require('moment');
 const Promise = require('bluebird');

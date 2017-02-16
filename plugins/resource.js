@@ -5,7 +5,7 @@ const fs = require('fs');
 const uuid = require('uuid');
 
 const Boom = require('boom');
-const Joi = require('Joi');
+const Joi = require('joi');
 
 const Resource = require('../models/Resource');
 const ResourceType = require('../models/ResourceType');

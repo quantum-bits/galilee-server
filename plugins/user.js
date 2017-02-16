@@ -1,7 +1,7 @@
 'use strict';
 
 const Boom = require('boom');
-const Joi = require('Joi');
+const Joi = require('joi');
 
 const User = require('../models/User');
 const Config = require('../models/Config');
