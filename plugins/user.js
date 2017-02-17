@@ -111,8 +111,9 @@ exports.register = function (server, options, next) {
             method: 'GET',
             path: '/users/permissions',
             config: {
-                description: 'Fetch all permission types',
-                auth: 'jwt'
+                description: 'Fetch all permission types'
+                // TODO: Re-enable jwt for this endpoint.
+                //auth: 'jwt'
             },
             handler: function (request, reply) {
                 Permission.query()
