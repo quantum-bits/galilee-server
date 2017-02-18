@@ -39,7 +39,9 @@ exports.register = function (server, options, next) {
                 ReadingDay.query()
                     .where('date', request.pre.normalizeDate)
                     .first()
-                    .eager('[readings.applications.[practice,steps.resources],questions]')
+                    .eager('[readings(orderBySeq).applications(orderBySeq).[practice,steps(orderBySeq).resources],questions]', {
+                        orderBySeq: qBuilder => qBuilder.orderBy('seq')
+                    })
                     .omit(['readingDayId', 'readingId', 'practiceId'])
                     .then(readingDay => {
                         if (!readingDay) {
