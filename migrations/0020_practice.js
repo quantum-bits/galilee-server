@@ -7,6 +7,7 @@ exports.up = function (knex, Promise) {
             table.string('title').notNullable();
             table.text('summary').notNullable();
             table.text('description').notNullable();
+            table.string('infoUrl');
         }),
 
         knex.schema.createTableIfNotExists('application', table => {
