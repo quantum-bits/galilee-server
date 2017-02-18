@@ -57,34 +57,33 @@ class AuthenticationService {
     }
 }
 
-let authService = null;
-
-function getTranslations() {
-    return authService.authenticate().then(token =>
-        Request.get('https://api.biblegateway.com/3/bible')
-            .query({access_token: token})
-            .then(resp => resp.body.data));
-}
-
-function getVersionInfo(version) {
-    return authService.authenticate().then(token =>
-        Request.get(`https://api.biblegateway.com/3/bible/${version}`)
-            .query({access_token: token})
-            .then(resp => resp.body.data[0]));
-}
-
-function getPassage(version, osis) {
-    return authService.authenticate().then(token =>
-        Request.get(`https://api.biblegateway.com/3/bible/${osis}/${version}`)
-            .query({access_token: token})
-            .then(resp => resp.body.data[0]));
-}
-
 exports.register = function (server, options, next) {
 
-    authService = new AuthenticationService(
-        server.settings.app.config.get('bg:username'),
-        server.settings.app.config.get('bg:password'));
+    const authService =
+        new AuthenticationService(options.username, options.password);
+
+    function getTranslations() {
+        return authService.authenticate().then(token =>
+            Request.get('https://api.biblegateway.com/3/bible')
+                .query({access_token: token})
+                .then(resp => resp.body.data));
+    }
+
+    function getVersionInfo(version) {
+        return authService.authenticate().then(token =>
+            Request.get(`https://api.biblegateway.com/3/bible/${version}`)
+                .query({access_token: token})
+                .then(resp => resp.body.data[0]));
+    }
+
+    function getPassage(version, osis) {
+        return authService.authenticate().then(token =>
+            Request.get(`https://api.biblegateway.com/3/bible/${osis}/${version}`)
+                .query({access_token: token})
+                .then(resp => resp.body.data[0]));
+    }
+
+    server.expose('getPassage', getPassage);
 
     server.method('getTranslations', function (next) {
         getTranslations()

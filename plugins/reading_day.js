@@ -40,26 +40,6 @@ exports.register = function (server, options, next) {
             .catch(err => next(err, null));
     });
 
-    function getReadingPassage(reading, version) {
-        let content = null;
-        reading.passages.forEach(passage => {
-            if (passage.version.id === version.id) {
-                content = passage.content;
-            }
-        });
-
-        if (!content) {
-            getPassage(version.code, reading.osisRef).then(passage => {
-                Passage.query()
-                    .insertAndFetch({
-                        readingId: reading.id,
-                        versionId: version.id,
-                        content: passage.passages[0].content
-                    })
-            })
-        }
-    }
-
     server.route([
         {
             method: 'GET',
@@ -83,43 +63,10 @@ exports.register = function (server, options, next) {
                         if (!readingDay) {
                             reply(Boom.notFound(`No reading data for '${request.pre.date}'`));
                         } else {
-
-                            readingDay.readings.map(reading => {
-                                new Promise((resolve, reject) => {
-                                    const passage = reading.getPassage(request.pre.version.id);
-                                    if (passage) {
-                                        reading.text = passage;
-                                        resolve(true);
-                                    } else {
-                                        server.methods.getPassage(request.pre.version.code, reading.osisRef, (err, result) => {
-                                            if (err) {
-                                                reading.text = `Bible Gateway error '${err}'`;
-                                            } else {
-                                                reading.text = result.data[0].passages[0].content;
-                                            }
-                                            return resolve(true);
-                                        });
-                                    }
-
-                                })
-                            });
-
-
                             // Fetch scripture text from Bible Gateway.
-                            let promises = [];
-                            readingDay.readings.map(reading => {
-                                let p = new Promise((resolve, reject) => {
-                                    server.methods.getPassage(request.pre.version.code, reading.osisRef, (err, result) => {
-                                        if (err) {
-                                            reading.text = `Bible Gateway error '${err}'`;
-                                        } else {
-                                            reading.text = result.data[0].passages[0].content;
-                                        }
-                                        return resolve(result);
-                                    })
-                                });
-                                promises.push(p);
-                            });
+                            let promises = readingDay.readings.map(reading =>
+                                server.plugins.bible_gateway.getPassage(request.pre.version.code, reading.osisRef)
+                                    .then(passage => reading.text = passage.passages[0].content));
 
                             // Wait for Bible Gateway to complete and respond to client.
                             Promise.all(promises).then(res => {
