@@ -11,8 +11,8 @@
     "watch": "GALILEE=development nodemon index.js",
     "test": "lab --verbose --transform node_modules/lab-babel --globals __core-js_shared__",
     "test-cov": "lab --transform node_modules/lab-babel --globals __core-js_shared__ --reporter html --output foo-coverage.html",
-    "knex:migrate": "knex migrate:latest",
-    "knex:seed": "knex seed:run"
+    "knex:migrate": "GALILEE=development knex migrate:latest",
+    "knex:seed": "GALILEE=development knex seed:run"
   },
   "repository": {
     "type": "git",
@@ -49,7 +49,7 @@
     "pm2": "^2.4.0",
     "random-js": "^1.0.8",
     "rx": "^4.1.0",
-    "superagent": "^3.4.1",
+    "superagent": "^3.4.4",
     "tv": "^6.1.0",
     "uuid": "^3.0.1",
     "vision": "^4.1.1"

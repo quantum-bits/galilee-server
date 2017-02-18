@@ -36,12 +36,6 @@ exports.up = function (knex, Promise) {
             table.primary(['groupId', 'userId']);
         }),
 
-        knex.schema.createTableIfNotExists('version', table => {
-            table.increments('id');
-            table.string('code').notNullable();
-            table.string('title').notNullable();
-        }),
-
         knex.schema.createTableIfNotExists('permission', table => {
             table.string('id').primary();
             table.string('title').notNullable();

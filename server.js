@@ -62,7 +62,13 @@ module.exports = function (callback) {
             {register: require('./plugins/authentication')},
 
             {register: require('./plugins/admin')},
-            {register: require('./plugins/bible_gateway')},
+            {
+                register: require('./plugins/bible_gateway'),
+                options: {
+                    username: server.settings.app.config.get('bg:username'),
+                    password: server.settings.app.config.get('bg:password')
+                }
+            },
             {register: require('./plugins/forum')},
             {register: require('./plugins/practice')},
             {register: require('./plugins/journal')},

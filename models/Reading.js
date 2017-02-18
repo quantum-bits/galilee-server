@@ -17,6 +17,14 @@ class Reading extends db.Model {
                     to: 'readingDay.id'
                 }
             },
+            passages: {
+                relation: db.Model.HasManyRelation,
+                modelClass: __dirname + '/Passage',
+                join: {
+                    from: 'reading.id',
+                    to: 'passage.readingId'
+                }
+            },
             applications: {
                 relation: db.Model.HasManyRelation,
                 modelClass: __dirname + '/Application',
@@ -46,7 +54,7 @@ class Reading extends db.Model {
                 }
             }
         }
-    }
+    };
 
 }
 
