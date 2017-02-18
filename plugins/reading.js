@@ -84,6 +84,7 @@ exports.register = function (server, options, next) {
             },
             handler: function (request, reply) {
                 Reading.query()
+                    .eager('passages.version')
                     .then(readings => reply(readings))
                     .catch(err => reply(Boom.badImplementation(err)));
             }

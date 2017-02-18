@@ -3,6 +3,8 @@
 const Boom = require('boom');
 const Joi = require('joi');
 
+const debug = require('debug')('readingday');
+
 const Config = require('../models/Config');
 const Passage = require('../models/Passage');
 const Question = require('../models/Question');
@@ -40,6 +42,41 @@ exports.register = function (server, options, next) {
             .catch(err => next(err, null));
     });
 
+    // Get the passage for a reading from the given version. If the passage is already in the database,
+    // return it directly. Otherwise, fetch it from BG and cache it in the database for a future
+    // fetch. In either case, return just the content.
+    function getPassageContent(reading, version) {
+        return Reading.query()
+            .findById(reading.id)
+            .eager('passages.version')
+            .then(reading => {
+                let passage = reading.passages.find(passage => {
+                    return passage.version.id === version.id;
+                });
+
+                if (passage) {
+                    debug("ALREADY HAVE %o", version.code);
+                    return passage.content;
+                }
+
+                // Don't have this version of the passage; go fetch it.
+                debug("FETCH PASSAGE %o FOR %o", reading.osisRef, version.code);
+                return server.plugins.bible_gateway.getPassage(version.code, reading.osisRef)
+                    .then(passage => {
+                        // Cache the passage in the database.
+                        const content = passage.passages[0].content;
+                        return Passage.query().insert({
+                            readingId: reading.id,
+                            versionId: version.id,
+                            content: content
+                        }).then(() => {
+                            debug("SAVED PASSAGE");
+                            return content;
+                        });
+                    });
+            }).catch(err => new Error(err));
+    }
+
     server.route([
         {
             method: 'GET',
@@ -63,15 +100,14 @@ exports.register = function (server, options, next) {
                         if (!readingDay) {
                             reply(Boom.notFound(`No reading data for '${request.pre.date}'`));
                         } else {
-                            // Fetch scripture text from Bible Gateway.
-                            let promises = readingDay.readings.map(reading =>
-                                server.plugins.bible_gateway.getPassage(request.pre.version.code, reading.osisRef)
-                                    .then(passage => reading.text = passage.passages[0].content));
-
-                            // Wait for Bible Gateway to complete and respond to client.
-                            Promise.all(promises).then(res => {
+                            // Fetch all passages, either from DB or BG.
+                            Promise.all(readingDay.readings.map(reading =>
+                                getPassageContent(reading, request.pre.version).then(content => {
+                                    reading.text = content;
+                                    return reading;
+                                }))).then(readings => {
                                 reply(readingDay);
-                            });
+                            })
                         }
                     })
                     .catch(err => reply(Boom.badImplementation(err)));
