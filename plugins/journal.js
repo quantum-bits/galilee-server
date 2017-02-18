@@ -216,22 +216,24 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                let insertPromise = JournalEntry.query().insert({
+                // TODO: This is unlikely to be the best way to pass along the new entry,
+                // but the .relate query below doesn't return the entry, just the IDs
+                // of the newly inserted relationship.
+                let new_entry = null;
+                
+                JournalEntry.query().insert({
                     userId: request.auth.credentials.id,
                     title: request.payload.title,
                     entry: request.payload.entry
-                });
-
-                let relatePromise = insertPromise.then(entry => {
+                }).then(entry => {
+                    new_entry = entry;
                     return entry.$relatedQuery('tags')
-                        .relate(request.pre.allTags.map(tag => tag.id))
-                });
-
-                Promise.join(insertPromise, relatePromise, (entry, relate) => {
-                    return JournalEntry.query()
-                        .findById(entry.id)
-                        .eager('tags');
-                }).then(entry => reply(entry))
+                        .relate(request.pre.allTags.map(tag => tag.id));
+                }).then(() =>
+                    JournalEntry.query()
+                        .findById(new_entry.id)
+                        .eager('tags')
+                ).then(entry => reply(entry))
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         },
