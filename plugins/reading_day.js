@@ -3,12 +3,12 @@
 const Boom = require('boom');
 const Joi = require('joi');
 
-const moment = require('moment');
-const _ = require('lodash');
-
+const Config = require('../models/Config');
+const Passage = require('../models/Passage');
+const Question = require('../models/Question');
 const Reading = require('../models/Reading');
 const ReadingDay = require('../models/ReadingDay');
-const Question = require('../models/Question');
+const Version = require('../models/Version');
 
 exports.register = function (server, options, next) {
 
@@ -25,31 +25,91 @@ exports.register = function (server, options, next) {
             .first()
             .then(readingDay => next(null, readingDay))
             .catch(err => next(err, null));
-    })
+    });
+
+    server.method('getVersion', function (code, next) {
+        new Promise((resolve, reject) => {
+            if (code) {
+                resolve(code);
+            } else {
+                Config.query().findById('default-version').then(config => resolve(config.value));
+            }
+        }).then(code => {
+            return Version.query().where('code', code).first();
+        }).then(version => next(null, version))
+            .catch(err => next(err, null));
+    });
+
+    function getReadingPassage(reading, version) {
+        let content = null;
+        reading.passages.forEach(passage => {
+            if (passage.version.id === version.id) {
+                content = passage.content;
+            }
+        });
+
+        if (!content) {
+            getPassage(version.code, reading.osisRef).then(passage => {
+                Passage.query()
+                    .insertAndFetch({
+                        readingId: reading.id,
+                        versionId: version.id,
+                        content: passage.passages[0].content
+                    })
+            })
+        }
+    }
 
     server.route([
         {
             method: 'GET',
-            path: '/daily/{date}',
+            path: '/daily/{date}/{version?}',
             config: {
                 description: "Get readings for given date (or 'today')",
-                pre: ['normalizeDate(params.date)']
+                pre: [
+                    {assign: 'date', method: 'normalizeDate(params.date)'},
+                    {assign: 'version', method: 'getVersion(params.version)'}
+                ]
             },
             handler: function (request, reply) {
+                // console.log("DATE", request.pre.date);
+                // console.log("VERSION", request.pre.version);
                 ReadingDay.query()
-                    .where('date', request.pre.normalizeDate)
+                    .where('date', request.pre.date)
                     .first()
                     .eager('[readings.applications.[practice,steps.resources],questions]')
                     .omit(['readingDayId', 'readingId', 'practiceId'])
                     .then(readingDay => {
                         if (!readingDay) {
-                            reply(Boom.notFound(`No reading data for '${request.pre.normalizeDate}'`));
+                            reply(Boom.notFound(`No reading data for '${request.pre.date}'`));
                         } else {
+
+                            readingDay.readings.map(reading => {
+                                new Promise((resolve, reject) => {
+                                    const passage = reading.getPassage(request.pre.version.id);
+                                    if (passage) {
+                                        reading.text = passage;
+                                        resolve(true);
+                                    } else {
+                                        server.methods.getPassage(request.pre.version.code, reading.osisRef, (err, result) => {
+                                            if (err) {
+                                                reading.text = `Bible Gateway error '${err}'`;
+                                            } else {
+                                                reading.text = result.data[0].passages[0].content;
+                                            }
+                                            return resolve(true);
+                                        });
+                                    }
+
+                                })
+                            });
+
+
                             // Fetch scripture text from Bible Gateway.
                             let promises = [];
                             readingDay.readings.map(reading => {
                                 let p = new Promise((resolve, reject) => {
-                                    server.methods.getPassage('NKJV', reading.osisRef, (err, result) => {
+                                    server.methods.getPassage(request.pre.version.code, reading.osisRef, (err, result) => {
                                         if (err) {
                                             reading.text = `Bible Gateway error '${err}'`;
                                         } else {
@@ -78,7 +138,7 @@ exports.register = function (server, options, next) {
                 description: 'Create reading day',
                 auth: {
                     strategy: 'jwt',
-                    access: { scope: 'admin' }
+                    access: {scope: 'admin'}
                 },
                 validate: {
                     payload: {
@@ -87,7 +147,7 @@ exports.register = function (server, options, next) {
                     }
                 },
                 pre: [
-                    {assign:'readingDay', method: 'getReadingDayByDate(payload.date)'}
+                    {assign: 'readingDay', method: 'getReadingDayByDate(payload.date)'}
                 ]
             },
             handler: function (request, reply) {
@@ -113,7 +173,7 @@ exports.register = function (server, options, next) {
                 description: 'Get all reading days',
                 auth: {
                     strategy: 'jwt',
-                    access: { scope: 'admin' }
+                    access: {scope: 'admin'}
                 },
             },
             handler: function (request, reply) {
@@ -130,7 +190,7 @@ exports.register = function (server, options, next) {
                 description: 'Get a reading day',
                 auth: {
                     strategy: 'jwt',
-                    access: { scope: 'admin' }
+                    access: {scope: 'admin'}
                 },
                 validate: {
                     params: {
@@ -138,7 +198,7 @@ exports.register = function (server, options, next) {
                     }
                 },
                 pre: [
-                    { assign: 'readingDay', method: 'getReadingDayById(params.id)' }
+                    {assign: 'readingDay', method: 'getReadingDayById(params.id)'}
                 ]
             },
             handler: function (request, reply) {
@@ -157,7 +217,7 @@ exports.register = function (server, options, next) {
                 description: 'Update reading day',
                 auth: {
                     strategy: 'jwt',
-                    access: { scope: 'admin' }
+                    access: {scope: 'admin'}
                 },
                 validate: {
                     params: {
@@ -169,7 +229,7 @@ exports.register = function (server, options, next) {
                     }
                 },
                 pre: [
-                    {assign:'readingDay', method: 'getReadingDayById(params.id)'}
+                    {assign: 'readingDay', method: 'getReadingDayById(params.id)'}
                 ]
             },
             handler: function (request, reply) {
@@ -191,7 +251,7 @@ exports.register = function (server, options, next) {
                 description: 'Delete a reading day',
                 auth: {
                     strategy: 'jwt',
-                    access: { scope: 'admin' }
+                    access: {scope: 'admin'}
                 },
                 validate: {
                     params: {
@@ -199,7 +259,7 @@ exports.register = function (server, options, next) {
                     }
                 },
                 pre: [
-                    { assign: 'readingDay', method: 'getReadingDayById(params.id)' }
+                    {assign: 'readingDay', method: 'getReadingDayById(params.id)'}
                 ]
             },
             handler: function (request, reply) {

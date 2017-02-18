@@ -16,7 +16,19 @@ exports.up = function (knex, Promise) {
             table.integer('seq').notNullable();
             table.string('stdRef').notNullable();
             table.string('osisRef').notNullable();
-            table.text('passage');
+        }),
+
+        knex.schema.createTableIfNotExists('version', table => {
+            table.increments('id');
+            table.string('code').notNullable();
+            table.string('title').notNullable();
+        }),
+
+        knex.schema.createTableIfNotExists('passage', table => {
+            table.increments('id');
+            table.integer('readingId').notNullable().references('reading.id').onDelete('CASCADE');
+            table.integer('versionId').notNullable().references('version.id').onDelete('CASCADE');
+            table.text('content').notNullable();
         }),
 
         knex.schema.createTableIfNotExists('question', table => {

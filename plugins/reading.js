@@ -20,9 +20,10 @@ exports.register = function (server, options, next) {
             .catch(err => next(err, null));
     });
 
-    server.method('getReading', function (readingId, next) {
+    server.method('getReading', function (id, next) {
         Reading.query()
-            .findById(readingId)
+            .findById(id)
+            .eager('passages.version')
             .then(reading => next(null, reading))
             .catch(err => next(err, null));
     });

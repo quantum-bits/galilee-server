@@ -16,6 +16,7 @@ exports.seed = function (knex, Promise) {
         knex('stepResource').del(),
         knex('userPermission').del(),
         knex('post').del(),
+        knex('passage').del(),
 
     ]).then(() => Promise.all([
 
