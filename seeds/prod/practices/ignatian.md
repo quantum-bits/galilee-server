@@ -1,4 +1,4 @@
-# The Ignatian Method
+{ "title": "The Ignatian Method" }
 
 The Ignatian method of Scripture engagement gives us the opportunity to engage
 our imaginations by placing ourselves in the stories of Scripture in an attempt

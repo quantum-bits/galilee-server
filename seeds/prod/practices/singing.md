@@ -1,4 +1,4 @@
-# Singing Scripture
+{ "title": "Singing Scripture" }
 
 Singing the truths in the Bible enhances our experience with God through his
 Word both emotionally and cognitively. Excellent music stirs our hearts,

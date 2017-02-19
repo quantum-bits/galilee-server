@@ -1,4 +1,4 @@
-# Manuscripting Bible Study
+{ "title": "Manuscripting Bible Study" }
 
 The Manuscripting Bible Study practice starts with the
 "marking" of a passage in a small group setting.

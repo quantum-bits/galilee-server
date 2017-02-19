@@ -1,4 +1,4 @@
-# Praying Scripture
+{ "title": "Praying Scripture" }
 
 Engaging the Bible and praying are the primary methods for developing a
 deepening relationship with God. While many tend to think of prayer and Bible

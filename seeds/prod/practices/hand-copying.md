@@ -1,4 +1,4 @@
-# Hand Copying Scripture
+{ "title": "Hand Copying Scripture" }
 
 Hand copying Scripture is simply writing out word-for-word passages of
 Scripture by hand.  Writing the Bible out by hand offers us the unique

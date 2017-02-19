@@ -1,4 +1,4 @@
-# Small Group
+{ "title": "Small Group" }
 
 As members of the Body of Christ, our spiritual growth is dependent on
 connecting with other parts of the Body – there should be no "solo"
