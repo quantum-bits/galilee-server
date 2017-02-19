@@ -1,4 +1,4 @@
-{ "title": "Storying Scripture" }
+{ "title": "Storying Scripture", "id": 13 }
 
 In storying, a teacher tells a Bible story by memory to a group of people. The
 listeners then retell the story together back to the teacher as best as they

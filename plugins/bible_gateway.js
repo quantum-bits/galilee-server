@@ -103,8 +103,8 @@ exports.register = function (server, options, next) {
             .catch(err => next(err, null));
     });
 
-    server.route(
-        [
+    if (false) {
+        server.route([
             {
                 method: 'GET',
                 path: '/bg/translations',
@@ -152,6 +152,7 @@ exports.register = function (server, options, next) {
                 }
             }
         ]);
+    }
 
     next();
 };

@@ -1,4 +1,4 @@
-{ "title": "Journaling Scripture" }
+{ "title": "Journaling Scripture", "id": 4 }
 
 A Scripture journal is a conversation with God.
 It is meant to be a place where we can safely record and reflect

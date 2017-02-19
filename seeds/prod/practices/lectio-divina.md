@@ -1,4 +1,4 @@
-{ "title": "Lectio Divina" }
+{ "title": "Lectio Divina", "id": 5 }
 
 Lectio divina, Latin for "sacred reading," "divine reading," or "holy reading," is a spiritual practice that has been in use for over a thousand years.  Lectio divina is an intimate way of communicating with the Lord. All too often in prayer and worship, we talk to God but don't give him a chance to communicate back to us. Lectio divina employs God's own words to have a personal conversation with him.  The four traditional stages of lectio divina are lectio (reading), meditatio (meditation), oratio (prayer), and contemplatio (contemplation). The steps were created simply to provide structure and guidance for people who wish to learn how to perform this practice. Lectio divina is best practiced with passages that you have at least some familiarity with.  Lectio divina is not intended to introduce you to something new in the Bible; its purpose is to allow you to experience and feed on what you know.
 

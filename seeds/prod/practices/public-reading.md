@@ -1,4 +1,4 @@
-{ "title": "Public Reading of Scripture" }
+{ "title": "Public Reading of Scripture", "id": 9 }
 
 The Bible was meant to be read, but it was also meant to be heard. To hear
 someone read the Word is a different experience than to simply read silently to

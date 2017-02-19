@@ -1,4 +1,4 @@
-{ "title": "Memorizing Scripture" }
+{ "title": "Memorizing Scripture", "id": 7 }
 
 Memorizing Scripture is one of the most effective means of Scripture
 engagement. Because Scripture engagement is about reflecting on the Bible and

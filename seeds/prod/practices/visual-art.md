@@ -1,4 +1,4 @@
-{ "title": "Scripture Engagement Through Visual Art" }
+{ "title": "Scripture Engagement Through Visual Art", "id": 14 }
 
 Images connect with our emotions and can convey deep truths. Images can be
 powerful triggers to help us remember the stories and connect with the truths

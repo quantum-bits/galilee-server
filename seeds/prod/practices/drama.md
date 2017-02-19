@@ -1,4 +1,4 @@
-{ "title": "Dramatizing Scripture" }
+{ "title": "Dramatizing Scripture", "id": 1 }
 
 So often there is something memorable and moving about watching a story unfold
 that is being dramatized before us. With a bit of creativity, Scripture stories

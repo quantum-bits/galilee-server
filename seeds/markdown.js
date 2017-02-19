@@ -1,16 +1,7 @@
 'use strict';
 
-let fs = require('fs');
-
-const Promise = require('bluebird');
-Promise.promisifyAll(fs);
-
 const marked = require('marked');
 const debug = require('debug')('seed');
-
-const Practice = require('../../models/Practice');
-
-const dirName = __dirname + '/practices';
 
 // Is 'line' blank?
 function isBlankLine(line) {
@@ -72,27 +63,29 @@ function splitContent(content) {
 
 // Convert markdown to HTML.
 function convertToHtml(lines) {
-    let md = marked(lines.join(' ')).trim();
+    // Join lines with newline, so markdown can find paragraphs.
+    let md = marked(lines.join('\n')).trim();
+
+    // Wrap in a class for styling.
     let html = `<div class="galilee">${md}</div>`;
     return html;
 }
 
-exports.seed = function (knex, Promise) {
-    return fs.readdirAsync(dirName).then(fileNames => {
-        debug("FILES %O", fileNames);
+// Do all the conversion.
+function convertAll(content) {
+    let lines = splitContent(content);
+    let metaData = shiftMetaData(lines);
+    let html = convertToHtml(lines);
 
-        return Promise.all(fileNames.map(fileName =>
-            fs.readFileAsync(`${dirName}/${fileName}`, 'utf8').then(content => {
-                let lines = splitContent(content);
-                let metaData = shiftMetaData(lines);
-                debug("META %O\nLINES %O", metaData, lines);
+    return {
+        metaData: metaData,
+        html: html
+    };
+}
 
-                return Practice.query().insert({
-                    title: metaData.title,
-                    summary: convertToHtml(lines),
-                    description: ''
-                });
-            })
-        ))
-    }).catch(err => new Error(err));
-};
+exports.convertAll = convertAll;
+
+exports.convertHtml = function(content) {
+    const conversion = convertAll(content);
+    return conversion.html;
+}
