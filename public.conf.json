@@ -38,9 +38,13 @@
   },
   "production": {
     "db": {
-      "client": "postgresql",
+      "client": "pg",
       "connection": {
-        "database": "galilee"
+        "database": "galilee",
+        "charset": "utf8"
+      },
+      "seeds": {
+        "directory": "./seeds/prod"
       },
       "pool": {
         "min": 2,

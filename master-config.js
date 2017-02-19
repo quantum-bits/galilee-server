@@ -11,6 +11,7 @@ nconf.file('secrets', './secret.conf.json');
 
 // Make sure we have a GALILEE environment variable.
 const envName = nconf.get('GALILEE');
+debug("ENV NAME %o", envName);
 if (!envName) {
     throw Error("No GALILEE environment variable");
 }
@@ -18,12 +19,11 @@ if (!envName) {
 // Pull values from the selected environment into the top level
 const selectedEnv = nconf.get(envName);
 if (!selectedEnv) {
-    throw Error(`No Galilee environment '${selectedEnv}'`);
+    throw Error(`No Galilee environment '${envName}'`);
 }
 
 _.forEach(selectedEnv, (v, k) => nconf.set(k, v));
 
-debug("NCONF %O", nconf);
 debug("CONFIG %O", nconf.get());
 
 module.exports = nconf;

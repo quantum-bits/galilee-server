@@ -12,7 +12,9 @@
     "test": "lab --verbose --transform node_modules/lab-babel --globals __core-js_shared__",
     "test-cov": "lab --transform node_modules/lab-babel --globals __core-js_shared__ --reporter html --output foo-coverage.html",
     "knex:migrate": "GALILEE=development knex migrate:latest",
-    "knex:seed": "GALILEE=development knex seed:run"
+    "knex:seed": "GALILEE=development knex seed:run",
+    "knex:migrate:prod": "GALILEE=production knex --env production migrate:latest",
+    "knex:seed:prod": "GALILEE=production knex --env production seed:run"
   },
   "repository": {
     "type": "git",
@@ -41,6 +43,7 @@
     "knex": "^0.12.6",
     "lodash": "^4.17.4",
     "lout": "^9.2.0",
+    "marked": "^0.3.6",
     "moment": "^2.17.1",
     "moment-range": "^3.0.2",
     "nconf": "^0.8.4",

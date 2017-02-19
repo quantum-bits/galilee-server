@@ -10,7 +10,7 @@ exports.register = function (server, options, next) {
     server.method('readPractice', function (id, next) {
         Practice.query()
             .findById(id)
-            .then(result => next(null, result))
+            .then(practice => next(null, practice))
             .catch(err => next(err, null));
     });
 
