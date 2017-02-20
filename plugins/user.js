@@ -143,7 +143,7 @@ exports.register = function (server, options, next) {
                 if (request.pre.user) {
                     reply(Boom.conflict('E-mail address already in use.'));
                 } else {
-                    Config.defaultVersion()
+                    Config.query().findById('default-version')
                         .then(version => User.query()
                             .insertAndFetch({
                                 email: request.payload.email,
