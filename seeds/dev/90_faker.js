@@ -273,7 +273,7 @@ function randomApplications() {
 }
 
 function randomReadings() {
-    return _.times(random.integer(2, 3), n => {
+    return _.times(random.integer(0, 3), n => {
         let ref = randomReference();
         return {
             seq: n + 1,

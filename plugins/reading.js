@@ -7,16 +7,27 @@ const moment = require('moment');
 const _ = require('lodash');
 
 const Reading = require('../models/Reading');
+const ReadingDay = require('../models/ReadingDay');
 
 exports.register = function (server, options, next) {
 
-    // Get statistics on all the user's journal entries.
+    // Map array [ { date: 'YYYY-MM-DD', count: n }, ... ] to object { 'YYYY-MM-DD': n, ... }
+    function arrayOfObjToObj(arr) {
+        return _.reduce(arr, (obj, val) => {
+            let date_key = moment(val.date).format('YYYY-MM-DD');
+            obj[date_key] = +val.count;
+            return obj
+        }, {})
+    }
+
     server.method('getReadingStats', function (next) {
-        Reading.query()
-            .join('readingDay', 'readingDayId', 'readingDay.id')
+        ReadingDay.query()
             .select('readingDay.date')
-            .map(result => moment(result.date).format('YYYY-MM-DD'))
-            .then(dates => next(null, _.countBy(dates)))
+            .count('reading.id')
+            .leftOuterJoin('reading', 'reading.readingDayId', 'readingDay.id')
+            .groupBy('readingDay.id')
+            .orderBy('readingDay.date')
+            .then(result => next(null, arrayOfObjToObj(result)))
             .catch(err => next(err, null));
     });
 
@@ -37,7 +48,7 @@ exports.register = function (server, options, next) {
                 description: 'New rading',
                 auth: {
                     strategy: 'jwt',
-                    access: { scope: 'admin' }
+                    access: {scope: 'admin'}
                 },
                 validate: {
                     payload: {
@@ -79,7 +90,7 @@ exports.register = function (server, options, next) {
                 description: 'Get all readings',
                 auth: {
                     strategy: 'jwt',
-                    access: { scope: 'admin' }
+                    access: {scope: 'admin'}
                 }
             },
             handler: function (request, reply) {
@@ -97,7 +108,7 @@ exports.register = function (server, options, next) {
                 description: 'Get a single reading',
                 auth: {
                     strategy: 'jwt',
-                    access: { scope: 'admin' }
+                    access: {scope: 'admin'}
                 },
                 validate: {
                     params: {
@@ -105,7 +116,7 @@ exports.register = function (server, options, next) {
                     }
                 },
                 pre: [
-                    {assign:'reading', method:'getReading(params.id)'}
+                    {assign: 'reading', method: 'getReading(params.id)'}
                 ]
             },
             handler: function (request, reply) {
@@ -140,7 +151,7 @@ exports.register = function (server, options, next) {
                     {assign: 'reading', method: 'getReading(params.id)'}
                 ]
             },
-            handler: function(request, reply) {
+            handler: function (request, reply) {
                 if (!request.pre.reading) {
                     reply(Boom.notFound(`No reading with ID ${request.params.id}`));
                 } else {
@@ -159,7 +170,7 @@ exports.register = function (server, options, next) {
                 description: 'Delete a reading',
                 auth: {
                     strategy: 'jwt',
-                    access: { scope: 'admin' }
+                    access: {scope: 'admin'}
                 },
                 validate: {
                     params: {

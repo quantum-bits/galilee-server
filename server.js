@@ -11,6 +11,10 @@ module.exports = function (callback) {
     const server = new Hapi.Server({
         app: {
             config: require('./master-config')
+        },
+        debug: {
+            request: ['error'],
+            log: ['error']
         }
     });
 
