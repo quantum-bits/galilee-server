@@ -11,6 +11,10 @@ class Config extends db.Model {
     static get idColumn() {
         return 'key';
     }
+
+    static getDefaultVersion() {
+        return Config.query().findById('default-version');
+    }
 }
 
 module.exports = Config;

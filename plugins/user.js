@@ -135,7 +135,9 @@ exports.register = function (server, options, next) {
                         email: Joi.string().email().required(),
                         password: Joi.string().min(6).required(),
                         firstName: Joi.string().required(),
-                        lastName: Joi.string().required()
+                        lastName: Joi.string().required(),
+                        // TODO: This should become a required field in the payload.
+                        preferredVersionId: Joi.number().integer()
                     }
                 }
             },
@@ -143,8 +145,8 @@ exports.register = function (server, options, next) {
                 if (request.pre.user) {
                     reply(Boom.conflict('E-mail address already in use.'));
                 } else {
-                    Config.query().findById('default-version')
-                        .then(version => User.query()
+                    Config.getDefaultVersion().then(version =>
+                        User.query()
                             .insertAndFetch({
                                 email: request.payload.email,
                                 password: request.payload.password,

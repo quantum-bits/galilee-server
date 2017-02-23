@@ -29,12 +29,26 @@ exports.register = function (server, options, next) {
             .catch(err => next(err, null));
     });
 
+    function getVersion(versionCode, user) {
+        new Promise((resolve, reject) => {
+            if (code) {
+                Version.query().where('code', code).first();
+            } else if (user) {
+                Version.query().findById(user.preferredVersionId)
+            }
+
+        })
+    }
+
+    // Return a promise that resolves to the full Version record for the
+    // version 'code'. If 'code' is falsy, retrieve the default version
+    // from the Config object.
     server.method('getVersion', function (code, next) {
         new Promise((resolve, reject) => {
             if (code) {
                 resolve(code);
             } else {
-                Config.query().findById('default-version').then(config => resolve(config.value));
+                Config.getDefaultVersion().then(config => resolve(config.value));
             }
         }).then(code => {
             return Version.query().where('code', code).first();
@@ -83,6 +97,10 @@ exports.register = function (server, options, next) {
             path: '/daily/{date}/{version?}',
             config: {
                 description: "Get readings for given date (or 'today')",
+                auth: {
+                    strategy: 'jwt',
+                    mode: 'optional'    // If credentials present, must be valid.
+                },
                 pre: [
                     {assign: 'date', method: 'normalizeDate(params.date)'},
                     {assign: 'version', method: 'getVersion(params.version)'}

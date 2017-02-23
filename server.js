@@ -78,6 +78,7 @@ module.exports = function (callback) {
             {register: require('./plugins/application')},
             // {register: require('./plugins/resource')},
             {register: require('./plugins/user')},
+            {register: require('./plugins/version')},
 
             {
                 register: require('tv'),        // Documentation
