@@ -4,6 +4,8 @@ const Hapi = require('hapi');
 const Path = require('path');
 const moment = require('moment');
 
+const BG = require('./lib/bg');
+
 const User = require('./models/User');
 
 module.exports = function (callback) {
@@ -56,6 +58,12 @@ module.exports = function (callback) {
         fetchUser({'id': id}, next);
     });
 
+    const bibleService = new BG.BibleService(
+        // Dependency injection!
+        new BG.AuthenticationService(
+            server.settings.app.config.get('bg:username'),
+            server.settings.app.config.get('bg:password')));
+
     server.register(
         [
             {register: require('inert')},       // Static files
@@ -67,18 +75,18 @@ module.exports = function (callback) {
 
             {register: require('./plugins/admin')},
             {
-                register: require('./plugins/bible_gateway'),
-                options: {
-                    username: server.settings.app.config.get('bg:username'),
-                    password: server.settings.app.config.get('bg:password')
-                }
+                register: require('./plugins/bg'),
+                options: {bibleService: bibleService}
             },
             {register: require('./plugins/forum')},
             {register: require('./plugins/practice')},
             {register: require('./plugins/journal')},
             {register: require('./plugins/question')},
             {register: require('./plugins/reading')},
-            {register: require('./plugins/reading_day')},
+            {
+                register: require('./plugins/reading_day'),
+                options: {bibleService: bibleService}
+            },
             {register: require('./plugins/application')},
             // {register: require('./plugins/resource')},
             {register: require('./plugins/user')},

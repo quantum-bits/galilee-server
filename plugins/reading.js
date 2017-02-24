@@ -20,6 +20,8 @@ exports.register = function (server, options, next) {
         }, {})
     }
 
+    // Get the number of readings for each reading day, including reading days
+    // in the database with which no readings have yet been associated.
     server.method('getReadingStats', function (next) {
         ReadingDay.query()
             .select('readingDay.date')

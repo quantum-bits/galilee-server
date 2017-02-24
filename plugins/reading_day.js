@@ -14,6 +14,8 @@ const Version = require('../models/Version');
 
 exports.register = function (server, options, next) {
 
+    const bibleService = options.bibleService;
+
     server.method('getReadingDayById', function (readingDayId, next) {
         ReadingDay.query()
             .findById(readingDayId)
@@ -29,105 +31,73 @@ exports.register = function (server, options, next) {
             .catch(err => next(err, null));
     });
 
-    function getVersion(versionCode, user) {
-        new Promise((resolve, reject) => {
-            if (code) {
-                Version.query().where('code', code).first();
-            } else if (user) {
-                Version.query().findById(user.preferredVersionId)
-            }
-
-        })
-    }
-
-    // Return a promise that resolves to the full Version record for the
-    // version 'code'. If 'code' is falsy, retrieve the default version
-    // from the Config object.
-    server.method('getVersion', function (code, next) {
-        new Promise((resolve, reject) => {
-            if (code) {
-                resolve(code);
-            } else {
-                Config.getDefaultVersion().then(config => resolve(config.value));
-            }
-        }).then(code => {
-            return Version.query().where('code', code).first();
-        }).then(version => next(null, version))
-            .catch(err => next(err, null));
-    });
-
-    // Get the passage for a reading from the given version. If the passage is already in the database,
-    // return it directly. Otherwise, fetch it from BG and cache it in the database for a future
-    // fetch. In either case, return just the content.
-    function getPassageContent(reading, version) {
-        return Reading.query()
-            .findById(reading.id)
-            .eager('passages.version')
-            .then(reading => {
-                let passage = reading.passages.find(passage => {
-                    return passage.version.id === version.id;
-                });
-
-                if (passage) {
-                    debug("ALREADY HAVE %o", version.code);
-                    return passage.content;
-                }
-
-                // Don't have this version of the passage; go fetch it.
-                debug("FETCH PASSAGE %o FOR %o", reading.osisRef, version.code);
-                return server.plugins.bible_gateway.getPassage(version.code, reading.osisRef)
-                    .then(passage => {
-                        // Cache the passage in the database.
-                        const content = passage.passages[0].content;
+    // Resolve a reading's passage from the given version. If the passage is already in the database,
+    // use it directly. Otherwise, fetch it from BG and store it in the database. In either case,
+    // the reading will be updated with the passage content and version.
+    function resolvePassage(reading, version) {
+        debug(`Resolve ${reading.osisRef} from ${version.code}`);
+        return Passage.query()
+            .where('readingId', reading.id)
+            .andWhere('versionId', version.id)
+            .first()
+            .then(result => {
+                if (result) {
+                    debug("Already in DB");
+                    return result.content;
+                } else {
+                    debug("Fetch from BG");
+                    return bibleService.getPassage(version.code, reading.osisRef).then(response => {
+                        const content = response.passages[0].content;
                         return Passage.query().insert({
                             readingId: reading.id,
                             versionId: version.id,
                             content: content
-                        }).then(() => {
-                            debug("SAVED PASSAGE");
-                            return content;
-                        });
+                        }).then(() => content);
                     });
-            }).catch(err => new Error(err));
+                }
+            }).then(content => {
+                reading.text = content;
+                reading.version = version;
+                return reading;
+            });
     }
 
     server.route([
         {
             method: 'GET',
-            path: '/daily/{date}/{version?}',
+            path: '/daily/{date}/{versionCode?}',
             config: {
                 description: "Get readings for given date (or 'today')",
                 auth: {
                     strategy: 'jwt',
                     mode: 'optional'    // If credentials present, must be valid.
                 },
+                // TODO: Add validators
                 pre: [
-                    {assign: 'date', method: 'normalizeDate(params.date)'},
-                    {assign: 'version', method: 'getVersion(params.version)'}
+                    {assign: 'date', method: 'normalizeDate(params.date)'}
                 ]
             },
             handler: function (request, reply) {
-                // console.log("DATE", request.pre.date);
-                // console.log("VERSION", request.pre.version);
+                debug("Credentials %O", request.auth.credentials);
+
+                // TODO: Make this come from the user object
+                const version = bibleService.resolveVersion(request.params.versionCode);
+
                 ReadingDay.query()
                     .where('date', request.pre.date)
                     .first()
-                    .eager('[readings(orderBySeq).applications(orderBySeq).[practice,steps(orderBySeq).resources],questions(orderBySeq)]', {
-                        orderBySeq: qBuilder => qBuilder.orderBy('seq')
+                    .eager('[readings(bySeq).[applications(bySeq).[practice,steps(bySeq)]],questions(bySeq)]', {
+                        bySeq: qBuilder => qBuilder.orderBy('seq')
                     })
                     .omit(['readingDayId', 'readingId', 'practiceId'])
                     .then(readingDay => {
                         if (!readingDay) {
                             reply(Boom.notFound(`No reading data for '${request.pre.date}'`));
                         } else {
-                            // Fetch all passages, either from DB or BG.
-                            Promise.all(readingDay.readings.map(reading =>
-                                getPassageContent(reading, request.pre.version).then(content => {
-                                    reading.text = content;
-                                    return reading;
-                                }))).then(readings => {
-                                reply(readingDay);
-                            })
+                            // Resolve the passage for each reading.
+                            return Promise.all(readingDay.readings
+                                .map(reading => resolvePassage(reading, version)))
+                                .then(readings => reply(readingDay));
                         }
                     })
                     .catch(err => reply(Boom.badImplementation(err)));
