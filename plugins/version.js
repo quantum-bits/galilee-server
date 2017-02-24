@@ -7,6 +7,8 @@ const Version = require('../models/Version');
 
 exports.register = function (server, options, next) {
 
+    const bibleService = options.bibleService;
+
     server.route([
 
         // No 'POST' route -- it's up to BG which versions we can use.
@@ -18,8 +20,8 @@ exports.register = function (server, options, next) {
                 description: "Get all versions"
             },
             handler: function (request, reply) {
-                Version.query()
-                    .then(versions => reply(versions))
+                bibleService.getAuthorizedVersions()
+                    .then(versions => reply(versions));
             }
         }
     ]);

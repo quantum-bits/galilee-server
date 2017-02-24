@@ -90,7 +90,10 @@ module.exports = function (callback) {
             {register: require('./plugins/application')},
             // {register: require('./plugins/resource')},
             {register: require('./plugins/user')},
-            {register: require('./plugins/version')},
+            {
+                register: require('./plugins/version'),
+                options: {bibleService: bibleService}
+            },
 
             {
                 register: require('tv'),        // Documentation
