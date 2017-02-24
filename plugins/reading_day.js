@@ -78,10 +78,15 @@ exports.register = function (server, options, next) {
                 ]
             },
             handler: function (request, reply) {
-                debug("Credentials %O", request.auth.credentials);
-
-                // TODO: Make this come from the user object
-                const version = bibleService.resolveVersion(request.params.versionCode);
+                let version = null;
+                if (request.auth.isAuthenticated) {
+                    debug("Trying version id %o", request.auth.credentials.preferredVersionId);
+                    version = bibleService.resolveVersionById(request.auth.credentials.preferredVersionId);
+                } else {
+                    debug("Trying version code %o", request.params.versionCode);
+                    version = bibleService.resolveVersion(request.params.versionCode);
+                }
+                debug("Using %O", version);
 
                 ReadingDay.query()
                     .where('date', request.pre.date)
