@@ -121,7 +121,7 @@ exports.register = function (server, options, next) {
                 validate: {
                     payload: {
                         date: Joi.date().required().description('Date of reading day'),
-                        name: Joi.string().description('Optional day name (e.g., Easter)')
+                        name: Joi.string().allow('').description('Optional day name (e.g., Easter)')
                     }
                 },
                 pre: [
