@@ -5,9 +5,11 @@ const debug = require('debug')('config');
 
 const nconf = require('nconf');
 
-nconf.env(['GALILEE']);
-nconf.file('database', './public.conf.json');
-nconf.file('secrets', './secret.conf.json');
+// Configure nconf.
+nconf
+    .env(['GALILEE'])
+    .file('database', './public.conf.json')
+    .file('secrets', './secret.conf.json');
 
 // Make sure we have a GALILEE environment variable.
 const envName = nconf.get('GALILEE');
@@ -21,7 +23,6 @@ const selectedEnv = nconf.get(envName);
 if (!selectedEnv) {
     throw Error(`No Galilee environment '${envName}'`);
 }
-
 _.forEach(selectedEnv, (v, k) => nconf.set(k, v));
 
 debug("CONFIG %O", nconf.get());

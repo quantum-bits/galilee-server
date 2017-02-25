@@ -2,13 +2,13 @@
   "name": "galilee-server",
   "version": "0.0.1",
   "description": "Scripture Engagement Application: Server",
-  "main": "index.js",
+  "main": "main.js",
   "directories": {
     "doc": "doc"
   },
   "scripts": {
-    "start": "GALILEE=development node index.js",
-    "watch": "GALILEE=development nodemon index.js",
+    "start": "GALILEE=development node main.js",
+    "watch": "GALILEE=development nodemon main.js",
     "test": "lab --verbose --transform node_modules/lab-babel --globals __core-js_shared__",
     "test-cov": "lab --transform node_modules/lab-babel --globals __core-js_shared__ --reporter html --output foo-coverage.html",
     "knex:migrate": "GALILEE=development knex migrate:latest",

@@ -5,14 +5,23 @@ const Path = require('path');
 const moment = require('moment');
 
 const BG = require('./lib/bg');
-
 const User = require('./models/User');
 
-module.exports = function (callback) {
+exports.initializeServer = function() {
+    const masterConfig = require('./master-config');
+
+    return new BG.AuthenticationService()
+        .init(masterConfig.get('bg:username'), masterConfig.get('bg:password'))
+        .then(authService => new BG.BibleService().init(authService))
+        .then(bibleService => configureServer(masterConfig, bibleService));
+}
+
+// This function returns a promise that's resolved by the newly configured server.
+function configureServer(masterConfig, bibleService) {
 
     const server = new Hapi.Server({
         app: {
-            config: require('./master-config')
+            config: masterConfig
         },
         debug: {
             request: ['error'],
@@ -58,12 +67,7 @@ module.exports = function (callback) {
         fetchUser({'id': id}, next);
     });
 
-    const bibleService = new BG.BibleService(
-        new BG.AuthenticationService(
-            server.settings.app.config.get('bg:username'),
-            server.settings.app.config.get('bg:password')));
-
-    server.register(
+    return server.register(
         [
             {register: require('inert')},       // Static files
             {register: require('vision')},      // Templates (needed by tv)
@@ -134,27 +138,22 @@ module.exports = function (callback) {
             routes: {
                 prefix: '/api'
             }
-        },
-
-        err => {
-            if (err) {
-                throw(err);
-            }
-
-            callback(err, server);
         }
-    );
 
-    // TODO: Do we need this??
-    server.route({
-        method: 'GET',
-        path: '/{param*}',
-        handler: {
-            directory: {
-                path: '.',
-                redirectToSlash: true,
-                index: true
-            }
-        }
-    });
-};
+        // If no callback (as here), returns a promise object
+        // (cf. https://hapijs.com/api#serverregisterplugins-options-callback).
+    ).then(() => server);
+
+    // // TODO: Do we need this??
+    // server.route({
+    //     method: 'GET',
+    //     path: '/{param*}',
+    //     handler: {
+    //         directory: {
+    //             path: '.',
+    //             redirectToSlash: true,
+    //             index: true
+    //         }
+    //     }
+    // });
+}

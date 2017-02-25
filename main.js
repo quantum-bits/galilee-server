@@ -1,10 +1,8 @@
+"use strict";
+
 const Server = require('./server');
 
-Server((err, server) => {
-    if (err) {
-        throw err;
-    }
-
+Server.initializeServer().then(server => {
     server.start(err => {
         if (err) {
             throw err;
