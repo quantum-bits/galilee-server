@@ -20,8 +20,7 @@ exports.register = function (server, options, next) {
                 description: "Get all versions"
             },
             handler: function (request, reply) {
-                bibleService.getAuthorizedVersions()
-                    .then(versions => reply(versions));
+                reply(bibleService.getAuthorizedVersions());
             }
         }
     ]);
