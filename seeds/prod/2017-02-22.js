@@ -101,7 +101,7 @@ exports.seed = function (knex, Promise) {
                     applications: [
                         {
                             seq: 1,
-                            practiceId: 15,
+                            practiceId: 10,
                             steps: [
                                 {
                                     seq: 1,

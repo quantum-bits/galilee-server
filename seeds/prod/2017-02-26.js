@@ -111,6 +111,3 @@ exports.seed = function (knex, Promise) {
         ]   // readings
     }); // insertGraph
 };  // function
-
-exports.seed().then(`${theDate} added`);
-process.exit(0);
