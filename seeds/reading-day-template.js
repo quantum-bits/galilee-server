@@ -85,4 +85,5 @@ exports.seed = function (knex, Promise) {
     }); // insertGraph
 };  // function
 
-
+exports.seed().then(`${theDate} added`);
+process.exit(0);
