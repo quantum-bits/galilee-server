@@ -14,10 +14,7 @@ exports.register = function (server, options, next) {
                 description: 'Retrieve list of available versions'
             },
             handler: function (request, reply) {
-                bibleService
-                    .getAuthorizedVersions()
-                    .then(versions => reply(versions))
-                    .catch(err => new Error(err));
+                reply(bibleService.getAuthorizedVersions());
             }
         },
 

@@ -3,7 +3,6 @@
 const Boom = require('boom');
 const Joi = require('joi');
 const _ = require('lodash');
-const moment = require('moment');
 const Promise = require('bluebird');
 
 const User = require('../models/User');
@@ -36,7 +35,8 @@ exports.register = function (server, options, next) {
         JournalEntry.query()
             .select('updatedAt')
             .where('userId', userId)
-            .map(entry => moment(entry.updatedAt).format('YYYY-MM-DD'))
+            .orderBy('updatedAt')
+            .map(entry => entry.updatedAt)
             .then(entries => next(null, _.countBy(entries)))
             .catch(err => next(err, null));
     });
@@ -85,8 +85,7 @@ exports.register = function (server, options, next) {
         }
 
         if (queryParams.date) {
-            const date = moment(queryParams.date).format('YYYY-MM-DD')
-            queryBuilder.whereRaw(`date_trunc('day', "journalEntry"."updatedAt") = '${date}'`);
+            queryBuilder.where('updatedAt', queryParams.date);
         }
 
         if (queryParams.tag) {

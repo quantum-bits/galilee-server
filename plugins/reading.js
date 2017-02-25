@@ -14,8 +14,7 @@ exports.register = function (server, options, next) {
     // Map array [ { date: 'YYYY-MM-DD', count: n }, ... ] to object { 'YYYY-MM-DD': n, ... }
     function arrayOfObjToObj(arr) {
         return _.reduce(arr, (obj, val) => {
-            let date_key = moment(val.date).format('YYYY-MM-DD');
-            obj[date_key] = +val.count;
+            obj[val.date] = +val.count;
             return obj
         }, {})
     }
