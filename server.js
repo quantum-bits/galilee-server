@@ -3,17 +3,24 @@
 const Hapi = require('hapi');
 const Path = require('path');
 const moment = require('moment');
+const debug = require('debug')('server');
 
 const BG = require('./lib/bg');
 const User = require('./models/User');
 
-exports.initializeServer = function() {
+exports.initializeServer = function () {
     const masterConfig = require('./master-config');
 
     return new BG.AuthenticationService()
         .init(masterConfig.get('bg:username'), masterConfig.get('bg:password'))
-        .then(authService => new BG.BibleService().init(authService))
-        .then(bibleService => configureServer(masterConfig, bibleService));
+        .then(authService => {
+            debug("%O", authService);
+            return new BG.BibleService().init(authService)
+        })
+        .then(bibleService => {
+            debug("%O", bibleService);
+            return configureServer(masterConfig, bibleService)
+        });
 }
 
 // This function returns a promise that's resolved by the newly configured server.
@@ -77,26 +84,19 @@ function configureServer(masterConfig, bibleService) {
             {register: require('./plugins/authentication')},
 
             {register: require('./plugins/admin')},
-            {
-                register: require('./plugins/bg'),
-                options: {bibleService: bibleService}
-            },
+            {register: require('./plugins/application')},
+            {register: require('./plugins/bg'), options: {bibleService: bibleService}},
             {register: require('./plugins/forum')},
-            {register: require('./plugins/practice')},
             {register: require('./plugins/journal')},
+            {register: require('./plugins/practice')},
             {register: require('./plugins/question')},
             {register: require('./plugins/reading')},
-            {
-                register: require('./plugins/reading_day'),
-                options: {bibleService: bibleService}
-            },
-            {register: require('./plugins/application')},
-            // {register: require('./plugins/resource')},
+            {register: require('./plugins/reading_day'), options: {bibleService: bibleService}},
+            {register: require('./plugins/static')},
             {register: require('./plugins/user')},
-            {
-                register: require('./plugins/version'),
-                options: {bibleService: bibleService}
-            },
+            {register: require('./plugins/version'), options: {bibleService: bibleService}},
+
+            // {register: require('./plugins/resource')},
 
             {
                 register: require('tv'),        // Documentation
@@ -144,16 +144,4 @@ function configureServer(masterConfig, bibleService) {
         // (cf. https://hapijs.com/api#serverregisterplugins-options-callback).
     ).then(() => server);
 
-    // // TODO: Do we need this??
-    // server.route({
-    //     method: 'GET',
-    //     path: '/{param*}',
-    //     handler: {
-    //         directory: {
-    //             path: '.',
-    //             redirectToSlash: true,
-    //             index: true
-    //         }
-    //     }
-    // });
 }
