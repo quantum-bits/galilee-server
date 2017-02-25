@@ -31,6 +31,21 @@ exports.register = function (server, options, next) {
             .catch(err => next(err, null));
     });
 
+    function resolveVersion(request) {
+        // Version from request parameter.
+        const paramsVersion = bibleService.findVersionByCode(request.params.versionCode);
+
+        // Preferred version of authenticated user, if any.
+        const userVersion = request.auth.isAuthenticated
+            ? bibleService.findVersionById(request.auth.credentials.preferredVersionId)
+            : null;
+
+        const defaultVersion = bibleService.defaultVersion;
+
+        debug("%o %o %o", paramsVersion, userVersion, defaultVersion);
+        return paramsVersion || userVersion || defaultVersion;
+    }
+
     // Resolve a reading's passage from the given version. If the passage is already in the database,
     // use it directly. Otherwise, fetch it from BG and store it in the database. In either case,
     // the reading will be updated with the passage content and version.
@@ -78,15 +93,7 @@ exports.register = function (server, options, next) {
                 ]
             },
             handler: function (request, reply) {
-                let version = null;
-                if (request.auth.isAuthenticated) {
-                    debug("Trying version id %o", request.auth.credentials.preferredVersionId);
-                    version = bibleService.resolveVersionById(request.auth.credentials.preferredVersionId);
-                } else {
-                    debug("Trying version code %o", request.params.versionCode);
-                    version = bibleService.resolveVersion(request.params.versionCode);
-                }
-                debug("Using %O", version);
+                const version = resolveVersion(request);
 
                 ReadingDay.query()
                     .where('date', request.pre.date)
@@ -104,8 +111,7 @@ exports.register = function (server, options, next) {
                                 .map(reading => resolvePassage(reading, version)))
                                 .then(readings => reply(readingDay));
                         }
-                    })
-                    .catch(err => reply(Boom.badImplementation(err)));
+                    });
             }
         },
 
@@ -138,8 +144,7 @@ exports.register = function (server, options, next) {
                             name: request.payload.name || ''
                         })
                         .returning('*')
-                        .then(readingDay => reply(readingDay))
-                        .catch(err => reply(Boom.badImplementation(err)));
+                        .then(readingDay => reply(readingDay));
                 }
             }
         },
@@ -156,8 +161,7 @@ exports.register = function (server, options, next) {
             },
             handler: function (request, reply) {
                 ReadingDay.query()
-                    .then(readingDays => reply(readingDays))
-                    .catch(err => reply(Boom.badImplementation(err)));
+                    .then(readingDays => reply(readingDays));
             }
         },
 
@@ -216,8 +220,7 @@ exports.register = function (server, options, next) {
                 } else {
                     request.pre.readingDay.$query()
                         .updateAndFetch(request.payload)
-                        .then(readingDay => reply(readingDay))
-                        .catch(err => reply(Boom.badImplementation(err)));
+                        .then(readingDay => reply(readingDay));
                 }
             }
         },
@@ -246,8 +249,7 @@ exports.register = function (server, options, next) {
                 } else {
                     ReadingDay.query()
                         .deleteById(request.params.id)
-                        .then(result => reply(result))
-                        .catch(err => reply(Boom.badImplementation(err)));
+                        .then(result => reply(result));
                 }
             }
         }

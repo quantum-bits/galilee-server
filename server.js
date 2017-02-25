@@ -23,7 +23,7 @@ module.exports = function (callback) {
     server.connection({
         port: server.settings.app.config.get('hapi:port'),
         routes: {
-            cors: true,
+            cors: true,         // TODO: This seems too permissive.
             files: {
                 relativeTo: Path.join(__dirname, 'public')
             }
@@ -59,7 +59,6 @@ module.exports = function (callback) {
     });
 
     const bibleService = new BG.BibleService(
-        // Dependency injection!
         new BG.AuthenticationService(
             server.settings.app.config.get('bg:username'),
             server.settings.app.config.get('bg:password')));
@@ -146,6 +145,7 @@ module.exports = function (callback) {
         }
     );
 
+    // TODO: Do we need this??
     server.route({
         method: 'GET',
         path: '/{param*}',
