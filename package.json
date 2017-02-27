@@ -7,14 +7,16 @@
     "doc": "doc"
   },
   "scripts": {
-    "start": "GALILEE=development node main.js",
-    "watch": "GALILEE=development nodemon main.js",
-    "test": "lab --verbose --transform node_modules/lab-babel --globals __core-js_shared__",
-    "test-cov": "lab --transform node_modules/lab-babel --globals __core-js_shared__ --reporter html --output foo-coverage.html",
     "knex:migrate": "GALILEE=development knex migrate:latest",
-    "knex:seed": "GALILEE=development knex seed:run",
     "knex:migrate:prod": "GALILEE=production knex --env production migrate:latest",
-    "knex:seed:prod": "GALILEE=production knex --env production seed:run"
+    "knex:seed": "GALILEE=development knex seed:run",
+    "knex:seed:prod": "GALILEE=production knex --env production seed:run",
+    "start": "GALILEE=development node main.js",
+    "start:prod": "GALILEE=production node main.js",
+    "watch": "GALILEE=development nodemon main.js",
+    "watch:prod": "GALILEE=production nodemon main.js",
+    "test": "lab --verbose --transform node_modules/lab-babel --globals __core-js_shared__",
+    "test-cov": "lab --transform node_modules/lab-babel --globals __core-js_shared__ --reporter html --output foo-coverage.html"
   },
   "repository": {
     "type": "git",

@@ -1,7 +1,7 @@
 "use strict";
 
 const moment = require('moment');
-const config = require('./master-config');
+const MasterConfig = require('./master-config');
 const pgTypes = require('pg').types;
 
 // Override node-postgres conversion of DATE fields to a timestamp.
@@ -10,9 +10,7 @@ pgTypes.setTypeParser(PG_DATE_OID, function(val) {
     return moment(val).format('YYYY-MM-DD');
 });
 
-
-// TODO: This doesn't seem right: hard-wired 'development'?
-const knex = exports.knex = require('knex')(config.get('development:db'));
+const knex = exports.knex = require('knex')(MasterConfig.get('db'));
 
 const Model = exports.Model = require('objection').Model;
 Model.knex(knex);
