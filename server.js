@@ -5,17 +5,17 @@ const Path = require('path');
 const moment = require('moment');
 const debug = require('debug')('server');
 
-const BG = require('./lib/bg');
+const Bible = require('./lib/bible');
 const User = require('./models/User');
 
 exports.initializeServer = function () {
     const masterConfig = require('./master-config');
 
-    return new BG.AuthenticationService()
+    return new Bible.AuthenticationService()
         .init(masterConfig.get('bg:username'), masterConfig.get('bg:password'))
         .then(authService => {
             debug("%O", authService);
-            return new BG.BibleService().init(authService)
+            return new Bible.BibleService().init(authService)
         })
         .then(bibleService => {
             debug("%O", bibleService);

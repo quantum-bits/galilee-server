@@ -11,6 +11,7 @@
     "knex:migrate:prod": "GALILEE=production knex --env production migrate:latest",
     "knex:seed:dev": "GALILEE=development knex seed:run",
     "knex:seed:prod": "GALILEE=production knex --env production seed:run",
+    "start": "echo Please run with start:dev or start.prod",
     "start:dev": "GALILEE=development node main.js",
     "start:prod": "GALILEE=production node main.js",
     "watch:dev": "GALILEE=development nodemon main.js",
