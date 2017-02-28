@@ -11,8 +11,8 @@ exports.up = function (knex, Promise) {
             table.integer('userId').references('user.id');
             table.integer('readingId').references('reading.id');
             table.integer('stepId').references('step.id');
-            table.timestamp('createdAt').defaultTo(knex.fn.now());
-            table.timestamp('updatedAt').defaultTo(knex.fn.now());
+            table.timestamp('createdAt', true).defaultTo(knex.fn.now());
+            table.timestamp('updatedAt', true).defaultTo(knex.fn.now());
         }),
 
         knex.schema.createTableIfNotExists('journalEntryTag', table => {

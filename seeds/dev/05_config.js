@@ -6,6 +6,6 @@ exports.seed = function (knex, Promise) {
     return Config.query().insertGraph([
         {key: 'upload-root', value: '../resources'},
         {key: 'bg-access-token', value: null},
-        {key: 'default-version', value: 'NKJV'}
+        {key: 'default-version', value: 'MSG'}
     ]).catch(err => console.error("Error", err));
 };

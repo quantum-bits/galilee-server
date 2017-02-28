@@ -59,7 +59,7 @@ exports.register = function (server, options, next) {
                 description: "Get questions for given date (or 'today')",
                 validate: {
                     params: {
-                        date: Joi.alternatives().try('today', Joi.date().iso())
+                        date: Joi.alternatives().try('today', Joi.string().isoDate())
                     }
                 },
                 pre: ['normalizeDate(params.date)']

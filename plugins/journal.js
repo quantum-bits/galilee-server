@@ -4,6 +4,8 @@ const Boom = require('boom');
 const Joi = require('joi');
 const _ = require('lodash');
 const Promise = require('bluebird');
+const moment = require('moment');
+const debug = require('debug')('journal');
 
 const User = require('../models/User');
 const Tag = require('../models/Tag');
@@ -36,7 +38,7 @@ exports.register = function (server, options, next) {
             .select('updatedAt')
             .where('userId', userId)
             .orderBy('updatedAt')
-            .map(entry => entry.updatedAt)
+            .map(entry => moment(entry.updatedAt).format('YYYY-MM-DD'))
             .then(entries => next(null, _.countBy(entries)))
             .catch(err => next(err, null));
     });
@@ -85,7 +87,11 @@ exports.register = function (server, options, next) {
         }
 
         if (queryParams.date) {
-            queryBuilder.where('updatedAt', queryParams.date);
+            const fromDate = moment(queryParams.date).format('YYYY-MM-DD');
+            const toDate = moment(fromDate).add(1, 'day').format('YYYY-MM-DD');;
+            queryBuilder
+                .where('updatedAt', '>=', fromDate)
+                .where('updatedAt', '<',  toDate);
         }
 
         if (queryParams.tag) {
@@ -97,6 +103,13 @@ exports.register = function (server, options, next) {
 
         // Run the query
         queryBuilder
+            .map(entry => {
+                // Before: "2017-02-17T13:38:14.266Z"   (UTC)
+                // After:  "2017-02-17T08:38:14-05:00"  (Local)
+                entry.updatedAt = moment(entry.updatedAt).format();
+                entry.createdAt = moment(entry.createdAt).format();
+                return entry;
+            })
             .then(entries => next(null, entries))
             .catch(err => next(err, null));
     });
@@ -133,7 +146,7 @@ exports.register = function (server, options, next) {
                     query: {
                         offset: Joi.number().integer().min(0).default(0).description('Offset; default 0'),
                         limit: Joi.number().integer().min(1).description('Limit; no default'),
-                        date: Joi.string().description('Entries for a given date'),
+                        date: Joi.string().isoDate().description('Entries for a given date'),
                         tag: Joi.number().integer().min(1).description('Entries with a given tag ID')
                     }
                 }

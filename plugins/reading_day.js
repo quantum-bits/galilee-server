@@ -126,7 +126,7 @@ exports.register = function (server, options, next) {
                 },
                 validate: {
                     payload: {
-                        date: Joi.date().required().description('Date of reading day'),
+                        date: Joi.string().isoDate().required().description('Date of reading day'),
                         name: Joi.string().allow('').description('Optional day name (e.g., Easter)')
                     }
                 },
@@ -206,8 +206,8 @@ exports.register = function (server, options, next) {
                         id: Joi.number().integer().required().description('Reading day ID')
                     },
                     payload: {
-                        date: Joi.date().description('Date of reading day'),
-                        name: Joi.string().description('Optional day name (e.g., Easter)')
+                        date: Joi.string().isoDate().description('Date of reading day'),
+                        name: Joi.string().allow('').description('Optional day name (e.g., Easter)')
                     }
                 },
                 pre: [
