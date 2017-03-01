@@ -61,8 +61,7 @@ exports.register = function (server, options, next) {
                     return result.content;
                 } else {
                     debug("Fetch from BG");
-                    return bibleService.getPassage(version.code, reading.osisRef).then(response => {
-                        const content = response.passages[0].content;
+                    return bibleService.getPassage(version.code, reading.osisRef).then(content => {
                         return Passage.query().insert({
                             readingId: reading.id,
                             versionId: version.id,
