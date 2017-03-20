@@ -12,8 +12,10 @@
     "knex:seed:dev": "GALILEE=development knex seed:run",
     "knex:seed:prod": "GALILEE=production knex --env production seed:run",
     "start:dev": "GALILEE=development node main.js",
+    "start:staging": "GALILEE=staging node main.js",
     "start:prod": "GALILEE=production node main.js",
     "watch:dev": "GALILEE=development nodemon main.js",
+    "watch:staging": "GALILEE=staging nodemon main.js",
     "watch:prod": "GALILEE=production nodemon main.js",
     "test": "lab --verbose --transform node_modules/lab-babel --globals __core-js_shared__",
     "test-cov": "lab --transform node_modules/lab-babel --globals __core-js_shared__ --reporter html --output foo-coverage.html"

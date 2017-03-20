@@ -31,8 +31,8 @@ class Reading extends db.Model {
                 join: {
                     from: 'reading.id',
                     through: {
-                        from: 'readingPractice.readingId',
-                        to: 'readingPractice.guidanceId'
+                        from: 'readingGuidance.readingId',
+                        to: 'readingGuidance.guidanceId'
                     },
                     to: 'guidance.id'
                 }

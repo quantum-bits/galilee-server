@@ -7,7 +7,6 @@ const debug = require('debug')('readingday');
 
 const Config = require('../models/Config');
 const Passage = require('../models/Passage');
-const Question = require('../models/Question');
 const Reading = require('../models/Reading');
 const ReadingDay = require('../models/ReadingDay');
 const Version = require('../models/Version');
@@ -97,10 +96,10 @@ exports.register = function (server, options, next) {
                 ReadingDay.query()
                     .where('date', request.pre.date)
                     .first()
-                    .eager('[readings(bySeq).[applications(bySeq).[practice,steps(bySeq)]],questions(bySeq)]', {
+                    .eager('[readings(bySeq).guidance.[practice,steps(bySeq)],guidance.[practice,steps(bySeq)]]', {
                         bySeq: qBuilder => qBuilder.orderBy('seq')
                     })
-                    .omit(['readingDayId', 'readingId', 'practiceId'])
+                    .omit(['readingDayId', 'readingId', 'practiceId', 'guidanceId'])
                     .then(readingDay => {
                         if (!readingDay) {
                             reply(Boom.notFound(`No reading data for '${request.pre.date}'`));

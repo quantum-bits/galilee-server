@@ -17,15 +17,18 @@ class ReadingDay extends db.Model {
                     to: 'reading.readingDayId'
                 }
             },
-            questions: {
+            guidance: {
                 relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/Question',
+                modelClass: __dirname + '/Guidance',
                 join: {
                     from: 'readingDay.id',
-                    to: 'question.readingDayId'
+                    through: {
+                        from: 'readingDayGuidance.readingId',
+                        to: 'readingDayGuidance.guidanceId'
+                    },
+                    to: 'guidance.id'
                 }
             }
-
         }
     }
 }
