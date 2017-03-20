@@ -9,29 +9,16 @@ class Step extends db.Model {
 
     static get relationMappings() {
         return {
-            application: {
+            guidance: {
                 relation: db.Model.BelongsToOneRelation,
-                modelClass: __dirname + '/Application',
+                modelClass: __dirname + '/Guidance',
                 join: {
-                    from: 'step.applicationId',
-                    to: 'application.id'
-                }
-            },
-            resources: {
-                relation: db.Model.ManyToManyRelation,
-                modelClass: __dirname + '/Resource',
-                join: {
-                    from: 'step.id',
-                    through: {
-                        from: 'stepResource.stepId',
-                        to: 'stepResource.resourceId'
-                    },
-                    to: 'resource.id'
+                    from: 'step.guidanceId',
+                    to: 'guidance.id'
                 }
             }
         }
     }
-
 }
 
 module.exports = Step;

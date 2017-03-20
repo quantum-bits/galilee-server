@@ -3,7 +3,7 @@
 const Boom = require('boom');
 const Joi = require('joi');
 
-const Application = require('../models/Application');
+const Application = require('../models/Guidance');
 
 exports.register = function (server, options, next) {
 
@@ -83,7 +83,7 @@ exports.register = function (server, options, next) {
                     ],
                     validate: {
                         params: {
-                            id: Joi.number().integer().min(1).required().description('Application ID')
+                            id: Joi.number().integer().min(1).required().description('Guidance ID')
                         }
                     }
                 },
@@ -112,7 +112,7 @@ exports.register = function (server, options, next) {
                     ],
                     validate: {
                         params: {
-                            id: Joi.number().integer().min(1).required().description('Application ID')
+                            id: Joi.number().integer().min(1).required().description('Guidance ID')
                         }
                     }
                 },

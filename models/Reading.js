@@ -25,37 +25,20 @@ class Reading extends db.Model {
                     to: 'passage.readingId'
                 }
             },
-            applications: {
+            guidance: {
                 relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/Application',
-                join: {
-                    from: 'reading.id',
-                    to: 'application.readingId'
-                }
-            },
-            practices: {
-                relation: db.Model.ManyToManyRelation,
-                modelClass: __dirname + '/Practice',
+                modelClass: __dirname + '/Guidance',
                 join: {
                     from: 'reading.id',
                     through: {
-                        from: 'application.readingId',
-                        to: 'application.practiceId'
+                        from: 'readingPractice.readingId',
+                        to: 'readingPractice.guidanceId'
                     },
-                    to: 'practice.id'
-                }
-            },
-            posts: {
-                relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/Post',
-                join: {
-                    from: 'reading.id',
-                    to: 'post.readingId'
+                    to: 'guidance.id'
                 }
             }
         }
     };
-
 }
 
 module.exports = Reading;
