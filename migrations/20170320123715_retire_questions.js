@@ -94,17 +94,20 @@ exports.up = function (knex, Promise) {
                 });
             });
         });
+    }).then(() => {
+        return;
         // Delete references to 'step' and then 'step' itself.
-    }).then(() => knex.schema.table('journalEntry', table => table.dropColumn('stepId'))
-    ).then(() => knex.schema.dropTable('stepResource')
-    ).then(() => knex.schema.dropTable('step')
-        // Rename 'newStep' to take the place of 'step'. Then reconnect the new 'step'.
-    ).then(() => knex.schema.renameTable('newStep', 'step')
-    ).then(() => knex.schema.table('journalEntry', table => table.integer('stepId').references('step.id'))
-        // Questions no longer used.
-    ).then(() => knex.schema.dropTable('question')
-        // Don't need the 'application' table any longer (replaced by 'guidance' and 'readingXxxPractice'.
-    ).then(() => knex.schema.dropTable('application'));
+        return knex.schema.table('journalEntry', table => table.dropColumn('stepId'))
+            .then(() => knex.schema.dropTable('stepResource'))
+            .then(() => knex.schema.dropTable('step'))
+            // Rename 'newStep' to take the place of 'step'. Then reconnect the new 'step'.
+            .then(() => knex.schema.renameTable('newStep', 'step'))
+            .then(() => knex.schema.table('journalEntry', table => table.integer('stepId').references('step.id')))
+            // Questions no longer used.
+            .then(() => knex.schema.dropTable('question'))
+            // Don't need the 'application' table any longer (replaced by 'guidance' and 'readingXxxPractice'.
+            .then(() => knex.schema.dropTable('application'));
+    });
 }
 
 exports.down = function (knex, Promise) {
