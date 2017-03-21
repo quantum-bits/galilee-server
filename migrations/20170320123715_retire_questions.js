@@ -3,60 +3,43 @@
 // Dispense with questions
 
 exports.up = function (knex, Promise) {
-    return knex.schema.createTableIfNotExists('guidance', table => {
+    return knex.schema.createTableIfNotExists('direction', table => {
         table.increments('id');
+        table.integer('seq').notNullable();
         table.integer('practiceId').notNullable().references('practice.id').onDelete('CASCADE');
-    }).then(() => Promise.all([
-        // Relate a 'reading' to a 'practice' via 'guidance'.
-        knex.schema.createTableIfNotExists('readingGuidance', table => {
-            table.increments('id');
-            table.integer('seq').notNullable();
-            table.integer('readingId').notNullable().references('reading.id').onDelete('CASCADE');
-            table.integer('guidanceId').notNullable().references('guidance.id');
-        }),
-        // Relate a 'readingDay' to a 'practice' via 'guidance'.
-        knex.schema.createTableIfNotExists('readingDayGuidance', table => {
-            table.increments('id');
-            table.integer('seq').notNullable();
-            table.integer('readingDayId').notNullable().references('readingDay.id').onDelete('CASCADE');
-            table.integer('guidanceId').notNullable().references('guidance.id');
-        }),
-        // New step table that references 'guidance' instead of 'application'. Later, we will
+        table.integer('readingId').references('reading.id').onDelete('CASCADE');
+        table.integer('readingDayId').references('readingDay.id').onDelete('CASCADE');
+    }).then(() => {
+        // New step table that references 'direction' instead of 'application'. Later, we will
         // delete the old 'step' table and rename this one to 'step'
-        knex.schema.createTableIfNotExists('newStep', table => {
+        return knex.schema.createTableIfNotExists('newStep', table => {
             table.increments('id');
             table.integer('seq').notNullable();
             table.text('description').notNullable();
-            table.integer('guidanceId').notNullable().references('guidance.id').onDelete('CASCADE');
+            table.integer('directionId').notNullable().references('direction.id').onDelete('CASCADE');
         })
-    ])).then(() => {
-        // Migrate applications to guidance/readingGuidance
+    }).then(() => {
+        // Migrate 'application'
         return knex.select('id', 'seq', 'readingId', 'practiceId').from('application').map(applicationRow => {
-            return knex('guidance').returning('id').insert({
-                // Create new guidance for the practice.
-                practiceId: applicationRow.practiceId
-            }).then(guidanceId => {
+            return knex('direction').returning('id').insert({
+                // Create new direction for the practice.
+                seq: +applicationRow.seq,
+                practiceId: +applicationRow.practiceId,
+                readingId: +applicationRow.readingId
+            }).then(directionId => {
                 // For each step of the application
                 return knex.select('seq', 'description').from('step').where('applicationId', applicationRow.id).map(stepRow => {
-                    return Promise.all([
-                        // Create a new readingGuidance associated with the new guidance
-                        knex('readingGuidance').insert({
-                            seq: +applicationRow.seq,
-                            readingId: +applicationRow.readingId,
-                            guidanceId: +guidanceId
-                        }),
-                        // Create a new step.
-                        knex('newStep').insert({
-                            seq: stepRow.seq,
-                            description: stepRow.description,
-                            guidanceId: +guidanceId
-                        })
-                    ]);
+                    // Create a new step.
+                    return knex('newStep').insert({
+                        seq: stepRow.seq,
+                        description: stepRow.description,
+                        directionId: +directionId
+                    })
                 });
             });
         });
     }).then(() => {
-        // Migrate questions to guidance/readingDayGuidance
+        // Migrate 'question'
         return knex('practice').returning('id').insert({
             title: 'Engaging Scripture in Community',
             summary: '',
@@ -71,31 +54,24 @@ exports.up = function (knex, Promise) {
                         let content = '<ol><li>'
                             + rows.map(row => row.text).join('</li><li>')
                             + '</li></ol>';
-                        // Create new guidance for the appropriate practice.
-                        return knex('guidance').returning('id').insert({
-                            practiceId: +practiceId
-                        }).then(guidanceId => {
-                            return Promise.all([
-                                // Add a readingDayGuidance for the newly added guidance.
-                                knex('readingDayGuidance').insert({
-                                    seq: 1,
-                                    readingDayId: +readingDayRow.id,
-                                    guidanceId: +guidanceId
-                                }),
-                                // Add a new step with the given content.
-                                knex('newStep').insert({
-                                    seq: 1,
-                                    description: content,
-                                    guidanceId: +guidanceId
-                                })
-                            ]);
+                        // Create new direction for the appropriate practice.
+                        return knex('direction').returning('id').insert({
+                            seq: 1,
+                            practiceId: +practiceId,
+                            readingDayId: +readingDayRow.id
+                        }).then(directionId => {
+                            // Add a new step with the given content.
+                            return knex('newStep').insert({
+                                seq: 1,
+                                description: content,
+                                directionId: +directionId
+                            })
                         });
                     }
                 });
             });
         });
     }).then(() => {
-        return;
         // Delete references to 'step' and then 'step' itself.
         return knex.schema.table('journalEntry', table => table.dropColumn('stepId'))
             .then(() => knex.schema.dropTable('stepResource'))
@@ -103,12 +79,13 @@ exports.up = function (knex, Promise) {
             // Rename 'newStep' to take the place of 'step'. Then reconnect the new 'step'.
             .then(() => knex.schema.renameTable('newStep', 'step'))
             .then(() => knex.schema.table('journalEntry', table => table.integer('stepId').references('step.id')))
-            // Questions no longer used.
+            // The 'question' and 'application' tables no longer used.
             .then(() => knex.schema.dropTable('question'))
-            // Don't need the 'application' table any longer (replaced by 'guidance' and 'readingXxxPractice'.
-            .then(() => knex.schema.dropTable('application'));
+            .then(() => knex.schema.dropTable('application'))
+            // Unrelated: we're not using this column.
+            .then(() => knex.schema.table('practice', table => table.dropColumn('description')));
     });
-}
+};
 
 exports.down = function (knex, Promise) {
 };

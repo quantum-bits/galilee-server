@@ -17,16 +17,12 @@ class ReadingDay extends db.Model {
                     to: 'reading.readingDayId'
                 }
             },
-            guidance: {
+            direction: {
                 relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/Guidance',
+                modelClass: __dirname + '/Direction',
                 join: {
                     from: 'readingDay.id',
-                    through: {
-                        from: 'readingDayGuidance.readingId',
-                        to: 'readingDayGuidance.guidanceId'
-                    },
-                    to: 'guidance.id'
+                    to: 'direction.readingDayId'
                 }
             }
         }

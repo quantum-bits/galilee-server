@@ -9,12 +9,12 @@ class Step extends db.Model {
 
     static get relationMappings() {
         return {
-            guidance: {
+            direction: {
                 relation: db.Model.BelongsToOneRelation,
-                modelClass: __dirname + '/Guidance',
+                modelClass: __dirname + '/Direction',
                 join: {
-                    from: 'step.guidanceId',
-                    to: 'guidance.id'
+                    from: 'step.directionId',
+                    to: 'direction.id'
                 }
             }
         }

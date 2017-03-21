@@ -9,17 +9,16 @@ class Practice extends db.Model {
 
     static get relationMappings() {
         return {
-            guidance: {
+            directions: {
                 relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/Guidance',
+                modelClass: __dirname + '/Direction',
                 join: {
                     from: 'practice.id',
-                    to: 'guidance.practiceId'
+                    to: 'direction.practiceId'
                 }
             }
         }
     }
-
 }
 
 module.exports = Practice;

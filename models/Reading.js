@@ -25,16 +25,12 @@ class Reading extends db.Model {
                     to: 'passage.readingId'
                 }
             },
-            guidance: {
+            direction: {
                 relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/Guidance',
+                modelClass: __dirname + '/Direction',
                 join: {
                     from: 'reading.id',
-                    through: {
-                        from: 'readingGuidance.readingId',
-                        to: 'readingGuidance.guidanceId'
-                    },
-                    to: 'guidance.id'
+                    to: 'direction.readingId'
                 }
             }
         }
