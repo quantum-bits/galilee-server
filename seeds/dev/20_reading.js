@@ -15,7 +15,8 @@ exports.seed = function (knex, Promise) {
                 seq: 1,
                 practice: {
                     title: "Engaging Scripture in Community",
-                    summary: "What used to be the list of questions"
+                    summary: "What used to be the list of questions",
+                    infoUrl: "https://www.biblegateway.com/resources/scripture-engagement"
                 },
                 steps: [
                     { seq: 1, description: 'What is your name?' },
@@ -35,6 +36,7 @@ exports.seed = function (knex, Promise) {
                         practice: {
                             title: "Praying Scripture",
                             summary: "Summary of Praying Scripture",
+                            infoUrl: "https://www.biblegateway.com/resources/scripture-engagement/praying-scripture/home"
                         }
                     },
                     {
@@ -42,6 +44,7 @@ exports.seed = function (knex, Promise) {
                         practice: {
                             title: "Lectio Divina",
                             summary: "Summary of Lectio Divina",
+                            infoUrl: "https://www.biblegateway.com/resources/scripture-engagement/lectio-divina/home"
                         },
                         steps: [
                             {
@@ -67,6 +70,7 @@ exports.seed = function (knex, Promise) {
                         practice: {
                             title: "Scripture Engagement Through Visual Art",
                             summary: "Summary of Scripture Engagement Through Visual Art",
+                            infoUrl: "https://www.biblegateway.com/resources/scripture-engagement/art/home"
                         },
                         steps: [
                             {
@@ -141,6 +145,7 @@ exports.seed = function (knex, Promise) {
                         practice: {
                             title: "Journaling Scripture",
                             summary: "Summary of Journaling Scripture",
+                            infoUrl: "https://www.biblegateway.com/resources/scripture-engagement/journaling-scripture/home"
                         }
                     }
                 ]

@@ -213,27 +213,30 @@ function randomReference() {
 
 let _practiceObjects = null;
 function randomPractices() {
+    const baseUrl = 'https://www.biblegateway.com/resources/scripture-engagement';
     if (_practiceObjects === null) {
-        const practiceTitles = [
-            'Dramatizing Scripture',
-            'Hand Copying Scripture',
-            'The Ignatian Method',
-            'Journaling Scripture',
-            'Lectio Divina',
-            'Manuscript Bible Study',
-            'Memorizing Scripture',
-            'Praying Scripture',
-            'Public Reading of Scripture',
-            'Scripture Engagement Through Visual Art',
-            'Singing Scripture',
-            'Speaking Scripture',
-            'Storying Scripture'
+        const practiceData = [
+            {title: 'Dramatizing Scripture', url: baseUrl + '/dramatizing-scripture/home'},
+            {title: 'Hand Copying Scripture', url: baseUrl + '/hand-copying-scripture/home'},
+            {title: 'The Ignatian Method', url: baseUrl + '/ignatian-method/home'},
+            {title: 'Journaling Scripture', url: baseUrl + '/journaling-scripture/home'},
+            {title: 'Lectio Divina', url: baseUrl + '/lectio-divina/home'},
+            {title: 'Manuscript Bible Study', url: baseUrl + '/manuscript-bible-study/home'},
+            {title: 'Memorizing Scripture', url: baseUrl + '/scripture-memorization/home'},
+            {title: 'Praying Scripture', url: baseUrl + '/praying-scripture/home'},
+            {title: 'Public Reading of Scripture', url: baseUrl + '/public-reading-scripture/home'},
+            {title: 'Scripture Engagement Through Visual Art', url: baseUrl + '/art/home'},
+            {title: 'Singing Scripture', url: baseUrl + '/singing-scripture/home'},
+            {title: 'Speaking Scripture', url: baseUrl + '/speaking-scripture/home'},
+            {title: 'Storying Scripture', url: baseUrl + '/storying-scripture/home'},
+            {title: 'Engaging Scripture in Community', url: baseUrl}
         ];
 
-        _practiceObjects = _.map(practiceTitles, (title, idx) => ({
+        _practiceObjects = _.map(practiceData, (data, idx) => ({
             _id: `practice-${idx}`,
             _used: false,
-            title: title,
+            title: data.title,
+            infoUrl: data.url
         }));
     }
 
@@ -250,7 +253,8 @@ function randomPractices() {
             return {
                 "#id": pracObj._id,
                 title: pracObj.title,
-                summary: `Summary of ${pracObj.title}`
+                summary: `Summary of ${pracObj.title}`,
+                infoUrl: pracObj.infoUrl
             };
         }
     });
