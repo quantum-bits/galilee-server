@@ -78,7 +78,15 @@ exports.up = function (knex, Promise) {
             .then(() => knex.schema.dropTable('step'))
             // Rename 'newStep' to take the place of 'step'. Then reconnect the new 'step'.
             .then(() => knex.schema.renameTable('newStep', 'step'))
-            .then(() => knex.schema.table('journalEntry', table => table.integer('stepId').references('step.id')))
+            .then(() => knex.schema.table('journalEntry', table => {
+                table.integer('stepId').references('step.id')
+            }))
+            .then(() => knex.schema.createTableIfNotExists('stepResource', table => {
+                // Recreate the stepResource table.
+                table.integer('stepId').references('step.id').onDelete('CASCADE');
+                table.uuid('resourceId').references('resource.id');
+                table.primary(['stepId', 'resourceId']);
+            }))
             // The 'question' and 'application' tables no longer used.
             .then(() => knex.schema.dropTable('question'))
             .then(() => knex.schema.dropTable('application'))

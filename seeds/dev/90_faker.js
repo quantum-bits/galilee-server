@@ -250,8 +250,7 @@ function randomPractices() {
             return {
                 "#id": pracObj._id,
                 title: pracObj.title,
-                summary: `Summary of ${pracObj.title}`,
-                description: `Description of ${pracObj.title}`
+                summary: `Summary of ${pracObj.title}`
             };
         }
     });
@@ -264,7 +263,7 @@ function randomSteps() {
     }));
 }
 
-function randomApplications() {
+function randomDirections() {
     return _.map(randomPractices(), (practice, index) => ({
         practice: practice,
         seq: index + 1,
@@ -279,16 +278,9 @@ function randomReadings() {
             seq: n + 1,
             stdRef: ref.stdRef,
             osisRef: ref.osisRef,
-            applications: randomApplications()
+            directions: randomDirections()
         };
     });
-}
-
-function randomQuestions() {
-    return _.times(random.integer(2, 3), n => ({
-        seq: n + 1,
-        text: _.capitalize(faker.lorem.words(random.integer(3, 6)) + '?')
-    }));
 }
 
 function seedReadingDays() {
@@ -298,7 +290,7 @@ function seedReadingDays() {
 
     const readingDays = _.map(Array.from(range.by('days')), currentDate => ({
         date: currentDate,
-        questions: randomQuestions(),
+        directions: randomDirections(),
         readings: randomReadings()
     }));
     return ReadingDay.query().insertGraph(readingDays);

@@ -16,7 +16,20 @@ class Step extends db.Model {
                     from: 'step.directionId',
                     to: 'direction.id'
                 }
+            },
+            resources: {
+                relation: db.Model.ManyToManyRelation,
+                modelClass: __dirname + '/Resource',
+                join: {
+                    from: 'step.id',
+                    through: {
+                        from: 'stepResource.stepId',
+                        to: 'stepResource.resourceId'
+                    },
+                    to: 'resource.id'
+                }
             }
+
         }
     }
 }
