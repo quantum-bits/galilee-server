@@ -96,10 +96,10 @@ exports.register = function (server, options, next) {
                 ReadingDay.query()
                     .where('date', request.pre.date)
                     .first()
-                    .eager('[readings(bySeq).guidance.[practice,steps(bySeq)],guidance.[practice,steps(bySeq)]]', {
+                    .eager('[readings(bySeq).directions.[practice,steps(bySeq)],directions.[practice,steps(bySeq)]]', {
                         bySeq: qBuilder => qBuilder.orderBy('seq')
                     })
-                    .omit(['readingDayId', 'readingId', 'practiceId', 'guidanceId'])
+                    .omit(['readingDayId', 'readingId', 'practiceId', 'directionId'])
                     .then(readingDay => {
                         if (!readingDay) {
                             reply(Boom.notFound(`No reading data for '${request.pre.date}'`));

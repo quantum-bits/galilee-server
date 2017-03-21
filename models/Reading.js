@@ -25,7 +25,7 @@ class Reading extends db.Model {
                     to: 'passage.readingId'
                 }
             },
-            direction: {
+            directions: {
                 relation: db.Model.HasManyRelation,
                 modelClass: __dirname + '/Direction',
                 join: {

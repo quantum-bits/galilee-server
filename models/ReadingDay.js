@@ -17,7 +17,7 @@ class ReadingDay extends db.Model {
                     to: 'reading.readingDayId'
                 }
             },
-            direction: {
+            directions: {
                 relation: db.Model.HasManyRelation,
                 modelClass: __dirname + '/Direction',
                 join: {
