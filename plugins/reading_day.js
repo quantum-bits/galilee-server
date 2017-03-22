@@ -49,6 +49,35 @@ exports.register = function (server, options, next) {
         return rtnVersion;
     }
 
+    // Resolve a reading's passage from the given version. If the passage is already in the database,
+    // use it directly. Otherwise, fetch it and cache it in the database. Augment the reading object
+    // with the text and version of the passage.
+    function resolvePassage(reading, version) {
+        debug(`Resolve ${reading.osisRef} from ${version.code}`);
+        return Passage.query()
+            .where('readingId', reading.id)
+            .andWhere('versionId', version.id)
+            .first()
+            .then(result => {
+                if (result) {
+                    debug("Already in DB");
+                    return result.content;
+                } else {
+                    debug("Fetch from service");
+                    return bibleService.fetchPassage(version.code, reading.osisRef).then(content => {
+                        return Passage.query().insert({
+                            readingId: reading.id,
+                            versionId: version.id,
+                            content: content
+                        }).then(() => content);
+                    });
+                }
+            }).then(content => {
+                reading.text = content;
+                reading.version = version;
+                return reading;
+            });
+    }
 
     server.route([
         {
