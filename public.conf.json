@@ -20,12 +20,12 @@
     "db": {
       "client": "pg",
       "connection": {
-        "database": "galilee",
+        "database": "staging",
         "host": "localhost",
         "charset": "utf8"
       },
       "seeds": {
-        "directory": "./seeds/dev"
+        "directory": "./seeds/prod"
       },
       "pool": {
         "min": 2,

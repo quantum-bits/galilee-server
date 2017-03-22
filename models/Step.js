@@ -9,12 +9,12 @@ class Step extends db.Model {
 
     static get relationMappings() {
         return {
-            application: {
+            direction: {
                 relation: db.Model.BelongsToOneRelation,
-                modelClass: __dirname + '/Application',
+                modelClass: __dirname + '/Direction',
                 join: {
-                    from: 'step.applicationId',
-                    to: 'application.id'
+                    from: 'step.directionId',
+                    to: 'direction.id'
                 }
             },
             resources: {
@@ -29,9 +29,9 @@ class Step extends db.Model {
                     to: 'resource.id'
                 }
             }
+
         }
     }
-
 }
 
 module.exports = Step;

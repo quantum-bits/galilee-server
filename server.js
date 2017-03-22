@@ -84,7 +84,6 @@ function configureServer(masterConfig, bibleService) {
             {register: require('./plugins/forum')},
             {register: require('./plugins/journal')},
             {register: require('./plugins/practice')},
-            {register: require('./plugins/question')},
             {register: require('./plugins/reading')},
             {register: require('./plugins/reading_day'), options: {bibleService: bibleService}},
             {register: require('./plugins/static')},

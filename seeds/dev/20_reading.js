@@ -10,23 +10,33 @@ exports.seed = function (knex, Promise) {
 
     return ReadingDay.query().insertGraph({
         date: '2016-02-02',
-        questions: [
-            { seq: 1, text: 'What is your name?' },
-            { seq: 2, text: 'What is your quest?' },
-            { seq: 3, text: 'What is your favorite color?' }
+        directions: [
+            {
+                seq: 1,
+                practice: {
+                    title: "Engaging Scripture in Community",
+                    summary: "What used to be the list of questions",
+                    infoUrl: "https://www.biblegateway.com/resources/scripture-engagement"
+                },
+                steps: [
+                    { seq: 1, description: 'What is your name?' },
+                    { seq: 2, description: 'What is your quest?' },
+                    { seq: 3, description: 'What is your favorite color?' }
+                ]
+            }
         ],
         readings: [
             {
                 seq: 1,
                 stdRef: 'Hosea 1.2-10',
                 osisRef: 'Hos.1.2-Hos.1.10',
-                applications: [
+                directions: [
                     {
                         seq: 1,
                         practice: {
                             title: "Praying Scripture",
                             summary: "Summary of Praying Scripture",
-                            description: "Description of Praying Scripture"
+                            infoUrl: "https://www.biblegateway.com/resources/scripture-engagement/praying-scripture/home"
                         }
                     },
                     {
@@ -34,7 +44,7 @@ exports.seed = function (knex, Promise) {
                         practice: {
                             title: "Lectio Divina",
                             summary: "Summary of Lectio Divina",
-                            description: "Description of Lectio Divina"
+                            infoUrl: "https://www.biblegateway.com/resources/scripture-engagement/lectio-divina/home"
                         },
                         steps: [
                             {
@@ -60,7 +70,7 @@ exports.seed = function (knex, Promise) {
                         practice: {
                             title: "Scripture Engagement Through Visual Art",
                             summary: "Summary of Scripture Engagement Through Visual Art",
-                            description: "Description of Scripture Engagement Through Visual Art"
+                            infoUrl: "https://www.biblegateway.com/resources/scripture-engagement/art/home"
                         },
                         steps: [
                             {
@@ -129,13 +139,13 @@ exports.seed = function (knex, Promise) {
                 seq: 2,
                 stdRef: 'Psalm 85',
                 osisRef: 'Ps.85',
-                applications: [
+                directions: [
                     {
                         seq: 1,
                         practice: {
                             title: "Journaling Scripture",
                             summary: "Summary of Journaling Scripture",
-                            description: "Description of Journaling Scripture"
+                            infoUrl: "https://www.biblegateway.com/resources/scripture-engagement/journaling-scripture/home"
                         }
                     }
                 ]
