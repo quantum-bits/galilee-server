@@ -5,23 +5,19 @@ const Path = require('path');
 const moment = require('moment');
 const debug = require('debug')('server');
 
-const Bible = require('./lib/bible');
+const BibleService = require('./lib/bible');
 const User = require('./models/User');
 
+// Initialize services required by the server, then the server itself. Returns
+// a promise that resolves to the Hapi server.
 exports.initializeServer = function () {
     const masterConfig = require('./master-config');
 
-    return new Bible.AuthenticationService()
-        .init(masterConfig.get('bg:username'), masterConfig.get('bg:password'))
-        .then(authService => {
-            debug("%O", authService);
-            return new Bible.BibleService().init(authService)
-        })
-        .then(bibleService => {
-            debug("%O", bibleService);
-            return configureServer(masterConfig, bibleService)
-        });
-}
+    return new BibleService(masterConfig).then(bibleService => {
+        debug("%O", bibleService);
+        return configureServer(masterConfig, bibleService)
+    });
+};
 
 // This function returns a promise that's resolved by the newly configured server.
 function configureServer(masterConfig, bibleService) {
@@ -85,7 +81,6 @@ function configureServer(masterConfig, bibleService) {
 
             {register: require('./plugins/admin')},
             {register: require('./plugins/application')},
-            {register: require('./plugins/bg'), options: {bibleService: bibleService}},
             {register: require('./plugins/forum')},
             {register: require('./plugins/journal')},
             {register: require('./plugins/practice')},
@@ -143,5 +138,4 @@ function configureServer(masterConfig, bibleService) {
         // If no callback (as here), returns a promise object
         // (cf. https://hapijs.com/api#serverregisterplugins-options-callback).
     ).then(() => server);
-
 }

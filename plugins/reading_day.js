@@ -43,7 +43,10 @@ exports.register = function (server, options, next) {
         const defaultVersion = bibleService.defaultVersion;
 
         debug("%o %o %o", paramsVersion, userVersion, defaultVersion);
-        return paramsVersion || userVersion || defaultVersion;
+        const rtnVersion = paramsVersion || userVersion || defaultVersion;
+        assert(rtnVersion, `Can't resolve version for ${request}`);
+
+        return rtnVersion;
     }
 
     // Resolve a reading's passage from the given version. If the passage is already in the database,
