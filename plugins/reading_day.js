@@ -2,6 +2,7 @@
 
 const Boom = require('boom');
 const Joi = require('joi');
+const assert = require('assert');
 
 const debug = require('debug')('readingday');
 
@@ -49,36 +50,6 @@ exports.register = function (server, options, next) {
         return rtnVersion;
     }
 
-    // Resolve a reading's passage from the given version. If the passage is already in the database,
-    // use it directly. Otherwise, fetch it from BG and store it in the database. In either case,
-    // the reading will be updated with the passage content and version.
-    function resolvePassage(reading, version) {
-        debug(`Resolve ${reading.osisRef} from ${version.code}`);
-        return Passage.query()
-            .where('readingId', reading.id)
-            .andWhere('versionId', version.id)
-            .first()
-            .then(result => {
-                if (result) {
-                    debug("Already in DB");
-                    return result.content;
-                } else {
-                    debug("Fetch from BG");
-                    return bibleService.getPassage(version.code, reading.osisRef).then(response => {
-                        const content = response.passages[0].content;
-                        return Passage.query().insert({
-                            readingId: reading.id,
-                            versionId: version.id,
-                            content: content
-                        }).then(() => content);
-                    });
-                }
-            }).then(content => {
-                reading.text = content;
-                reading.version = version;
-                return reading;
-            });
-    }
 
     server.route([
         {
