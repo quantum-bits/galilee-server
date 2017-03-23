@@ -19,15 +19,34 @@ exports.register = function (server, options, next) {
         }, {})
     }
 
-    // Get the number of readings for each reading day, including reading days
-    // in the database with which no readings have yet been associated.
-    server.method('getReadingStats', function (next) {
-        ReadingDay.query()
+    function dateRange() {
+        let now = moment();
+        return {
+            from: now.startOf('week').subtract(2, 'weeks').format('YYYY-MM-DD'),
+            to: now.endOf('week').add(2, 'weeks').format('YYYY-MM-DD')
+        }
+    }
+
+    // Get the number of readings for each reading day.
+    server.method('getReadingStats', function (scope, next) {
+        let isAdmin = scope.find(elt => elt == 'admin');
+
+        let query = ReadingDay.query()
             .select('readingDay.date')
             .count('reading.id')
             .leftOuterJoin('reading', 'reading.readingDayId', 'readingDay.id')
             .groupBy('readingDay.id')
-            .orderBy('readingDay.date')
+            .orderBy('readingDay.date');
+
+        if (!isAdmin) {
+            // Ordinary user; limit date range.
+            let range = dateRange();
+            query
+                .where('readingDay.date', '>=', range.from)
+                .where('readingDay.date', '<=', range.to);
+        }
+
+        query
             .then(result => next(null, arrayOfObjToObj(result)))
             .catch(err => next(err, null));
     });
@@ -76,7 +95,7 @@ exports.register = function (server, options, next) {
                 description: 'Readings metadata',
                 auth: 'jwt',
                 pre: [
-                    {assign: 'readingStats', method: 'getReadingStats()'}
+                    {assign: 'readingStats', method: 'getReadingStats(auth.credentials.scope)'}
                 ]
             },
             handler: function (request, reply) {
