@@ -74,7 +74,10 @@ exports.register = function (server, options, next) {
                 }
             }).then(content => {
                 reading.text = content;
-                reading.version = version;
+                reading.version = {
+                    code: version.code,
+                    title: version.title
+                };
                 return reading;
             });
     }
