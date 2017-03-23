@@ -42,7 +42,7 @@ exports.register = function (server, options, next) {
 
         const defaultVersion = bibleService.defaultVersion;
 
-        debug("%o %o %o", paramsVersion, userVersion, defaultVersion);
+        debug("Params %O\nUser %O\nDefault %O", paramsVersion, userVersion, defaultVersion);
         const rtnVersion = paramsVersion || userVersion || defaultVersion;
         assert(rtnVersion, `Can't resolve version for ${request}`);
 
