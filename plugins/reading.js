@@ -20,10 +20,13 @@ exports.register = function (server, options, next) {
     }
 
     function dateRange() {
-        let now = moment();
+        // Moments are mutable; clone one so we are certain that we start from the
+        // same date, even if we cross midnight between endpoints.
+        let now1 = moment();
+        let now2 = now1.clone();
         return {
-            from: now.startOf('week').subtract(2, 'weeks').format('YYYY-MM-DD'),
-            to: now.endOf('week').add(2, 'weeks').format('YYYY-MM-DD')
+            from: now1.startOf('week').subtract(2, 'weeks').format('YYYY-MM-DD'),
+            to: now2.endOf('week').add(2, 'weeks').format('YYYY-MM-DD')
         }
     }
 
