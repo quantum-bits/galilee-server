@@ -48,12 +48,12 @@
     "joi": "^10.2.2",
     "knex": "^0.12.6",
     "lodash": "^4.17.4",
-    "lout": "^9.2.0",
+    "lout": "^10.0.1",
     "marked": "^0.3.6",
     "moment": "^2.17.1",
     "moment-range": "^3.0.2",
     "nconf": "^0.8.4",
-    "objection": "^0.6.2",
+    "objection": "^0.7.10",
     "pg": "^6.1.2",
     "pm2": "^2.4.0",
     "random-js": "^1.0.8",
@@ -64,12 +64,12 @@
     "vision": "^4.1.1"
   },
   "devDependencies": {
-    "@types/knex": "0.0.43",
+    "@types/knex": "0.0.44",
     "babel-cli": "^6.22.2",
     "babel-preset-es2015": "^6.22.0",
     "code": "^4.0.0",
-    "faker": "^3.1.0",
-    "lab": "^12.1.0",
+    "faker": "^4.1.0",
+    "lab": "^13.0.1",
     "lab-babel": "^1.1.1",
     "nodemon": "^1.11.0"
   }
