@@ -55,8 +55,3 @@ WHERE title = 'Storying Scripture';
 UPDATE practice
 SET "infoUrl" = 'https://www.biblegateway.com/resources/scripture-engagement/ignatian-method/home'
 WHERE title = 'The Ignatian Method';
-
-UPDATE practice
-SET title   = 'Engaging Scripture in Community',
-  "infoUrl" = 'https://www.biblegateway.com/resources/scripture-engagement/ignatian-method/home'
-WHERE title = 'Small Group';
