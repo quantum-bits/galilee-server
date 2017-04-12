@@ -43,7 +43,8 @@ exports.up = function (knex, Promise) {
         return knex('practice').returning('id').insert({
             title: 'Engaging Scripture in Community',
             summary: '',
-            description: ''
+            description: '',
+            infoUrl: 'https://www.biblegateway.com/resources/scripture-engagement/main/small-group-introduction'
         }).then(practiceId => {
             // For each reading day
             return knex.select('id').from('readingDay').map(readingDayRow => {
