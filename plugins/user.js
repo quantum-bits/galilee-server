@@ -108,6 +108,29 @@ exports.register = function (server, options, next) {
         },
 
         {
+            method: 'PATCH',
+                path: '/users/preferredVersionId',
+            config: {
+            description: 'Update user password',
+                validate: {
+                    payload: {
+                        preferredVersionId: Joi.number().integer().required()
+                    }
+                },
+                auth: 'jwt'
+            },
+            handler: (request, reply) => {
+                User.query()
+                    .patchAndFetchById(request.auth.credentials.id, request.payload)
+                    .omit(['password'])
+                    .then(user => reply(user))
+                    .catch(err => reply(Boom.badImplementation(err)));
+            }
+        },
+
+
+
+        {
             method: 'GET',
             path: '/users/permissions',
             config: {
@@ -121,6 +144,7 @@ exports.register = function (server, options, next) {
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         },
+
 
         {
             method: 'POST',
