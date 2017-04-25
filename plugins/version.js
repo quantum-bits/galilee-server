@@ -22,6 +22,22 @@ exports.register = function (server, options, next) {
             handler: function (request, reply) {
                 reply(bibleService.getAuthorizedVersions());
             }
+        },
+
+        {
+            method: 'GET',
+            path: '/versions/{id}',
+            config: {
+                description: "Get a version by id",
+                validate: {
+                    params: {
+                        id: Joi.number().integer().required().description('Reading ID')
+                    }
+                }
+            },
+            handler: function (request, reply) {
+                reply(bibleService.findVersionById(request.params.id));
+            }
         }
     ]);
 
