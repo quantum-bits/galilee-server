@@ -32,8 +32,10 @@ exports.register = function (server, options, next) {
 
     // Get the number of readings for each reading day.
     server.method('getReadingStats', function (scope, next) {
-        let isAdmin = scope.find(elt => elt == 'admin');
-
+        let isAdmin = false; 
+        if(scope !== undefined){
+           isAdmin = scope.find(elt => elt == 'admin'); 
+        }
         let query = ReadingDay.query()
             .select('readingDay.date')
             .count('reading.id')
@@ -96,7 +98,10 @@ exports.register = function (server, options, next) {
             path: '/readings/meta',
             config: {
                 description: 'Readings metadata',
-                auth: 'jwt',
+                auth:{ 
+                    strategy: 'jwt',
+                    mode: 'try'
+                },
                 pre: [
                     {assign: 'readingStats', method: 'getReadingStats(auth.credentials.scope)'}
                 ]
