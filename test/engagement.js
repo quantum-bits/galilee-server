@@ -1,8 +1,8 @@
 'use strict';
 
+
 import {initTest, expect, server, db} from './support';
 const lab = exports.lab = initTest();
-
 const Practice = require('../models/Practice');
 
 lab.experiment('Test engagement endpoints', () => {
@@ -17,42 +17,14 @@ lab.experiment('Test engagement endpoints', () => {
                         .query()
                         .insertGraph({
                             title: "Lectio Divina",
-                            description: "Description of Lectio Divina",
-                            details: [
-                                {
-                                    title: "Lectio Divina Tips",
-                                    description: "Tips on Lectio Divina"
-                                },
-                                {
-                                    title: "Lectio Divina in a small group",
-                                    description: "Tips on Lectio Divina in a small group"
-                                },
-                                {
-                                    title: "Lectio Divina resources",
-                                    description: "Resources for Lectio Divina"
-                                }
-                            ]
+                            summary: "Description of Lectio Divina",
                         }),
 
                     Practice
                         .query()
                         .insertGraph({
                             title: "Praying Scripture",
-                            description: "Description of Praying Scripture",
-                            details: [
-                                {
-                                    title: "Praying Scripture Tips",
-                                    description: "Tips on Praying Scripture"
-                                },
-                                {
-                                    title: "Praying Scripture in a small group",
-                                    description: "Tips on Praying Scripture in a small group"
-                                },
-                                {
-                                    title: "Praying Scripture resources",
-                                    description: "Resources for Praying Scripture"
-                                }
-                            ]
+                            summary: "Description of Praying Scripture",
                         })
 
                 ]).catch(err => {
@@ -74,7 +46,7 @@ lab.experiment('Test engagement endpoints', () => {
                 console.log("RES", JSON.stringify(response, null, 4));
                 expect(res.statusCode).to.equal(200);
                 expect(response).to.have.length(2);
-                expect(response[0].details).to.have.length(3);
+                expect(response[0].title).to.equal("Lectio Divina");
                 done();
             });
     });

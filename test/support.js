@@ -26,10 +26,12 @@ exports.initTest = function() {
     const lab = Lab.script();
 
     lab.before((done) => {
-        Server((err, server) => {
+	console.log("Initialize Server Start!");
+        Server.initializeServer((err, server) => {
             if (err) {
                 Hoek.assert(!err, err);
             }
+	    console.log("Initialize Server Middle!");
             server.initialize(err => {
                 Hoek.assert(!err, err);
             });
@@ -37,6 +39,7 @@ exports.initTest = function() {
             server.log("Server initialized");
             done();
         })
+	console.log("Initialize Server End!");
     });
 
     return lab;
