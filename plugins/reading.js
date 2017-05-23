@@ -98,7 +98,7 @@ exports.register = function (server, options, next) {
             path: '/readings/meta',
             config: {
                 description: 'Readings metadata',
-                auth:{ 
+                auth:{
                     strategy: 'jwt',
                     mode: 'try'
                 },
