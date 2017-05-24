@@ -109,9 +109,9 @@ exports.register = function (server, options, next) {
 
         {
             method: 'PATCH',
-                path: '/users/preferredVersionId',
+                path: '/users/version',
             config: {
-            description: 'Update user password',
+            description: 'Update preferred version',
                 validate: {
                     payload: {
                         preferredVersionId: Joi.number().integer().required()
