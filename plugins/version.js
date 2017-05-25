@@ -26,6 +26,22 @@ exports.register = function (server, options, next) {
 
         {
             method: 'GET',
+            path: '/versions/default',
+            config: {
+                description: "Get default version"
+            },
+            handler: function (request, reply) {
+                let version = bibleService.getDefaultVersion();
+                reply({
+                    id: version.id,
+                    code: version.code,
+                    title: version.title
+                });
+            }
+        },
+
+        {
+            method: 'GET',
             path: '/versions/{id}',
             config: {
                 description: "Get a version by id",
@@ -36,9 +52,15 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                reply(bibleService.findVersionById(request.params.id));
+                let version = bibleService.findVersionById(request.params.id);
+                reply({
+                    id: version.id,
+                    code: version.code,
+                    title: version.title
+                });
             }
         }
+
     ]);
 
     next();
