@@ -22,17 +22,11 @@ exports.expect = Code.expect;
 const Server = require('../server');
 exports.server = null;
 
-exports.initTest = function() {
+exports.initTest = function () {
     const lab = Lab.script();
 
     lab.before((done) => {
-        Server((err, server) => {
-            if (err) {
-                Hoek.assert(!err, err);
-            }
-            server.initialize(err => {
-                Hoek.assert(!err, err);
-            });
+        Server.initializeServer().then(server => {
             exports.server = server;
             server.log("Server initialized");
             done();

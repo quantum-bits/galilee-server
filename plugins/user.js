@@ -10,18 +10,90 @@ const Version = require('../models/Version');
 
 exports.register = function (server, options, next) {
 
+    function isAdminUser(request) {
+        return request.auth.credentials.scope.find(scope => scope === 'admin');
+    }
+
+    function isAuthorizedForUser(request) {
+        return (request.params.id === request.auth.credentials.id || isAdminUser(request));
+    }
+
     server.route([
+
+        {
+            method: 'POST',
+            path: '/users',
+            config: {
+                description: 'Sign up a new user',
+                pre: [
+                    {assign: 'user', method: 'getUserByEmail(payload.email)'}
+                ],
+                validate: {
+                    payload: {
+                        email: Joi.string().email().required(),
+                        password: Joi.string().min(6).required(),
+                        firstName: Joi.string().required(),
+                        lastName: Joi.string().required(),
+                        preferredVersionId: Joi.number().integer().required()
+                    }
+                }
+            },
+            handler: function (request, reply) {
+                if (request.pre.user) {
+                    reply(Boom.conflict('E-mail address already in use.'));
+                } else {
+                    Config.getDefaultVersion().then(version =>
+                        User.query()
+                            .insertAndFetch({
+                                email: request.payload.email,
+                                password: request.payload.password,
+                                firstName: request.payload.firstName,
+                                lastName: request.payload.lastName,
+                                preferredVersionId: version.id
+                            })
+                            .omit(['password'])
+                            .then(user => reply(user))
+                            .catch(err => reply(Boom.badImplementation(err))));
+                }
+            }
+        },
 
         {
             method: 'GET',
             path: '/users',
             config: {
-                description: 'Retrieve data for current user',
+                description: 'Retrieve data for all users',
                 auth: 'jwt'
             },
             handler: function (request, reply) {
+                if (!isAdminUser(request)) {
+                    return reply(Boom.unauthorized('Insufficient permission'));
+                }
                 User.query()
-                    .where('id', request.auth.credentials.id)
+                    .eager('[permissions,version,groups.organization]')
+                    .omit(['password', 'organizationId'])
+                    .then(users => reply(users));
+            }
+        },
+
+        {
+            method: 'GET',
+            path: '/users/{id}',
+            config: {
+                description: 'Retrieve data for a user',
+                auth: 'jwt',
+                validate: {
+                    params: {
+                        id: Joi.number().integer().required().description('User ID')
+                    }
+                }
+            },
+            handler: function (request, reply) {
+                if (!isAuthorizedForUser(request)) {
+                    return reply(Boom.unauthorized(`Not authorized for user ${request.params.id}`));
+                }
+                User.query()
+                    .where('id', request.params.id)
                     .eager('[permissions,version,groups.organization]')
                     .omit(['password', 'organizationId'])
                     .first()
@@ -109,9 +181,9 @@ exports.register = function (server, options, next) {
 
         {
             method: 'PATCH',
-                path: '/users/version',
+            path: '/users/version',
             config: {
-            description: 'Update preferred version',
+                description: 'Update preferred version',
                 validate: {
                     payload: {
                         preferredVersionId: Joi.number().integer().required()
@@ -128,8 +200,6 @@ exports.register = function (server, options, next) {
             }
         },
 
-
-
         {
             method: 'GET',
             path: '/users/permissions',
@@ -144,46 +214,6 @@ exports.register = function (server, options, next) {
                     .catch(err => reply(Boom.badImplementation(err)));
             }
         },
-
-
-        {
-            method: 'POST',
-            path: '/users',
-            config: {
-                description: 'Sign up a new user',
-                pre: [
-                    {assign: 'user', method: 'getUserByEmail(payload.email)'}
-                ],
-                validate: {
-                    payload: {
-                        email: Joi.string().email().required(),
-                        password: Joi.string().min(6).required(),
-                        firstName: Joi.string().required(),
-                        lastName: Joi.string().required(),
-                        // TODO: This should become a required field in the payload.
-                        preferredVersionId: Joi.number().integer()
-                    }
-                }
-            },
-            handler: function (request, reply) {
-                if (request.pre.user) {
-                    reply(Boom.conflict('E-mail address already in use.'));
-                } else {
-                    Config.getDefaultVersion().then(version =>
-                        User.query()
-                            .insertAndFetch({
-                                email: request.payload.email,
-                                password: request.payload.password,
-                                firstName: request.payload.firstName,
-                                lastName: request.payload.lastName,
-                                preferredVersionId: version.id
-                            })
-                            .omit(['password'])
-                            .then(user => reply(user))
-                            .catch(err => reply(Boom.badImplementation(err))));
-                }
-            }
-        }
 
     ]);
 

@@ -11,6 +11,7 @@ exports.register = function (server, options, next) {
 
     const JWT_SECRET_KEY = server.settings.app.config.get('jwt-key');
 
+    // Validation function for Javascript Web Token authentication strategy
     function validate(decoded, request, callback) {
         if (decoded.hasOwnProperty('userId')) {
             server.methods.getUserById(decoded.userId, (err, user) => {
