@@ -3,56 +3,90 @@
 import {initTest, expect, server, db} from './support';
 const lab = exports.lab = initTest();
 
-const Practice = require('../models/Practice');
+const ReadingDay = require('../models/ReadingDay');
+const Config = require('../models/Config');
+const User = require('../models/User');
 
 lab.experiment('Test engagement endpoints', () => {
 
     let testPractices = null;
 
     lab.beforeEach(done => {
-        return db.knex.raw('TRUNCATE public.practice CASCADE')
+        return db.deleteAllData()
             .then(result => {
                 return Promise.all([
-                    Practice
-                        .query()
-                        .insertGraph({
-                            title: "Lectio Divina",
-                            description: "Description of Lectio Divina",
-                            details: [
-                                {
-                                    title: "Lectio Divina Tips",
-                                    description: "Tips on Lectio Divina"
-                                },
-                                {
-                                    title: "Lectio Divina in a small group",
-                                    description: "Tips on Lectio Divina in a small group"
-                                },
-                                {
-                                    title: "Lectio Divina resources",
-                                    description: "Resources for Lectio Divina"
-                                }
-                            ]
-                        }),
+                    Config.query()
+                        .insertGraph([
+                            {key: 'upload-root', value: '../resources'},
+                            {key: 'bg-access-token', value: null},
+                            {key: 'default-version', value: 'MSG'}
+                        ]),
 
-                    Practice
-                        .query()
-                        .insertGraph({
-                            title: "Praying Scripture",
-                            description: "Description of Praying Scripture",
-                            details: [
-                                {
-                                    title: "Praying Scripture Tips",
-                                    description: "Tips on Praying Scripture"
-                                },
-                                {
-                                    title: "Praying Scripture in a small group",
-                                    description: "Tips on Praying Scripture in a small group"
-                                },
-                                {
-                                    title: "Praying Scripture resources",
-                                    description: "Resources for Praying Scripture"
+                    User.query()
+                        .insertGraph([
+                            {
+                                email: 'student@example.com',
+                                password: 'student-password',
+                                firstName: 'Jane',
+                                lastName: 'Student',
+                                joinedOn: '2017-01-04',
+                                enabled: true,
+                                version: {
+                                    '#id': 'version-ver',
+                                    code: 'VER',
+                                    title: 'Version of the Bible'
                                 }
-                            ]
+                            },
+                            {
+                                email: 'admin@example.com',
+                                password: 'admin-password',
+                                firstName: 'June',
+                                lastName: 'Admin',
+                                joinedOn: '2017-02-04',
+                                enabled: true,
+                                version: {
+                                    '#ref': 'version-ver'
+                                },
+                                permissions: [
+                                    {
+                                        id: 'ADMIN',
+                                        title: 'Administrator'
+                                    }
+                                ]
+                            }
+                        ]),
+
+                    ReadingDay.query()
+                        .insertGraph({
+                            date: '2017-07-04',
+                            name: 'Independence Day',
+                            readings: [
+                                {
+                                    seq: 1,
+                                    stdRef: 'Jude 1:20',
+                                    osisRef: 'Jude.1.20',
+                                    directions: [
+                                        {
+                                            seq: 1,
+                                            practice: {
+                                                title: "Lectio Divina",
+                                                summary: "Summary of Lectio Divina",
+                                                infoUrl: "http://biblegateway.com",
+                                            },
+                                            steps: [
+                                                {
+                                                    seq: 1,
+                                                    description: "Do step 1"
+                                                },
+                                                {
+                                                    seq: 2,
+                                                    description: "Do step 2"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
                         })
 
                 ]).catch(err => {
@@ -64,11 +98,29 @@ lab.experiment('Test engagement endpoints', () => {
             })
     });
 
+    lab.test('Log in', done => {
+        server.inject({
+            method: 'POST',
+            url: '/api/authenticate',
+            payload: {
+                email: 'student@example.com',
+                password: 'student-password'
+            }
+        }, res => {
+            const response = JSON.parse(res.payload);
+            console.log("REQUEST", JSON.stringify(res.request.auth, null, 4));
+            console.log("RESPONSE", JSON.stringify(response, null, 4));
+            expect(res.statusCode).to.equal(200);
+            expect(response.jwtIdToken).to.have.length(145);
+            done();
+        });
+    });
+
     lab.test('Fetch all practices', done => {
         server.inject(
             {
                 method: 'GET',
-                url: '/practices'
+                url: '/api/practices'
             }, res => {
                 const response = JSON.parse(res.payload);
                 console.log("RES", JSON.stringify(response, null, 4));
@@ -85,7 +137,7 @@ lab.experiment('Test engagement endpoints', () => {
         server.inject(
             {
                 method: 'GET',
-                url: `/practices/${practiceId}`
+                url: `/api/practices/${practiceId}`
             }, res => {
                 const response = JSON.parse(res.payload);
                 console.log("RES", JSON.stringify(response, null, 4));
@@ -100,7 +152,7 @@ lab.experiment('Test engagement endpoints', () => {
         server.inject(
             {
                 method: 'GET',
-                url: '/practices/0'
+                url: '/api/practices/0'
             }, res => {
                 const response = JSON.parse(res.payload);
                 console.log("RES", JSON.stringify(response, null, 4));

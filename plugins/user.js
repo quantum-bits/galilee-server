@@ -10,10 +10,12 @@ const Version = require('../models/Version');
 
 exports.register = function (server, options, next) {
 
+    // Is the request from a user with administrative permissions?
     function isAdminUser(request) {
         return request.auth.credentials.scope.find(scope => scope === 'admin');
     }
 
+    // Is the request from a user who is authoried to see the given user's data?
     function isAuthorizedForUser(request) {
         return (request.params.id === request.auth.credentials.id || isAdminUser(request));
     }
@@ -42,19 +44,32 @@ exports.register = function (server, options, next) {
                 if (request.pre.user) {
                     reply(Boom.conflict('E-mail address already in use.'));
                 } else {
-                    Config.getDefaultVersion().then(version =>
-                        User.query()
-                            .insertAndFetch({
-                                email: request.payload.email,
-                                password: request.payload.password,
-                                firstName: request.payload.firstName,
-                                lastName: request.payload.lastName,
-                                preferredVersionId: version.id
-                            })
-                            .omit(['password'])
-                            .then(user => reply(user))
-                            .catch(err => reply(Boom.badImplementation(err))));
+                    User.query()
+                        .insertAndFetch({
+                            email: request.payload.email,
+                            password: request.payload.password,
+                            firstName: request.payload.firstName,
+                            lastName: request.payload.lastName,
+                            preferredVersionId: request.payload.preferredVersionId
+                        })
+                        .omit(['password'])
+                        .then(user => reply(user))
+                        .catch(err => reply(Boom.badImplementation(err)));
                 }
+            }
+        },
+
+        {
+            method: 'GET',
+            path: '/users/permissions',
+            config: {
+                description: 'Fetch all permission types',
+                auth: 'jwt'
+            },
+            handler: function (request, reply) {
+                Permission.query()
+                    .then(results => reply(results))
+                    .catch(err => reply(Boom.badImplementation(err)));
             }
         },
 
@@ -62,7 +77,7 @@ exports.register = function (server, options, next) {
             method: 'GET',
             path: '/users',
             config: {
-                description: 'Retrieve data for all users',
+                description: 'Retrieve data for all users (admin only)',
                 auth: 'jwt'
             },
             handler: function (request, reply) {
@@ -110,110 +125,42 @@ exports.register = function (server, options, next) {
 
         {
             method: 'PATCH',
-            path: '/users/name',
+            path: '/users/{id}',
             config: {
-                description: 'Update user name',
+                description: 'Update user data',
                 auth: 'jwt',
                 validate: {
                     payload: {
-                        firstName: Joi.string().required(),
-                        lastName: Joi.string().required()
+                        // None of these is required, but if present must validate.
+                        firstName: Joi.string(),
+                        lastName: Joi.string(),
+                        email: Joi.string().email(),
+                        password: Joi.string().min(6),
+                        preferredVersionId: Joi.number().integer()
                     }
                 }
             },
             handler: (request, reply) => {
-                User.query()
-                    .patchAndFetchById(request.auth.credentials.id, request.payload)
-                    .omit(['password'])
-                    .then(user => reply(user))
-                    .catch(err => reply(Boom.badImplementation(err)));
-            }
-        },
-
-        {
-            method: 'PATCH',
-            path: '/users/email',
-            config: {
-                description: 'Update user email',
-                auth: 'jwt',
-                pre: [
-                    {assign: 'userWithEmail', method: 'getUserByEmail(payload.email)'}
-                ],
-                validate: {
-                    payload: {
-                        email: Joi.string().email().required()
-                    }
+                if (!isAuthorizedForUser(request)) {
+                    return reply(Boom.unauthorized(`Not authorized for user ${request.params.id}`));
                 }
-            },
-            handler: (request, reply) => {
-                if (request.pre.userWithEmail) {
-                    reply(Boom.conflict(`E-mail address '${request.payload.email}' already in use.`));
-                } else {
-                    User.query()
-                        .patchAndFetchById(request.auth.credentials.id, request.payload)
-                        .omit(['password'])
-                        .then(user => reply(user))
-                        .catch(err => reply(Boom.badImplementation(err)));
+                if (request.payload.email !== null) {
+                    server.methods.getUserByEmail(request.payload.email, (err, user) => {
+                        if (err) {
+                            return reply(Boom.notFound('Email check failed'));
+                        }
+                        if (user) {
+                            reply(Boom.conflict(`E-mail address '${request.payload.email}' already in use.`));
+                        }
+                    });
                 }
-            }
-        },
-
-        {
-            method: 'PATCH',
-            path: '/users/password',
-            config: {
-                description: 'Update user password',
-                validate: {
-                    payload: {
-                        password: Joi.string().min(6).required()
-                    }
-                },
-                auth: 'jwt'
-            },
-            handler: (request, reply) => {
                 User.query()
-                    .patchAndFetchById(request.auth.credentials.id, request.payload)
+                    .patchAndFetchById(request.params.id, request.payload)
                     .omit(['password'])
                     .then(user => reply(user))
                     .catch(err => reply(Boom.badImplementation(err)));
             }
-        },
-
-        {
-            method: 'PATCH',
-            path: '/users/version',
-            config: {
-                description: 'Update preferred version',
-                validate: {
-                    payload: {
-                        preferredVersionId: Joi.number().integer().required()
-                    }
-                },
-                auth: 'jwt'
-            },
-            handler: (request, reply) => {
-                User.query()
-                    .patchAndFetchById(request.auth.credentials.id, request.payload)
-                    .omit(['password'])
-                    .then(user => reply(user))
-                    .catch(err => reply(Boom.badImplementation(err)));
-            }
-        },
-
-        {
-            method: 'GET',
-            path: '/users/permissions',
-            config: {
-                description: 'Fetch all permission types'
-                // TODO: Re-enable jwt for this endpoint.
-                //auth: 'jwt'
-            },
-            handler: function (request, reply) {
-                Permission.query()
-                    .then(results => reply(results))
-                    .catch(err => reply(Boom.badImplementation(err)));
-            }
-        },
+        }
 
     ]);
 

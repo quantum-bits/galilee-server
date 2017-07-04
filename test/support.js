@@ -12,8 +12,6 @@
  * the lab object itself to run properly.
  */
 
-const Hoek = require('hoek');
-
 const Lab = require('lab');
 
 const Code = require('code');
