@@ -5,22 +5,10 @@ const Path = require('path');
 const moment = require('moment');
 const debug = require('debug')('server');
 
-const BibleService = require('./lib/bible');
 const User = require('./models/User');
 
-// Initialize services required by the server, then the server itself. Returns
-// a promise that resolves to the Hapi server.
-exports.initializeServer = function () {
-    const masterConfig = require('./master-config');
-
-    return new BibleService(masterConfig).then(bibleService => {
-        debug("%O", bibleService);
-        return configureServer(masterConfig, bibleService)
-    });
-};
-
 // This function returns a promise that's resolved by the newly configured server.
-function configureServer(masterConfig, bibleService) {
+exports.configureServer = function (masterConfig, bibleService) {
 
     const server = new Hapi.Server({
         app: {
@@ -70,6 +58,8 @@ function configureServer(masterConfig, bibleService) {
         fetchUser({'id': id}, next);
     });
 
+    // If no callback (as here), returns a promise object
+    // (cf. https://hapijs.com/api#serverregisterplugins-options-callback).
     return server.register(
         [
             {register: require('inert')},       // Static files
@@ -133,8 +123,5 @@ function configureServer(masterConfig, bibleService) {
                 prefix: '/api'
             }
         }
-
-        // If no callback (as here), returns a promise object
-        // (cf. https://hapijs.com/api#serverregisterplugins-options-callback).
     ).then(() => server);
 }

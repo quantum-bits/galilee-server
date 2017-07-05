@@ -11,14 +11,14 @@
     "knex:migrate:prod": "GALILEE=production knex --env production migrate:latest",
     "knex:seed:dev": "GALILEE=development knex seed:run",
     "knex:seed:prod": "GALILEE=production knex --env production seed:run",
-    "start": "echo Please run with start:dev or start.prod",
+    "start": "echo Please run with start:dev or start:prod",
     "start:dev": "GALILEE=development node main.js",
     "start:staging": "GALILEE=staging node main.js",
     "start:prod": "GALILEE=production node main.js",
     "watch:dev": "GALILEE=development nodemon main.js",
     "watch:staging": "GALILEE=staging nodemon main.js",
     "watch:prod": "GALILEE=production nodemon main.js",
-    "test": "GALILEE=development lab --verbose --transform node_modules/lab-babel",
+    "test": "GALILEE=development ./node_modules/.bin/lab --verbose --transform node_modules/lab-babel --sourcemaps --globals __core-js_shared__"
     "test-cov": "lab --transform node_modules/lab-babel --globals __core-js_shared__ --reporter html --output foo-coverage.html"
   },
   "repository": {
@@ -31,6 +31,34 @@
     "url": "https://github.com/quantum-bits/galilee/issues"
   },
   "homepage": "https://github.com/quantum-bits/galilee#readme",
+  "babel": {
+    "presets": [
+      "stage-0"
+    ],
+    "plugins": [
+      "check-es2015-constants",
+      "transform-es2015-arrow-functions",
+      "transform-es2015-block-scoped-functions",
+      "transform-es2015-block-scoping",
+      "transform-es2015-computed-properties",
+      "transform-es2015-destructuring",
+      "transform-es2015-duplicate-keys",
+      "transform-class-properties",
+      "transform-es2015-for-of",
+      "transform-es2015-function-name",
+      "transform-es2015-literals",
+      "transform-es2015-modules-commonjs",
+      "transform-es2015-object-super",
+      "transform-es2015-parameters",
+      "transform-es2015-shorthand-properties",
+      "transform-es2015-spread",
+      "transform-es2015-sticky-regex",
+      "transform-es2015-template-literals",
+      "transform-es2015-typeof-symbol",
+      "transform-es2015-unicode-regex",
+      "transform-async-to-generator"
+    ]
+  },
   "dependencies": {
     "bcrypt": "^1.0.2",
     "blipp": "^2.3.0",
@@ -65,12 +93,33 @@
   },
   "devDependencies": {
     "@types/knex": "0.0.56",
-    "babel-cli": "^6.22.2",
-    "babel-preset-es2015": "^6.22.0",
     "code": "^4.0.0",
     "faker": "^4.1.0",
     "lab": "^14.1.0",
     "lab-babel": "^1.1.1",
-    "nodemon": "^1.11.0"
+    "nodemon": "^1.11.0",
+    "babel-cli": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-check-es2015-constants": "^6.22.0",
+    "babel-plugin-transform-es2015-arrow-functions": "^6.22.0",
+    "babel-plugin-transform-es2015-block-scoped-functions": "^6.22.0",
+    "babel-plugin-transform-es2015-block-scoping": "^6.24.1",
+    "babel-plugin-transform-es2015-computed-properties": "^6.24.1",
+    "babel-plugin-transform-es2015-destructuring": "^6.23.0",
+    "babel-plugin-transform-es2015-duplicate-keys": "^6.24.1",
+    "babel-plugin-transform-es2015-for-of": "^6.23.0",
+    "babel-plugin-transform-es2015-function-name": "^6.24.1",
+    "babel-plugin-transform-es2015-literals": "^6.22.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.0",
+    "babel-plugin-transform-es2015-object-super": "^6.24.1",
+    "babel-plugin-transform-es2015-parameters": "^6.24.1",
+    "babel-plugin-transform-es2015-shorthand-properties": "^6.24.1",
+    "babel-plugin-transform-es2015-spread": "^6.22.0",
+    "babel-plugin-transform-es2015-sticky-regex": "^6.24.1",
+    "babel-plugin-transform-es2015-template-literals": "^6.22.0",
+    "babel-plugin-transform-es2015-typeof-symbol": "^6.23.0",
+    "babel-plugin-transform-es2015-unicode-regex": "^6.24.1",
+    "babel-plugin-transform-async-to-generator": "^6.24.1"
   }
 }

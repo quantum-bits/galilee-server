@@ -12,7 +12,7 @@
  * the lab object itself to run properly.
  */
 
-const Lab = require('lab');
+const masterConfig = require('../master-config');
 
 const Code = require('code');
 exports.expect = Code.expect;
@@ -21,10 +21,10 @@ const Server = require('../server');
 exports.server = null;
 
 exports.initTest = function () {
-    const lab = Lab.script();
+    const lab = require('lab').script();
 
     lab.before((done) => {
-        Server.initializeServer().then(server => {
+        Server.configureServer(masterConfig, null).then(server => {
             exports.server = server;
             server.log("Server initialized");
             done();

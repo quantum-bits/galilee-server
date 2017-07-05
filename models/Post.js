@@ -2,7 +2,7 @@
 
 const db = require('../db');
 
-module.exports = class Post extends db.Model {
+class Post extends db.Model {
     static get tableName() {
         return 'post';
     }
@@ -36,3 +36,5 @@ module.exports = class Post extends db.Model {
         }
     }
 }
+
+module.exports = Post;

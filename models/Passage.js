@@ -2,7 +2,7 @@
 
 const db = require('../db');
 
-module.exports = class Passage extends db.Model {
+class Passage extends db.Model {
     static get tableName() {
         return 'passage';
     }
@@ -28,3 +28,5 @@ module.exports = class Passage extends db.Model {
         }
     }
 }
+
+module.exports = Passage;

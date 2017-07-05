@@ -7,7 +7,7 @@ const ReadingDay = require('../models/ReadingDay');
 const Config = require('../models/Config');
 const User = require('../models/User');
 
-lab.experiment('Practice endpoints', () => {
+lab.experiment('User endpoints', () => {
 
     let studentJwt = null;
     let adminJwt = null;
@@ -124,51 +124,20 @@ lab.experiment('Practice endpoints', () => {
             .then(() => authenticateAdmin());
     });
 
-    lab.test('fetch all practices', done => {
-        server.inject(
-            {
-                method: 'GET',
-                url: '/api/practices',
-                headers: {
-                    'Authorization': `Bearer ${adminJwt}`
-                }
-            }, res => {
-                const response = JSON.parse(res.payload);
-                expect(res.statusCode).to.equal(200);
-                expect(response).to.have.length(2);
-                done();
-            });
-    });
-
-    lab.test('fetch a single existing practice', done => {
-        server.inject(
-            {
-                method: 'GET',
-                url: '/api/practices/10',
-                headers: {
-                    'Authorization': `Bearer ${adminJwt}`
-                }
-            }, res => {
-                const response = JSON.parse(res.payload);
-                expect(res.statusCode).to.equal(200);
-                expect(response.id).to.equal(10);
-                done();
-            });
-    });
-
-    lab.test("catches attempt to fetch a non-existent practice", done => {
-        server.inject(
-            {
-                method: 'GET',
-                url: '/api/practices/1',
-                headers: {
-                    'Authorization': `Bearer ${adminJwt}`
-                }
-            }, res => {
-                const response = JSON.parse(res.payload);
-                expect(res.statusCode).to.equal(404);
-                done();
-            });
+    lab.test('allow a valid user to log in', done => {
+        server.inject({
+            method: 'POST',
+            url: '/api/authenticate',
+            payload: {
+                email: 'student@example.com',
+                password: 'student-password'
+            }
+        }, res => {
+            const response = JSON.parse(res.payload);
+            expect(res.statusCode).to.equal(200);
+            expect(response.jwtIdToken).to.have.length(145);
+            done();
+        });
     });
 
 });

@@ -12,7 +12,7 @@ function hashPassword(password) {
         .then(salt => bcrypt.hash(password, salt));
 }
 
-module.exports = class User extends db.Model {
+class User extends db.Model {
     static get tableName() {
         return 'user';
     }
@@ -98,3 +98,5 @@ module.exports = class User extends db.Model {
         }
     }
 }
+
+module.exports = User;

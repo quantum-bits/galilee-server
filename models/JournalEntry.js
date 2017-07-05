@@ -3,7 +3,7 @@
 const db = require('../db');
 const StampedModel = require('./StampedModel');
 
-module.exports = class JournalEntry extends StampedModel {
+class JournalEntry extends StampedModel {
     static get tableName() {
         return 'journalEntry';
     }
@@ -33,3 +33,5 @@ module.exports = class JournalEntry extends StampedModel {
         }
     }
 }
+
+module.exports = JournalEntry;
