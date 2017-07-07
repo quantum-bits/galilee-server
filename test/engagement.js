@@ -1,6 +1,6 @@
 'use strict';
 
-import {initTest, expect, server, db} from './support';
+import {initTest, expect, server, authenticateUser, db} from './support';
 const lab = exports.lab = initTest();
 
 const ReadingDay = require('../models/ReadingDay');
@@ -11,19 +11,6 @@ lab.experiment('Practice endpoints', () => {
 
     let studentJwt = null;
     let adminJwt = null;
-
-    function authenticateAdmin() {
-        return server.inject({
-            method: 'POST',
-            url: '/api/authenticate',
-            payload: {
-                email: 'admin@example.com',
-                password: 'admin-password'
-            }
-        }).then(res => {
-            adminJwt = JSON.parse(res.payload).jwtIdToken;
-        });
-    }
 
     lab.beforeEach(() => {
         return db.deleteAllData()
@@ -121,7 +108,12 @@ lab.experiment('Practice endpoints', () => {
                         ],
                     })
             ]))
-            .then(() => authenticateAdmin());
+            .then(() => Promise.all([
+                authenticateUser('admin@example.com', 'admin-password')
+                    .then(jwt => adminJwt = jwt),
+                authenticateUser('student@example.com', 'student-password')
+                    .then(jwt => studentJwt = jwt)
+            ]));
     });
 
     lab.test('fetch all practices', done => {

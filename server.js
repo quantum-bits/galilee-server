@@ -83,7 +83,7 @@ exports.configureServer = function (masterConfig, bibleService) {
             // {register: require('./plugins/resource')},
 
             {
-                register: require('tv'),        // Documentation
+                register: require('tv'),        // Debug console
                 options: {
                     host: 'localhost',
                     port: 2020
