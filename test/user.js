@@ -1,6 +1,6 @@
 'use strict';
 
-import {initTest, expect, server, authenticateUser, db} from './support';
+import {initTest, expect, server, db} from './support';
 import {loadUserCollection} from './fixtures';
 const lab = exports.lab = initTest();
 

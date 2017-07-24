@@ -1,6 +1,7 @@
 'use strict';
 
-import {initTest, expect, server, authenticateUser, db} from './support';
+import {initTest, expect, server, db} from './support';
+import {loadUserCollection} from './fixtures';
 const lab = exports.lab = initTest();
 
 const ReadingDay = require('../models/ReadingDay');
@@ -9,8 +10,7 @@ const User = require('../models/User');
 
 lab.experiment('Practice endpoints', () => {
 
-    let studentJwt = null;
-    let adminJwt = null;
+    let userCollection = null;
 
     lab.beforeEach(() => {
         return db.deleteAllData()
@@ -20,100 +20,61 @@ lab.experiment('Practice endpoints', () => {
                     {key: 'bg-access-token', value: null},
                     {key: 'default-version', value: 'MSG'}
                 ]))
-            .then(() => Promise.all([
-                User.query()
-                    .insertGraph([
+            .then(() => loadUserCollection(server))
+            .then(collection => userCollection = collection)
+            .then(() => ReadingDay.query()
+                .insertGraph({
+                    date: '2017-07-04',
+                    name: 'Independence Day',
+                    readings: [
                         {
-                            email: 'student@example.com',
-                            password: 'student-password',
-                            firstName: 'Jane',
-                            lastName: 'Student',
-                            joinedOn: '2017-01-04',
-                            enabled: true,
-                            version: {
-                                '#id': 'version-ver',
-                                code: 'VER',
-                                title: 'Version of the Bible'
-                            }
-                        },
-                        {
-                            email: 'admin@example.com',
-                            password: 'admin-password',
-                            firstName: 'June',
-                            lastName: 'Admin',
-                            joinedOn: '2017-02-04',
-                            enabled: true,
-                            version: {
-                                '#ref': 'version-ver'
-                            },
-                            permissions: [
+                            seq: 1,
+                            stdRef: 'Jude 1:20',
+                            osisRef: 'Jude.1.20',
+                            directions: [
                                 {
-                                    id: 'ADMIN',
-                                    title: 'Administrator'
+                                    seq: 1,
+                                    practice: {
+                                        id: 10,
+                                        title: "Lectio Divina",
+                                        summary: "Summary of Lectio Divina",
+                                        infoUrl: "http://biblegateway.com",
+                                    },
+                                    steps: [
+                                        {
+                                            seq: 1,
+                                            description: "Do step 1"
+                                        },
+                                        {
+                                            seq: 2,
+                                            description: "Do step 2"
+                                        },
+                                        {
+                                            seq: 3,
+                                            description: "Do step 3"
+                                        }
+                                    ]
+                                },
+                                {
+                                    seq: 2,
+                                    practice: {
+                                        id: 11,
+                                        title: "Storying Scripture",
+                                        summary: "Summary of Storying Scripture",
+                                        infoUrl: "http://biblegateway.com/storying",
+                                    },
+                                    steps: [
+                                        {
+                                            seq: 1,
+                                            description: "Do step 1"
+                                        }
+                                    ]
                                 }
+
                             ]
                         }
-                    ]),
-                ReadingDay.query()
-                    .insertGraph({
-                        date: '2017-07-04',
-                        name: 'Independence Day',
-                        readings: [
-                            {
-                                seq: 1,
-                                stdRef: 'Jude 1:20',
-                                osisRef: 'Jude.1.20',
-                                directions: [
-                                    {
-                                        seq: 1,
-                                        practice: {
-                                            id: 10,
-                                            title: "Lectio Divina",
-                                            summary: "Summary of Lectio Divina",
-                                            infoUrl: "http://biblegateway.com",
-                                        },
-                                        steps: [
-                                            {
-                                                seq: 1,
-                                                description: "Do step 1"
-                                            },
-                                            {
-                                                seq: 2,
-                                                description: "Do step 2"
-                                            },
-                                            {
-                                                seq: 3,
-                                                description: "Do step 3"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        seq: 2,
-                                        practice: {
-                                            id: 11,
-                                            title: "Storying Scripture",
-                                            summary: "Summary of Storying Scripture",
-                                            infoUrl: "http://biblegateway.com/storying",
-                                        },
-                                        steps: [
-                                            {
-                                                seq: 1,
-                                                description: "Do step 1"
-                                            }
-                                        ]
-                                    }
-
-                                ]
-                            }
-                        ],
-                    })
-            ]))
-            .then(() => Promise.all([
-                authenticateUser('admin@example.com', 'admin-password')
-                    .then(jwt => adminJwt = jwt),
-                authenticateUser('student@example.com', 'student-password')
-                    .then(jwt => studentJwt = jwt)
-            ]));
+                    ],
+                }));
     });
 
     lab.test('fetch all practices', done => {
@@ -121,9 +82,7 @@ lab.experiment('Practice endpoints', () => {
             {
                 method: 'GET',
                 url: '/api/practices',
-                headers: {
-                    'Authorization': `Bearer ${adminJwt}`
-                }
+                headers: userCollection.authHeaders('admin@example.com')
             }, res => {
                 const response = JSON.parse(res.payload);
                 expect(res.statusCode).to.equal(200);
@@ -137,9 +96,7 @@ lab.experiment('Practice endpoints', () => {
             {
                 method: 'GET',
                 url: '/api/practices/10',
-                headers: {
-                    'Authorization': `Bearer ${adminJwt}`
-                }
+                headers: userCollection.authHeaders('admin@example.com')
             }, res => {
                 const response = JSON.parse(res.payload);
                 expect(res.statusCode).to.equal(200);
@@ -153,9 +110,7 @@ lab.experiment('Practice endpoints', () => {
             {
                 method: 'GET',
                 url: '/api/practices/1',
-                headers: {
-                    'Authorization': `Bearer ${adminJwt}`
-                }
+                headers: userCollection.authHeaders('admin@example.com')
             }, res => {
                 const response = JSON.parse(res.payload);
                 expect(res.statusCode).to.equal(404);
