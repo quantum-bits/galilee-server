@@ -5,7 +5,7 @@ exports.up = function (knex, Promise) {
     return knex.schema.createTableIfNotExists('tag', table => {
         table.increments('id');
         table.string('label').notNullable();
-        table.integer('userId').references('user.id').nullable();
+        table.integer('userId').unsigned().references('user.id').nullable();
     });
 };
 

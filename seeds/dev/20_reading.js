@@ -79,9 +79,6 @@ exports.seed = function (knex, Promise) {
                                 resources: [
                                     {
                                         id: uuid(),
-                                        details: {
-                                            filename: 'cana.png'
-                                        },
                                         caption: 'Wedding at Cana',
                                         copyrightYear: 2006,
                                         copyrightOwner: 'Zondervan',
@@ -108,9 +105,6 @@ exports.seed = function (knex, Promise) {
                                 resources: [
                                     {
                                         id: uuid(),
-                                        details: {
-                                            filename: 'feeding5000.jpeg'
-                                        },
                                         caption: 'Feeding 5,000',
                                         copyrightYear: 2012,
                                         copyrightOwner: 'Zondervan',

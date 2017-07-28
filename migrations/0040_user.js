@@ -11,7 +11,7 @@ exports.up = function (knex, Promise) {
             table.string('avatarUrl');
             table.dateTime('joinedOn').defaultTo(knex.raw('NOW()'));
             table.boolean('enabled').defaultTo(true);
-            table.integer('preferredVersionId').references('version.id');
+            table.integer('preferredVersionId').unsigned().references('version.id');
         }),
 
         knex.schema.createTableIfNotExists('organization', table => {
@@ -22,15 +22,15 @@ exports.up = function (knex, Promise) {
 
         knex.schema.createTableIfNotExists('group', table => {
             table.increments('id');
-            table.integer('organizationId').references('organization.id');
+            table.integer('organizationId').unsigned().references('organization.id');
             table.string('name');
             table.boolean('enabled').defaultTo(true);
             table.dateTime('createdAt').defaultTo(knex.raw('NOW()'));
         }),
 
         knex.schema.createTableIfNotExists('membership', table => {
-            table.integer('groupId').references('group.id');
-            table.integer('userId').references('user.id');
+            table.integer('groupId').unsigned().references('group.id');
+            table.integer('userId').unsigned().references('user.id');
             table.boolean('enabled').defaultTo(true);
             table.dateTime('createdAt').defaultTo(knex.raw('NOW()'));
             table.primary(['groupId', 'userId']);
@@ -42,7 +42,7 @@ exports.up = function (knex, Promise) {
         }),
 
         knex.schema.createTableIfNotExists('userPermission', table => {
-            table.integer('userId').references('user.id');
+            table.integer('userId').unsigned().references('user.id');
             table.string('permissionId').references('permission.id');
             table.primary(['userId', 'permissionId']);
         })

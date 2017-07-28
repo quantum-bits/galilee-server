@@ -54,5 +54,21 @@
     "hapi": {
       "port": 3000
     }
+  },
+  "mysql": {
+    "db": {
+      "client": "mysql",
+      "connection": {
+        "host": "localhost",
+        "database": "galilee"
+      },
+      "seeds": {
+        "directory": "./seeds/dev"
+      },
+      "debug": false
+    },
+    "hapi": {
+      "port": 3000
+    }
   }
 }

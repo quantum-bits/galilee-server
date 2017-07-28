@@ -6,5 +6,6 @@ const config = require('./master-config');
 module.exports = {
     development: config.get("development:db"),
     staging: config.get("staging:db"),
-    production: config.get("production:db")
+    production: config.get("production:db"),
+    mysql: config.get("mysql:db")
 };

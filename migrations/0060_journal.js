@@ -8,16 +8,16 @@ exports.up = function (knex, Promise) {
             table.increments('id');
             table.string('title');
             table.text('entry');
-            table.integer('userId').references('user.id');
-            table.integer('readingId').references('reading.id');
-            table.integer('stepId').references('step.id');
+            table.integer('userId').unsigned().references('user.id');
+            table.integer('readingId').unsigned().references('reading.id');
+            table.integer('stepId').unsigned().references('step.id');
             table.timestamp('createdAt', true).defaultTo(knex.fn.now());
             table.timestamp('updatedAt', true).defaultTo(knex.fn.now());
         }),
 
         knex.schema.createTableIfNotExists('journalEntryTag', table => {
-            table.integer('tagId').references('tag.id');
-            table.integer('journalEntryId').references('journalEntry.id');
+            table.integer('tagId').unsigned().references('tag.id');
+            table.integer('journalEntryId').unsigned().references('journalEntry.id');
             table.primary(['tagId', 'journalEntryId']);
         })
     ])

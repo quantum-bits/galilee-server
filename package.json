@@ -7,19 +7,22 @@
     "doc": "doc"
   },
   "scripts": {
-    "knex:migrate:dev": "GALILEE=development knex migrate:latest",
+    "knex:migrate:dev": "GALILEE=development knex --env development migrate:latest",
+    "knex:migrate:mysql": "GALILEE=mysql knex --env mysql migrate:latest",
     "knex:migrate:prod": "GALILEE=production knex --env production migrate:latest",
-    "knex:seed:dev": "GALILEE=development knex seed:run",
+    "knex:seed:dev": "GALILEE=development knex --env development seed:run",
+    "knex:seed:mysql": "GALILEE=mysql knex --env mysql seed:run",
     "knex:seed:prod": "GALILEE=production knex --env production seed:run",
     "start": "echo Please run with start:dev or start:prod",
     "start:dev": "GALILEE=development node main.js",
-    "start:staging": "GALILEE=staging node main.js",
+    "start:mysql": "GALILEE=mysql node main.js",
     "start:prod": "GALILEE=production node main.js",
-    "watch:dev": "GALILEE=development nodemon main.js",
-    "watch:staging": "GALILEE=staging nodemon main.js",
-    "watch:prod": "GALILEE=production nodemon main.js",
+    "start:staging": "GALILEE=staging node main.js",
     "test": "GALILEE=development ./node_modules/.bin/lab --verbose --transform node_modules/lab-babel --sourcemaps --globals __core-js_shared__",
-    "test-cov": "lab --transform node_modules/lab-babel --globals __core-js_shared__ --reporter html --output foo-coverage.html"
+    "test-cov": "lab --transform node_modules/lab-babel --globals __core-js_shared__ --reporter html --output foo-coverage.html",
+    "watch:dev": "GALILEE=development nodemon main.js",
+    "watch:prod": "GALILEE=production nodemon main.js",
+    "watch:staging": "GALILEE=staging nodemon main.js"
   },
   "repository": {
     "type": "git",
@@ -80,6 +83,7 @@
     "marked": "^0.3.6",
     "moment": "^2.17.1",
     "moment-range": "^3.0.2",
+    "mysql": "^2.14.0",
     "nconf": "^0.8.4",
     "objection": "^0.8.4",
     "pg": "^6.1.2",

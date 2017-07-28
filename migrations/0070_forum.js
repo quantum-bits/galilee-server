@@ -6,10 +6,10 @@ exports.up = function (knex, Promise) {
             table.increments('id');
             table.string('title').nullable();
             table.text('content').notNullable();
-            table.integer('parentPostId').nullable().references('post.id');
-            table.integer('userId').notNullable().references('user.id');
-            table.integer('groupId').notNullable().references('group.id');
-            table.integer('readingId').nullable().references('reading.id');
+            table.integer('parentPostId').unsigned().nullable().references('post.id');
+            table.integer('userId').unsigned().notNullable().references('user.id');
+            table.integer('groupId').unsigned().notNullable().references('group.id');
+            table.integer('readingId').unsigned().nullable().references('reading.id');
             table.timestamp('createdAt').defaultTo(knex.fn.now());
             table.timestamp('updatedAt').defaultTo(knex.fn.now());
         })

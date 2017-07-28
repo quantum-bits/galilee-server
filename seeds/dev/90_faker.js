@@ -40,11 +40,12 @@ const versionData = [
 let _versionObjects = [];
 
 function seedVersions() {
+    debug('seedVersions');
     return Promise.all(versionData.map(datum =>
         Version.query().where('code', datum.code).first().then(result => {
             debug("Result %o", result);
             if (result) {
-                // Already have this one in the database. Returning 'v' is
+                // Already have this one in the database. Returning 'result' is
                 // equivalent to returning a resolved promise.
                 debug("Already have %o", result);
                 return result;
@@ -58,8 +59,8 @@ function seedVersions() {
             // There are two cases for the previous promise:
             //  1. The promise was resolved by an existing version in the DB,
             //     in which case this 'then' resolved trivially.
-            //  2. The promise from the insert was resolved by this then.
-            // In either case, we now have a version object form the database
+            //  2. The promise from the insert was resolved by this 'then' clause.
+            // In either case, we now have a version object from the database
             // and can insert it into the list of all versions.
             //
             // Even if the insert failed, we should be okay, because the
@@ -135,11 +136,13 @@ function randomUser() {
 }
 
 function seedUsers() {
+    debug('seedUsers');
     const users = _.times(NUM_USERS, n => randomUser())
     return User.query().insertGraph(users);
 }
 
 function seedJournalEntries() {
+    debug('seedJournalEntries');
     let today = new Date();
 
     // The map method will wait for all the promises returned by the insert operation.
@@ -288,12 +291,13 @@ function randomReadings() {
 }
 
 function seedReadingDays() {
+    debug('seedReadingDays');
     const startDate = moment().subtract(30, 'days');
     const endDate = moment().add(30, 'days');
     const range = momentRange.range(startDate, endDate);
 
     const readingDays = _.map(Array.from(range.by('days')), currentDate => ({
-        date: currentDate,
+        date: currentDate.format('YYYY-MM-DD'),
         directions: randomDirections(),
         readings: randomReadings()
     }));
@@ -301,6 +305,7 @@ function seedReadingDays() {
 }
 
 function seedForumPosts() {
+    debug('seedForumPosts');
     return Promise.all([
         // Get all the readings and users.
         Reading.query(),

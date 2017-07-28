@@ -12,7 +12,7 @@ exports.up = function (knex, Promise) {
 
         knex.schema.createTableIfNotExists('reading', table => {
             table.increments('id');
-            table.integer('readingDayId').notNullable().references('readingDay.id').onDelete('CASCADE');
+            table.integer('readingDayId').unsigned().notNullable().references('readingDay.id').onDelete('CASCADE');
             table.integer('seq').notNullable();
             table.string('stdRef').notNullable();
             table.string('osisRef').notNullable();
@@ -26,14 +26,14 @@ exports.up = function (knex, Promise) {
 
         knex.schema.createTableIfNotExists('passage', table => {
             table.increments('id');
-            table.integer('readingId').notNullable().references('reading.id').onDelete('CASCADE');
-            table.integer('versionId').notNullable().references('version.id').onDelete('CASCADE');
+            table.integer('readingId').unsigned().notNullable().references('reading.id').onDelete('CASCADE');
+            table.integer('versionId').unsigned().notNullable().references('version.id').onDelete('CASCADE');
             table.text('content').notNullable();
         }),
 
         knex.schema.createTableIfNotExists('question', table => {
             table.increments('id');
-            table.integer('readingDayId').notNullable().references('readingDay.id').onDelete('CASCADE');
+            table.integer('readingDayId').unsigned().notNullable().references('readingDay.id').onDelete('CASCADE');
             table.integer('seq').notNullable();
             table.string('text').notNullable();
         })
