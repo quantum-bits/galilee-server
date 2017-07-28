@@ -6,14 +6,6 @@ exports.up = function (knex, Promise) {
         table.dropForeign('readingId');
         table.foreign('readingId').references('reading.id').onDelete('CASCADE');
     });
-
-    // return knex.schema.raw(`
-    // ALTER TABLE post
-    // DROP CONSTRAINT post_readingid_foreign,
-    // ADD CONSTRAINT "post_readingid_foreign"
-    // FOREIGN KEY ("readingId")
-    // REFERENCES reading(id)
-    // ON DELETE CASCADE;`);
 };
 
 exports.down = function (knex, Promise) {
