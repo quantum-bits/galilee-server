@@ -122,6 +122,7 @@
     "babel-preset-stage-0": "^6.24.1",
     "code": "^4.0.0",
     "faker": "^4.1.0",
+    "jsonwebtoken": "^7.4.2",
     "lab": "^14.1.0",
     "lab-babel": "^1.1.1",
     "nodemon": "^1.11.0"

@@ -1,0 +1,17 @@
+#+TITLE: Galilee Notes
+#+AUTHOR: Tom Nurkkala
+#+OPTIONS: ':t toc:nil
+
+* Facebook
+** Access Tokens
+*** App Access Token
+*** User Access Token
+Can get an access token for testing from the [[https://developers.facebook.com/tools/explorer/][Graph API Explorer]].
+1. Choose the application from the dropdown (NW corner)
+2. Choose /Get User Access Token/ from /Get Token/ dropdown
+3. Choose permissions required from the popup; can revisit this page to add or
+   remove permissions
+4. Click /Get Access Token/
+5. Authorize via popup
+** Share Button
+- [[https://developers.facebook.com/docs/plugins/share-button/][FB Documentation]]

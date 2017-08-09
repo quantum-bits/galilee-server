@@ -1,12 +1,13 @@
 'use strict';
 
-import {initTest, expect, server, db} from './support';
+import {initTest, masterConfig, expect, server, db} from './support';
 import {loadUserCollection} from './fixtures';
 const lab = exports.lab = initTest();
 
 const _ = require('lodash');
 const debug = require('debug')('test');
 const random = require('random-js')();
+const jwt = require('jsonwebtoken');
 
 const ReadingDay = require('../models/ReadingDay');
 const Config = require('../models/Config');
@@ -17,6 +18,10 @@ function expectCountUsers(expected) {
     return User.query()
         .count('*')
         .then(resultSet => expect(+resultSet[0].count).to.equal(expected));
+}
+
+function verifyJwt(jwtIdToken) {
+    return jwt.verify(jwtIdToken, masterConfig.get('jwt-key'));
 }
 
 lab.experiment('User endpoints', () => {
@@ -137,7 +142,7 @@ lab.experiment('User endpoints', () => {
         }, res => {
             const response = JSON.parse(res.payload);
             expect(res.statusCode).to.equal(200);
-            expect(response.jwtIdToken).to.have.length(147);
+            expect(() => verifyJwt(response.jwtIdToken)).not.to.throw();
             expect(response.user.permissions).part.not.to.contain({id: 'ADMIN'});
             done();
         });
@@ -156,7 +161,7 @@ lab.experiment('User endpoints', () => {
         }, res => {
             const response = JSON.parse(res.payload);
             expect(res.statusCode).to.equal(200);
-            expect(response.jwtIdToken).to.have.length(147);
+            expect(() => verifyJwt(response.jwtIdToken)).not.to.throw();
             expect(response.user.permissions).part.to.contain({id: 'ADMIN'});
             done();
         });

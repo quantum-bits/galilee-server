@@ -13,6 +13,7 @@
  */
 
 const masterConfig = require('../master-config');
+exports.masterConfig = masterConfig;
 
 const Code = require('code');
 exports.expect = Code.expect;
