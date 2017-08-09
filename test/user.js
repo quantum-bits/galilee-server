@@ -2,6 +2,7 @@
 
 import {initTest, masterConfig, expect, server, db} from './support';
 import {loadUserCollection} from './fixtures';
+
 const lab = exports.lab = initTest();
 
 const _ = require('lodash');
@@ -20,11 +21,17 @@ function expectCountUsers(expected) {
         .then(resultSet => expect(+resultSet[0].count).to.equal(expected));
 }
 
+// Verify that a JWT is valid against the secret key.
 function verifyJwt(jwtIdToken) {
     return jwt.verify(jwtIdToken, masterConfig.get('jwt-key'));
 }
 
-lab.experiment('User endpoints', () => {
+// Reverse the letters in a string.
+function reverseString(str) {
+    return str.split('').reverse().join('');
+}
+
+lab.experiment('User endpoint', () => {
 
     let userCollection = null;
 
@@ -39,7 +46,7 @@ lab.experiment('User endpoints', () => {
             .then(collection => userCollection = collection);
     });
 
-    lab.test('create a new user', () => {
+    lab.test('creates a new user', () => {
         return server
             .inject({
                 method: 'POST',
@@ -55,10 +62,10 @@ lab.experiment('User endpoints', () => {
             .then(res => {
                 expect(res.statusCode).to.equal(200);
             })
-            .then(() => expectCountUsers(3));
+            .then(() => expectCountUsers(userCollection.numUsers() + 1));
     });
 
-    lab.test('reject a new user with a missing field (chosen at at random)', () => {
+    lab.test('rejects a new user with a missing field (chosen at at random)', () => {
         const allFields = {
             email: 'new@example.com',
             password: 'new-password',
@@ -75,10 +82,10 @@ lab.experiment('User endpoints', () => {
             .then(res => {
                 expect(res.statusCode).to.equal(400);
             })
-            .then(() => expectCountUsers(2));
+            .then(() => expectCountUsers(userCollection.numUsers()));
     });
 
-    lab.test('reject a new user with a duplicate email address', () => {
+    lab.test('rejects a new user with a duplicate email address', () => {
         const studentUser = userCollection.findUser('student@example.com');
 
         return server
@@ -96,10 +103,10 @@ lab.experiment('User endpoints', () => {
             .then(res => {
                 expect(res.statusCode).to.equal(409);
             })
-            .then(() => expectCountUsers(2));
+            .then(() => expectCountUsers(userCollection.numUsers()));
     });
 
-    lab.test('reject log in with a bogus account', done => {
+    lab.test('rejects login with a bogus account', () =>
         server.inject({
             method: 'POST',
             url: '/api/authenticate',
@@ -107,67 +114,63 @@ lab.experiment('User endpoints', () => {
                 email: 'zippyfritz@example.com',
                 password: 'bogus-password'
             }
-        }, res => {
+        }).then(res => {
             expect(res.statusCode).to.equal(401);
-            done();
-        });
-    });
+        })
+    );
 
-    lab.test('reject log in with a valid account but bogus password', done => {
+    lab.test('rejects login with a valid account but bogus password', () => {
         const studentUser = userCollection.findUser('student@example.com');
 
-        server.inject({
+        return server.inject({
             method: 'POST',
             url: '/api/authenticate',
             payload: {
                 email: studentUser.rawData.email,
                 password: 'the-wrong-password',
             }
-        }, res => {
+        }).then(res => {
             expect(res.statusCode).to.equal(401);
-            done();
         });
     });
 
-    lab.test('allow a valid user to log in', done => {
+    lab.test('allows a valid user to log in', () => {
         const studentUser = userCollection.findUser('student@example.com');
 
-        server.inject({
+        return server.inject({
             method: 'POST',
             url: '/api/authenticate',
             payload: {
                 email: studentUser.rawData.email,
                 password: studentUser.rawData.password
             }
-        }, res => {
+        }).then(res => {
             const response = JSON.parse(res.payload);
             expect(res.statusCode).to.equal(200);
             expect(() => verifyJwt(response.jwtIdToken)).not.to.throw();
             expect(response.user.permissions).part.not.to.contain({id: 'ADMIN'});
-            done();
         });
     });
 
-    lab.test('allow a valid admin user to log in', done => {
+    lab.test('allows a valid admin user to log in', () => {
         const adminUser = userCollection.findUser('admin@example.com');
 
-        server.inject({
+        return server.inject({
             method: 'POST',
             url: '/api/authenticate',
             payload: {
                 email: adminUser.rawData.email,
                 password: adminUser.rawData.password
             }
-        }, res => {
+        }).then(res => {
             const response = JSON.parse(res.payload);
             expect(res.statusCode).to.equal(200);
             expect(() => verifyJwt(response.jwtIdToken)).not.to.throw();
             expect(response.user.permissions).part.to.contain({id: 'ADMIN'});
-            done();
         });
     });
 
-    lab.test('retrieve permission types', () =>
+    lab.test('retrieves permission types', () =>
         server.inject({
             method: 'GET',
             url: '/api/users/permissions',
@@ -179,7 +182,7 @@ lab.experiment('User endpoints', () => {
         })
     );
 
-    lab.test('retrieve all users', () =>
+    lab.test('retrieves all users', () =>
         server.inject({
             method: 'GET',
             url: '/api/users',
@@ -187,11 +190,11 @@ lab.experiment('User endpoints', () => {
         }).then(res => {
             expect(res.statusCode).to.equal(200);
             const response = JSON.parse(res.payload);
-            expect(response).to.have.length(2);
+            expect(response).to.have.length(3);
         })
     );
 
-    lab.test('deny retrieval of all users to non-admin', () =>
+    lab.test('denies retrieval of all users to non-admin', () =>
         server.inject({
             method: 'GET',
             url: '/api/users',
@@ -200,5 +203,143 @@ lab.experiment('User endpoints', () => {
             expect(res.statusCode).to.equal(401);
         })
     );
+
+    lab.test('rejects an attempt to update a user without authenticating', () =>
+        server.inject({
+            method: 'PATCH',
+            url: '/api/users/55555'
+        }).then(res => {
+            expect(res.statusCode).to.equal(401);
+        })
+    );
+
+    lab.test('rejects omission of user ID', () =>
+        server.inject({
+            method: 'PATCH',
+            url: '/api/users',
+            headers: userCollection.authHeaders('student@example.com')
+        }).then(res => {
+            expect(res.statusCode).to.equal(404);
+        })
+    );
+
+    lab.test('rejects empty payload', () => {
+        const studentUser = userCollection.findUser('student@example.com');
+
+        return server.inject({
+            method: 'PATCH',
+            url: `/api/users/${studentUser.dbData.id}`,
+            headers: userCollection.authHeaders('student@example.com'),
+            payload: {}
+        }).then(res => {
+            expect(res.statusCode).to.equal(400);
+        });
+    });
+
+    lab.test('updates one attribute (normal user)', () => {
+        const studentUser = userCollection.findUser('student@example.com');
+        const reversedName = reverseString(studentUser.dbData.firstName);
+
+        return server.inject({
+            method: 'PATCH',
+            url: `/api/users/${studentUser.dbData.id}`,
+            headers: userCollection.authHeaders('student@example.com'),
+            payload: {
+                firstName: reversedName
+            }
+        }).then(res => {
+            expect(res.statusCode).to.equal(200);
+            const response = JSON.parse(res.payload);
+            expect(response.firstName).to.equal(reversedName);
+        });
+    });
+
+    lab.test('updates multiple attributes (normal user)', () => {
+        const studentUser = userCollection.findUser('student@example.com');
+        const reversedFirst = reverseString(studentUser.dbData.firstName);
+        const reversedLast = reverseString(studentUser.dbData.lastName);
+
+        return server.inject({
+            method: 'PATCH',
+            url: `/api/users/${studentUser.dbData.id}`,
+            headers: userCollection.authHeaders('student@example.com'),
+            payload: {
+                firstName: reversedFirst,
+                lastName: reversedLast
+            }
+        }).then(res => {
+            expect(res.statusCode).to.equal(200);
+            const response = JSON.parse(res.payload);
+            expect(response.firstName).to.equal(reversedFirst);
+            expect(response.lastName).to.equal(reversedLast);
+        });
+    });
+
+    lab.test('rejects attempt to update different user (not as admin)', () => {
+        const studentUser = userCollection.findUser('student@example.com');
+
+        return server.inject({
+            method: 'PATCH',
+            url: `/api/users/${studentUser.dbData.id}`,
+            headers: userCollection.authHeaders('staff@example.com'),
+            payload: {
+                firstName: 'Wallace'
+            }
+        }).then(res => {
+            expect(res.statusCode).to.equal(401);
+        });
+    });
+
+    lab.test('updates attribute of another user as admin', () => {
+        const studentUser = userCollection.findUser('student@example.com');
+        const reversedFirst = reverseString(studentUser.dbData.firstName);
+
+        return server.inject({
+            method: 'PATCH',
+            url: `/api/users/${studentUser.dbData.id}`,
+            headers: userCollection.authHeaders('admin@example.com'),
+            payload: {
+                firstName: reversedFirst
+            }
+        }).then(res => {
+            expect(res.statusCode).to.equal(200);
+            const response = JSON.parse(res.payload);
+            expect(response.firstName).to.equal(reversedFirst);
+        });
+    });
+
+    lab.test('updates user with non-duplicate email address', () => {
+        const studentUser = userCollection.findUser('student@example.com');
+        const newEmail = 'new.user@example.com';
+
+        return server.inject({
+            method: 'PATCH',
+            url: `/api/users/${studentUser.dbData.id}`,
+            headers: userCollection.authHeaders('student@example.com'),
+            payload: {
+                email: newEmail
+            }
+        }).then(res => {
+            expect(res.statusCode).to.equal(200);
+            const response = JSON.parse(res.payload);
+            expect(response.email).to.equal(newEmail);
+        });
+    });
+
+    lab.test('rejects attempt to set duplicate email address', () => {
+        const studentUser = userCollection.findUser('student@example.com');
+        const staffUser = userCollection.findUser('staff@example.com');
+
+        return server.inject({
+            method: 'PATCH',
+            url: `/api/users/${studentUser.dbData.id}`,
+            headers: userCollection.authHeaders('student@example.com'),
+            payload: {
+                email: staffUser.dbData.email
+            }
+        }).then(res => {
+            expect(res.statusCode).to.equal(409);
+        });
+    });
 
 });

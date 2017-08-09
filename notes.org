@@ -2,6 +2,12 @@
 #+AUTHOR: Tom Nurkkala
 #+OPTIONS: ':t toc:nil
 
+* Debugging
+- Using the [[https://www.npmjs.com/package/debug][debug]] package from NPM
+- Example of how to debug the server
+#+BEGIN_EXAMPLE
+% DEBUG_DEPTH=4 DEBUG=user,knex:bindings,knex:query npm run watch:dev
+#+END_EXAMPLE
 * Facebook
 ** Access Tokens
 *** App Access Token

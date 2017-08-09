@@ -4,9 +4,9 @@ const Boom = require('boom');
 const Joi = require('joi');
 
 const User = require('../models/User');
-const Config = require('../models/Config');
 const Permission = require('../models/Permission');
-const Version = require('../models/Version');
+const debug = require('debug')('user');
+
 
 exports.register = function (server, options, next) {
 
@@ -17,7 +17,7 @@ exports.register = function (server, options, next) {
 
     // Is the request from a user who is authoried to see the given user's data?
     function isAuthorizedForUser(request) {
-        return (request.params.id === request.auth.credentials.id || isAdminUser(request));
+        return (+request.params.id === request.auth.credentials.id || isAdminUser(request));
     }
 
     server.route([
@@ -130,35 +130,54 @@ exports.register = function (server, options, next) {
                 description: 'Update user data',
                 auth: 'jwt',
                 validate: {
-                    payload: {
-                        // None of these is required, but if present must validate.
+                    params: {
+                        id: Joi.number().integer().required().description('User ID')
+                    },
+                    // At least one of the following must be present.
+                    // None is required, but if present, must validate.
+                    payload: Joi.object({
                         firstName: Joi.string(),
                         lastName: Joi.string(),
                         email: Joi.string().email(),
                         password: Joi.string().min(6),
                         preferredVersionId: Joi.number().integer()
-                    }
+                    }).min(1)
                 }
             },
             handler: (request, reply) => {
+                // TODO: Reconsider the logic here.
+                // It would be cleaner to refactor out the `getUserByEmail`
+                // to run in a `pre` clause (like the POST handler). However,
+                // that would be problematic if the update does not include
+                // the `email` attribute, causing a null value to be passed
+                // to the server method.
+
+                // TODO: Try recoding getUserByEmail to return a Promise.
+
+                let doUpdate = true;
+
                 if (!isAuthorizedForUser(request)) {
                     return reply(Boom.unauthorized(`Not authorized for user ${request.params.id}`));
-                }
-                if (request.payload.email !== null) {
+
+                } else if (request.payload.email) {
                     server.methods.getUserByEmail(request.payload.email, (err, user) => {
                         if (err) {
+                            doUpdate = false;
                             return reply(Boom.notFound('Email check failed'));
                         }
                         if (user) {
-                            reply(Boom.conflict(`E-mail address '${request.payload.email}' already in use.`));
+                            doUpdate = false;
+                            return reply(Boom.conflict(`E-mail address '${request.payload.email}' already in use.`));
                         }
                     });
                 }
-                User.query()
-                    .patchAndFetchById(request.params.id, request.payload)
-                    .omit(['password'])
-                    .then(user => reply(user))
-                    .catch(err => reply(Boom.badImplementation(err)));
+
+                if (doUpdate) {
+                    User.query()
+                        .patchAndFetchById(request.params.id, request.payload)
+                        .omit(['password'])
+                        .then(user => reply(user));
+                }
             }
         }
 

@@ -8,7 +8,7 @@ exports.seed = function (knex, Promise) {
         [
             {
                 email: 'teacher@example.com',
-                password: 'password',
+                password: 'teacher-password',
                 firstName: 'Penny',
                 lastName: 'Lane',
                 version: {
@@ -33,7 +33,7 @@ exports.seed = function (knex, Promise) {
             },
             {
                 email: 'student@example.com',
-                password: 'password',
+                password: 'student-password',
                 firstName: 'Ferris',
                 lastName: 'Wheeler',
                 version: {
@@ -71,7 +71,7 @@ exports.seed = function (knex, Promise) {
             },
             {
                 email: 'admin@example.com',
-                password: 'password',
+                password: 'admin-password',
                 firstName: 'Royal',
                 lastName: 'Payne',
                 version: {

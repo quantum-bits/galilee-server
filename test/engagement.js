@@ -105,7 +105,7 @@ lab.experiment('Practice endpoints', () => {
             });
     });
 
-    lab.test("catches attempt to fetch a non-existent practice", done => {
+    lab.test("catch attempt to fetch a non-existent practice", done => {
         server.inject(
             {
                 method: 'GET',
