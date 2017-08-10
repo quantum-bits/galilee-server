@@ -24,13 +24,13 @@ exports.server = null;
 exports.initTest = function () {
     const lab = require('lab').script();
 
-    lab.before((done) => {
-        Server.configureServer(masterConfig, null).then(server => {
-            exports.server = server;
-            server.log("Server initialized");
-            done();
-        })
-    });
+    lab.before(() =>
+        Server.configureServer(masterConfig, null)
+            .then(server => {
+                exports.server = server;
+                server.log("Server initialized");
+            })
+    );
 
     return lab;
 };

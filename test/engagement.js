@@ -2,13 +2,14 @@
 
 import {initTest, expect, server, db} from './support';
 import {loadUserCollection} from './fixtures';
+
 const lab = exports.lab = initTest();
 
 const ReadingDay = require('../models/ReadingDay');
 const Config = require('../models/Config');
-const User = require('../models/User');
 
-lab.experiment('Practice endpoints', () => {
+
+lab.experiment('Practice endpoint', () => {
 
     let userCollection = null;
 
@@ -77,45 +78,38 @@ lab.experiment('Practice endpoints', () => {
                 }));
     });
 
-    lab.test('fetch all practices', done => {
-        server.inject(
-            {
-                method: 'GET',
-                url: '/api/practices',
-                headers: userCollection.authHeaders('admin@example.com')
-            }, res => {
-                const response = JSON.parse(res.payload);
-                expect(res.statusCode).to.equal(200);
-                expect(response).to.have.length(2);
-                done();
-            });
-    });
+    lab.test('fetches all practices', () =>
+        server.inject({
+            method: 'GET',
+            url: '/api/practices',
+            headers: userCollection.authHeaders('admin@example.com')
+        }).then(res => {
+            const response = JSON.parse(res.payload);
+            expect(res.statusCode).to.equal(200);
+            expect(response).to.have.length(2);
+        })
+    );
 
-    lab.test('fetch a single existing practice', done => {
-        server.inject(
-            {
-                method: 'GET',
-                url: '/api/practices/10',
-                headers: userCollection.authHeaders('admin@example.com')
-            }, res => {
-                const response = JSON.parse(res.payload);
-                expect(res.statusCode).to.equal(200);
-                expect(response.id).to.equal(10);
-                done();
-            });
-    });
+    lab.test('fetches a single existing practice', () =>
+        server.inject({
+            method: 'GET',
+            url: '/api/practices/10',
+            headers: userCollection.authHeaders('admin@example.com')
+        }).then(res => {
+            const response = JSON.parse(res.payload);
+            expect(res.statusCode).to.equal(200);
+            expect(response.id).to.equal(10);
+        })
+    );
 
-    lab.test("catch attempt to fetch a non-existent practice", done => {
-        server.inject(
-            {
-                method: 'GET',
-                url: '/api/practices/1',
-                headers: userCollection.authHeaders('admin@example.com')
-            }, res => {
-                const response = JSON.parse(res.payload);
-                expect(res.statusCode).to.equal(404);
-                done();
-            });
-    });
+    lab.test("catches attempt to fetch a non-existent practice", () =>
+        server.inject({
+            method: 'GET',
+            url: '/api/practices/1',
+            headers: userCollection.authHeaders('admin@example.com')
+        }).then(res => {
+            expect(res.statusCode).to.equal(404);
+        })
+    );
 
 });

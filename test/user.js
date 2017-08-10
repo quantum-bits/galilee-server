@@ -6,11 +6,9 @@ import {loadUserCollection} from './fixtures';
 const lab = exports.lab = initTest();
 
 const _ = require('lodash');
-const debug = require('debug')('test');
 const random = require('random-js')();
 const jwt = require('jsonwebtoken');
 
-const ReadingDay = require('../models/ReadingDay');
 const Config = require('../models/Config');
 const User = require('../models/User');
 
@@ -326,7 +324,7 @@ lab.experiment('User endpoint', () => {
         });
     });
 
-    lab.test('rejects attempt to set duplicate email address', () => {
+    lab.test('rejects attempt to set email address to an existing one', () => {
         const studentUser = userCollection.findUser('student@example.com');
         const staffUser = userCollection.findUser('staff@example.com');
 

@@ -5,7 +5,6 @@ const Joi = require('joi');
 
 const User = require('../models/User');
 const Permission = require('../models/Permission');
-const debug = require('debug')('user');
 
 
 exports.register = function (server, options, next) {
@@ -129,6 +128,9 @@ exports.register = function (server, options, next) {
             config: {
                 description: 'Update user data',
                 auth: 'jwt',
+                pre: [
+                    {assign: 'user', method: 'getUserByEmail(payload.email)'}
+                ],
                 validate: {
                     params: {
                         id: Joi.number().integer().required().description('User ID')
@@ -145,39 +147,17 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: (request, reply) => {
-                // TODO: Reconsider the logic here.
-                // It would be cleaner to refactor out the `getUserByEmail`
-                // to run in a `pre` clause (like the POST handler). However,
-                // that would be problematic if the update does not include
-                // the `email` attribute, causing a null value to be passed
-                // to the server method.
-
-                // TODO: Try recoding getUserByEmail to return a Promise.
-
-                let doUpdate = true;
-
                 if (!isAuthorizedForUser(request)) {
                     return reply(Boom.unauthorized(`Not authorized for user ${request.params.id}`));
 
-                } else if (request.payload.email) {
-                    server.methods.getUserByEmail(request.payload.email, (err, user) => {
-                        if (err) {
-                            doUpdate = false;
-                            return reply(Boom.notFound('Email check failed'));
-                        }
-                        if (user) {
-                            doUpdate = false;
-                            return reply(Boom.conflict(`E-mail address '${request.payload.email}' already in use.`));
-                        }
-                    });
+                } else if (request.pre.user) {
+                    return reply(Boom.conflict(`E-mail address '${request.payload.email}' already in use.`));
                 }
 
-                if (doUpdate) {
-                    User.query()
-                        .patchAndFetchById(request.params.id, request.payload)
-                        .omit(['password'])
-                        .then(user => reply(user));
-                }
+                User.query()
+                    .patchAndFetchById(request.params.id, request.payload)
+                    .omit(['password'])
+                    .then(updatedUser => reply(updatedUser));
             }
         }
 

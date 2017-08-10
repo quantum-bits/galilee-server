@@ -5,8 +5,6 @@ const Joi = require('joi');
 
 const JWT = require('jsonwebtoken');
 
-const User = require('../models/User');
-
 exports.register = function (server, options, next) {
 
     const JWT_SECRET_KEY = server.settings.app.config.get('jwt-key');
@@ -18,7 +16,7 @@ exports.register = function (server, options, next) {
                 if (err) {
                     callback(null, false);
                 } else {
-                    let scopes = user.permissions.map(perm => perm.id.toLowerCase())
+                    let scopes = user.permissions.map(perm => perm.id.toLowerCase());
                     let credentials = Object.assign(user, {scope: scopes});
                     callback(null, true, credentials);
                 }
@@ -48,15 +46,15 @@ exports.register = function (server, options, next) {
             path: '/authenticate',
             config: {
                 description: 'Authenticate to server',
+                pre: [
+                    {assign: 'user', method: 'getUserByEmail(payload.email)'}
+                ],
                 validate: {
                     payload: {
                         email: Joi.string().email().required().description('User e-mail address'),
                         password: Joi.string().min(6).required().description('User password')
                     }
-                },
-                pre: [
-                    {assign: 'user', method: 'getUserByEmail(payload.email)'}
-                ]
+                }
             },
             handler: function (request, reply) {
                 const email = request.payload.email;

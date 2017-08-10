@@ -3,7 +3,6 @@
 const Hapi = require('hapi');
 const Path = require('path');
 const moment = require('moment');
-const debug = require('debug')('server');
 
 const User = require('./models/User');
 
@@ -38,7 +37,7 @@ exports.configureServer = function (masterConfig, bibleService) {
         next(null, date);
     });
 
-    // Fetch a user with arbitrary object as where clause.
+    // Fetch a user with an arbitrary object as its WHERE clause.
     function fetchUser(whereClause, next) {
         User.query()
             .where(whereClause)
@@ -50,7 +49,11 @@ exports.configureServer = function (masterConfig, bibleService) {
 
     // Fetch a user by e-mail address.
     server.method('getUserByEmail', function (email, next) {
-        fetchUser({'email': email}, next);
+        if (email) {
+            fetchUser({'email': email}, next);
+        } else {
+            next(null, null);
+        }
     });
 
     // Fetch a user by ID.
@@ -124,4 +127,5 @@ exports.configureServer = function (masterConfig, bibleService) {
             }
         }
     ).then(() => server);
-}
+};
+

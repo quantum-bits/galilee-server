@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 DEBUG_DEPTH=4 \
-DEBUG=test \
+DEBUG=test,knex:query,knex:bindings \
 GALILEE=development \
 ./node_modules/.bin/lab \
     --verbose \
