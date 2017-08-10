@@ -36,7 +36,6 @@ exports.up = function (knex, Promise) {
 
 exports.down = function (knex, Promise) {
     return Promise.all([
-        knex.schema.dropTableIfExists('readingCollection'),
         knex.schema.dropTableIfExists('stepResource'),
         knex.schema.dropTableIfExists('resourceTag'),
         knex.schema.dropTableIfExists('resource'),
