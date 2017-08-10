@@ -8,6 +8,7 @@ node_modules/
 resources/??/*.jpeg
 foo[0-9]
 foo.*
+*.tex
 
 ## Configuration file that MUST NOT be checked in to Git.
 secret.conf.json
