@@ -7,62 +7,15 @@ const uuid = require('uuid');
 const Boom = require('boom');
 const Joi = require('joi');
 
-const Resource = require('../models/Resource');
-const ResourceType = require('../models/ResourceType');
-const Collection = require('../models/Collection');
 const Config = require('../models/Config');
+const License = require('../models/License');
+const Resource = require('../models/Resource');
 
 exports.register = function (server, options, next) {
 
     const extensionRe = /^\.(?:gif|jpe?g|png)$/;
 
     server.route([
-
-        {
-            method: 'GET',
-            path: '/collections',
-            config: {
-                description: 'Retrieve all collections'
-            },
-            handler: function (request, reply) {
-                Collection
-                    .query()
-                    .then(collections => reply(collections))
-                    .catch(err => reply(Boom.badImplementation(err)));
-            }
-        },
-
-        {
-            method: 'POST',
-            path: '/collections',
-            config: {
-                description: 'Add a new collection',
-                validate: {
-                    payload: {
-                        title: Joi.string().required().description('Title'),
-                        description: Joi.string().required().description('Description')
-                    }
-                },
-                response: {
-                    schema: {
-                        status: Joi.string().valid(['ok']).required(),
-                        collectionId: Joi.string().guid().required()
-                    }
-                }
-            },
-            handler: function (request, reply) {
-                const uniqueId = uuid.v4();
-
-                Collection.query()
-                    .insert({
-                        id: uniqueId,
-                        title: request.payload.title,
-                        description: request.payload.description
-                    })
-                    .then(() => reply({collectionId: uniqueId}))
-                    .catch(err => reply(Boom.badImplementation(err)));
-            }
-        },
 
         {
             method: 'POST',
@@ -143,12 +96,11 @@ exports.register = function (server, options, next) {
 
         {
             method: 'GET',
-            path: '/resources/types',
+            path: '/resources/licenses',
             handler: function (request, reply) {
-                ResourceType
+                License
                     .query()
-                    .then(types => reply(types))
-                    .catch(err => reply(Boom.badImplementation(err)));
+                    .then(licenses => reply(licenses));
             }
         }
     ]);

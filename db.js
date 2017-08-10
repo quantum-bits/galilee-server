@@ -26,6 +26,7 @@ exports.deleteAllData = function () {
         knex('userPermission').del(),
         knex('post').del(),
         knex('passage').del(),
+        knex('stepResource').del()
 
     ]).then(() => Promise.all([
 
@@ -37,12 +38,14 @@ exports.deleteAllData = function () {
 
     ])).then(() => Promise.all([
 
-        knex('resourceType').del(),     // FK resource
         knex('organization').del(),     // FK group
         knex('practice').del(),         // FK direction
         knex('reading').del(),          // FK direction, jounalEntry
         knex('step').del(),             // FK journalEntry
         knex('user').del(),             // FK journalEntry, membership, resource, tag, userPermission
+        knex('license').del(),          // FK resource
+        knex('mediaType').del(),        // FK resource
+        knex('mimeType').del(),         // FK resource
 
     ])).then(() => Promise.all([
 

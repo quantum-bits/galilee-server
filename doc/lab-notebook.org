@@ -1,5 +1,6 @@
 #+TITLE: Galilee Lab Notebook
 #+AUTHOR: Tom Nurkkala
+#+OPTIONS: ':t toc:nil
 
 * PostgreSQL Configuration
 ** Tutorials
@@ -71,7 +72,6 @@ host    all             all             ::1/128                 ident
   FROM pg_authid;
   #+END_EXAMPLE
 ** Setting up PGSQL for =galilee= User
-
 Ran the following commands as normal user (=tnurkkala=)
 - =sudo -u postgres createuser --login --pwprompt galilee=
   1. =--login= allows login
@@ -112,3 +112,22 @@ Ran the following commands as normal user (=tnurkkala=)
 - When I =ssh= to =john= and /then/ to =galilee=,
   my IP addres (reported by =who=) is =10.120.1.24= (IP address for =john=).
   Same deal with =ssh= via =galilee-proxy=, which uses =ProxyJump= through =john=.
+* Debugging
+- Using the [[https://www.npmjs.com/package/debug][debug]] package from NPM
+- Example of how to debug the server
+#+BEGIN_EXAMPLE
+% DEBUG_DEPTH=4 DEBUG=user,knex:bindings,knex:query npm run watch:dev
+#+END_EXAMPLE
+* Facebook
+** Access Tokens
+*** App Access Token
+*** User Access Token
+Can get an access token for testing from the [[https://developers.facebook.com/tools/explorer/][Graph API Explorer]].
+1. Choose the application from the dropdown (NW corner)
+2. Choose /Get User Access Token/ from /Get Token/ dropdown
+3. Choose permissions required from the popup; can revisit this page to add or
+   remove permissions
+4. Click /Get Access Token/
+5. Authorize via popup
+** Share Button
+- [[https://developers.facebook.com/docs/plugins/share-button/][FB Documentation]]

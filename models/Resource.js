@@ -9,6 +9,18 @@ class Resource extends db.Model {
 
     static get relationMappings() {
         return {
+            steps: {
+                relation: db.Model.ManyToManyRelation,
+                modelClass: __dirname + '/Step',
+                join: {
+                    from: 'resource.id',
+                    through: {
+                        from: 'stepResource.resourceId',
+                        to: 'stepResource.stepId'
+                    },
+                    to: 'step.id'
+                }
+            },
             tags: {
                 relation: db.Model.ManyToManyRelation,
                 modelClass: __dirname + '/Tag',
@@ -21,24 +33,28 @@ class Resource extends db.Model {
                     to: 'tag.id'
                 }
             },
-            type: {
+            license: {
                 relation: db.Model.BelongsToOneRelation,
-                modelClass: __dirname + '/ResourceType',
+                modelClass: __dirname + '/License',
                 join: {
-                    from: 'resource.resourceTypeId',
-                    to: 'resourceType.id'
+                    from: 'resource.licenseId',
+                    to: 'license.id'
                 }
             },
-            steps: {
-                relation: db.Model.ManyToManyRelation,
-                modelClass: __dirname + '/Step',
+            mediaType: {
+                relation: db.Model.BelongsToOneRelation,
+                modelClass: __dirname + '/MediaType',
                 join: {
-                    from: 'resource.id',
-                    through: {
-                        from: 'stepResource.resourceId',
-                        to: 'stepResource.stepId'
-                    },
-                    to: 'step.id'
+                    from: 'resource.mediaTypeId',
+                    to: 'mediaType.id'
+                }
+            },
+            mimeType: {
+                relation: db.Model.BelongsToOneRelation,
+                modelClass: __dirname + '/MimeType',
+                join: {
+                    from: 'resource.mimeTypeId',
+                    to: 'mimeType.id'
                 }
             }
         }

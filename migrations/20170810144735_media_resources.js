@@ -6,23 +6,23 @@ exports.up = function (knex, Promise) {
         .then(() => knex.schema.dropTable('resourceTag'))
         .then(() => knex.schema.dropTable('resource'))
         .then(() => knex.schema.dropTable('resourceType'))
-        .then(() => knex.schema.createTableIfNotExists('license', table => {
+        .then(() => knex.schema.createTable('license', table => {
             table.increments('id');
             table.string('name').notNullable().comment('Name of license');
             table.string('description').notNullable().comment('Longer description of license');
             table.string('url').comment('URL where more information can be found');
         }))
-        .then(() => knex.schema.createTableIfNotExists('mediaType', table => {
+        .then(() => knex.schema.createTable('mediaType', table => {
             table.comment('Information about media source (e.g., file upload vs. URL)');
             table.increments('id');
             table.string('description').notNullable().comment('Description of type')
         }))
-        .then(() => knex.schema.createTableIfNotExists('mimeType', table => {
+        .then(() => knex.schema.createTable('mimeType', table => {
             table.increments('id');
             table.string('type').notNullable().comment('MIME type (e.g., image/png)');
             table.string('description').notNullable().comment('Human-readable description');
         }))
-        .then(() => knex.schema.createTableIfNotExists('resource', table => {
+        .then(() => knex.schema.createTable('resource', table => {
             table.comment('Media Resources');
             table.increments('id');
             table.integer('seq').unsigned().notNullable().comment('Sequence number');
@@ -46,11 +46,11 @@ exports.up = function (knex, Promise) {
             table.string('physicalDimensions').comment('Physical dimensions');
             table.string('currentLocation').comment('Physical location');
         }))
-        .then(() => knex.schema.createTableIfNotExists('resourceTag', table => {
+        .then(() => knex.schema.createTable('resourceTag', table => {
             table.integer('resourceId').unsigned().references('resource.id');
             table.integer('tagId').unsigned().references('tag.id');
         }))
-        .then(() => knex.schema.createTableIfNotExists('stepResource', table => {
+        .then(() => knex.schema.createTable('stepResource', table => {
             table.integer('resourceId').unsigned().references('resource.id');
             table.integer('stepId').unsigned().references('step.id');
         }));
