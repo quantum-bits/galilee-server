@@ -25,9 +25,8 @@ exports.up = function (knex, Promise) {
         .then(() => knex.schema.createTable('resource', table => {
             table.comment('Media Resources');
             table.increments('id');
-            table.integer('seq').unsigned().notNullable().comment('Sequence number');
+            table.uuid('fileId').notNullable().comment('Unique ID for file storage');
             table.string('title').notNullable().comment('Title for display to user');
-            table.text('description').notNullable().comment('Description for display to user');
             table.integer('userId').unsigned().references('user.id').comment('User who created resource');
             table.string('sourceUrl').comment('URL where this resource lives (if any)');
             table.string('source').comment('Where this resource lives (if no URL)');
@@ -53,6 +52,8 @@ exports.up = function (knex, Promise) {
         .then(() => knex.schema.createTable('stepResource', table => {
             table.integer('resourceId').unsigned().references('resource.id');
             table.integer('stepId').unsigned().references('step.id');
+            table.integer('seq').unsigned().notNullable().comment('Sequence number');
+            table.text('description').notNullable().comment('Description for display to user');
         }));
 };
 

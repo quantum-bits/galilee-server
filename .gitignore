@@ -5,7 +5,7 @@
 auto/
 .idea/
 node_modules/
-resources/??/*.jpeg
+resources/??/
 foo[0-9]
 foo.*
 *.tex

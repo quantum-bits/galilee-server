@@ -24,7 +24,8 @@ class Step extends db.Model {
                     from: 'step.id',
                     through: {
                         from: 'stepResource.stepId',
-                        to: 'stepResource.resourceId'
+                        to: 'stepResource.resourceId',
+                        extra: ['seq', 'description']
                     },
                     to: 'resource.id'
                 }

@@ -1,8 +1,13 @@
 "use strict";
 
 const path = require('path');
-const fs = require('fs');
 const uuid = require('uuid');
+const debug = require('debug')('resource');
+
+const Promise = require('bluebird');
+const fs = require('fs');
+const fsMkdir = Promise.promisify(fs.mkdir);
+const fsRename = Promise.promisify(fs.rename);
 
 const Boom = require('boom');
 const Joi = require('joi');
@@ -19,9 +24,13 @@ exports.register = function (server, options, next) {
 
         {
             method: 'POST',
-            path: '/resources',
+            path: '/resources/uploads',
             config: {
-                description: 'Add a new resource',
+                description: 'Upload a new resource',
+                auth: {
+                    strategy: 'jwt',
+                    access: {scope: 'admin'}
+                },
                 payload: {
                     parse: true,
                     output: 'file'
@@ -29,21 +38,11 @@ exports.register = function (server, options, next) {
                 validate: {
                     payload: {
                         file: Joi.any().required().description('File being uploaded'),
-                        caption: Joi.string().required().description('Caption for file'),
-                        year: Joi.number().positive().min(1900).description('Copyright year'),
-                        owner: Joi.string().description('Copyright owner'),
-                        collectionId: Joi.string().guid().required().description('Resource collection ID'),
-                        typeId: Joi.number().positive().required().description('Resource type ID')
-                    }
-                },
-                response: {
-                    schema: {
-                        status: Joi.string().valid(['ok']).required(),
-                        resourceId: Joi.string().guid().required()
                     }
                 }
             },
             handler: function (request, reply) {
+                debug("PAYLOAD %O", request.payload);
                 const uploadName = path.basename(request.payload.file.filename);
 
                 const uploadExtension = path.extname(uploadName);
@@ -54,55 +53,134 @@ exports.register = function (server, options, next) {
                 const uploadPath = request.payload.file.path;
 
                 Config.query()
-                    .where('key', 'upload-root').first()
+                    .where('key', 'upload-root')
+                    .first()
                     .then(result => {
                         const uploadRoot = result.value;
                         const uniqueId = uuid.v4();
-                        const destination = path.join(__dirname, uploadRoot,
+                        const destination = path.join(__dirname,
+                            uploadRoot,
                             uniqueId.substr(0, 2),
-                            uniqueId + uploadExtension);
+                            uniqueId.substr(2) + uploadExtension);
                         const destDir = path.dirname(destination);
+                        debug('destDir %O');
 
-                        fs.mkdir(destDir, 0o750, err => {
-                            fs.rename(uploadPath, destination, err => {
-                                if (err) {
-                                    return reply(Boom.badImplementation("Can't rename uploaded file", err));
-                                }
+                        return fsMkdir(destDir, 0o750)
+                            .then(() => {
+                                return fsRename(uploadPath, destination);
+                            }).then(() => {
+                                return reply({fileId: uniqueId});
+                            });
+                    });
+            }
+        },
 
-                                Resource.query().insert({
-                                    id: uniqueId,
-                                    caption: request.payload.caption,
-                                    copyrightYear: request.payload.year,
-                                    copyrightOwner: request.payload.owner,
-                                    details: {
-                                        filename: uploadName
-                                    },
-                                    resourceTypeId: request.payload.typeId
-                                }).then(resource => {
-                                    return resource
-                                        .$relatedQuery('collections')
-                                        .relate(request.payload.collectionId)
-                                }).then(() => {
-                                    return reply({
-                                        status: 'ok',
-                                        resourceId: uniqueId
+        {
+            method: 'POST',
+            path: '/resources',
+            config: {
+                description: 'Add a new resource',
+                auth: {
+                    strategy: 'jwt',
+                    access: {scope: 'admin'}
+                },
+                payload: {
+                    parse: true,
+                    output: 'file'
+                },
+                validate: {
+                    payload: {
+                        file: Joi.any().required().description('File being uploaded'),
+                        stepId: Joi.number().positive().required().description('ID of step for this resource'),
+                        seq: Joi.number().positive().required().description('Sequence within step'),
+                        creator: Joi.string().required().description('Person who created this resource'),
+                        creationDate: Joi.date().iso(),
+                        copyrightDate: Joi.date().iso(),
+                        importDate: Joi.date().iso().required().description('Date imported into system'),
+                        licenseType: Joi.number().positive().required().description('License ID'),
+                        mimeType: Joi.number().positive().required().description('MIME type ID'),
+                        mediaType: Joi.number().positive().required().description('Media type ID'),
+                        keywords: Joi.array().items(Joi.string()),
+                        source: Joi.string().required().description('Free-form text regarding source of resource'),
+                        title: Joi.string().required().description('Title to display to user'),
+                        description: Joi.string().required().description('Description to display to user'),
+                        notes: Joi.string().description('Arbitrary notes regarding resource'),
+                        height: Joi.number().positive().description('Height (pixels) of image, video'),
+                        width: Joi.number().positive().description('Width (pixels) of image, video'),
+                        medium: Joi.string().description('Medium of resource (e.g., oil, stone)'),
+                        physicalDimensions: Joi.string().description('Physical size of the actual object, painting'),
+                        currentLocation: Joi.string().description('Location of actual object, painting'),
+                        duration: Joi.string().description('Duration (HH:MM:SS) of video or audio'),
+                    }
+                },
+                response: {
+                    schema: {
+                        status: Joi.string().valid(['ok']).required(),
+                        resourceId: Joi.string().guid().required()
+                    }
+                }
+            },
+            handler: function (request, reply) {
+                debug("PAYLOAD %O", request.payload);
+                const uploadName = path.basename(request.payload.file.filename);
+
+                const uploadExtension = path.extname(uploadName);
+                if (!extensionRe.test(uploadExtension)) {
+                    return reply(Boom.badData('Invalid file type'));
+                }
+
+                const uploadPath = request.payload.file.path;
+
+                Config.query()
+                    .where('key', 'upload-root')
+                    .first()
+                    .then(result => {
+                        const uploadRoot = result.value;
+                        const uniqueId = uuid.v4();
+                        const destination = path.join(__dirname,
+                            uploadRoot,
+                            uniqueId.substr(0, 2),
+                            uniqueId.substr(2) + uploadExtension);
+                        const destDir = path.dirname(destination);
+                        debug('destDir %O');
+
+                        return fsMkdir(destDir, 0o750)
+                            .then(() => {
+                                return fsRename(uploadPath, destination);
+                            }).then(() => {
+                                return Resource.query()
+                                    .insertAndFetch({
+                                        id: uniqueId,
+                                        caption: request.payload.caption,
+                                        copyrightYear: request.payload.year,
+                                        copyrightOwner: request.payload.owner,
+                                        details: {
+                                            filename: uploadName
+                                        },
+                                        resourceTypeId: request.payload.typeId
                                     });
-                                }).catch(err => reply(Boom.badImplementation('Problem with upload', err)));
-                            });     // rename
-                        });         // mkdir
-                    });             // query
+                            }).then(newRow => {
+                                return reply(newRow);
+                            });
+                    });
             }
         },
 
         {
             method: 'GET',
             path: '/resources/licenses',
+            config: {
+                description: 'List available licenses',
+                auth: {
+                    strategy: 'jwt',
+                }
+            },
             handler: function (request, reply) {
-                License
-                    .query()
+                License.query()
                     .then(licenses => reply(licenses));
             }
         }
+
     ]);
 
     next();

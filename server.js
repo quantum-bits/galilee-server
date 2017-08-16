@@ -79,11 +79,10 @@ exports.configureServer = function (masterConfig, bibleService) {
             {register: require('./plugins/practice')},
             {register: require('./plugins/reading')},
             {register: require('./plugins/reading_day'), options: {bibleService: bibleService}},
+            {register: require('./plugins/resource')},
             {register: require('./plugins/static')},
             {register: require('./plugins/user')},
             {register: require('./plugins/version'), options: {bibleService: bibleService}},
-
-            // {register: require('./plugins/resource')},
 
             {
                 register: require('tv'),        // Debug console
