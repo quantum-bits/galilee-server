@@ -9,9 +9,9 @@ class License extends db.Model {
 
     static get relationMappings() {
         return {
-            groups: {
+            resources: {
                 relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/Group',
+                modelClass: __dirname + '/Resource',
                 join: {
                     from: 'license.id',
                     to: 'resource.licenseId'

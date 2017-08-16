@@ -135,7 +135,7 @@ function fakeFullName() {
 let _randomUsers = [];
 
 function randomUser() {
-    let user = {
+    return {
         email: faker.internet.email(),
         password: 'password',
         firstName: faker.name.firstName(),
@@ -145,15 +145,14 @@ function randomUser() {
         preferredVersionId: random.pick(_versionObjects).id,
         groups: _.times(random.integer(1, 2), n => randomGroup())
     };
-    _randomUsers.push(user);
-    return user;
 }
 
 function seedUsers() {
     debug('seedUsers');
     const users = _.times(NUM_USERS, n => randomUser())
-    debug('USERS %O', _randomUsers);
-    return User.query().insertGraph(users);
+    return User.query()
+        .insertGraphAndFetch(users)
+        .then(insertedUsers => _randomUsers = insertedUsers);
 }
 
 function seedJournalEntries() {
@@ -279,31 +278,79 @@ function randomPractices() {
     });
 }
 
+function randomPickHelper(list) {
+    let element = random.pick(list);
+    if (element.metadata.used) {
+        return {
+            "#ref": element.metadata.id
+        };
+    } else {
+        element.metadata.used = true;
+        return Object.assign({
+            "#id": element.metadata.id
+        }, element.fields);
+    }
+}
+
 let _randomLicenses = null;
 
 function randomLicense() {
     if (_randomLicenses === null) {
         _randomLicenses = _.times(10, n => ({
-            _id: `license-${n}`,
-            _used: false,
-            name: _.capitalize(faker.lorem.words(random.integer(3, 4))),
-            description: _.capitalize(faker.lorem.words(random.integer(4, 8)))
+            metadata: {
+                id: `license-${n}`,
+                used: false
+            },
+            fields: {
+                name: _.capitalize(faker.lorem.words(random.integer(3, 4))),
+                description: _.capitalize(faker.lorem.words(random.integer(4, 8)))
+            }
         }));
     }
 
-    let license = random.pick(_randomLicenses);
-    if (license._used) {
-        return {
-            "#ref": license._id
-        };
-    } else {
-        license._used = true;
-        return {
-            "#id": license._id,
-            name: license.name,
-            description: license.description
-        };
+    return randomPickHelper(_randomLicenses);
+}
+
+let _randomMediaTypes = null;
+
+function randomMediaType() {
+    if (_randomMediaTypes === null) {
+        _randomMediaTypes = _.times(5, n => ({
+            metadata: {
+                id: `media-type-${n}`,
+                used: false
+            },
+            fields: {
+                description: _.capitalize(faker.lorem.words(random.integer(3, 7)))
+            }
+        }));
     }
+
+    return randomPickHelper(_randomMediaTypes);
+}
+
+let _randomMimeTypes = [];
+
+function randomMimeType() {
+    if (_randomMimeTypes.length === 0) {
+        [
+            {type: 'image/png', description: 'PNG image'},
+            {type: 'image/jpg', description: 'JPEG image'},
+            {type: 'image/gif', description: 'GIF image'},
+            {type: 'video/mpeg', description: 'MPEG video'},
+            {type: 'audio/aac', description: 'AAC audio'}
+        ].forEach((element, index) => {
+            _randomMimeTypes.push({
+                metadata: {
+                    id: `mime-type-${index}`,
+                    used: false
+                },
+                fields: element
+            });
+        });
+    }
+
+    return randomPickHelper(_randomMimeTypes);
 }
 
 function randomResources() {
@@ -320,6 +367,8 @@ function randomResources() {
             copyrightDate: faker.date.past(100),
 
             license: randomLicense(),
+            mediaType: randomMediaType(),
+            mimeType: randomMimeType(),
 
             notes: faker.lorem.paragraph(),
             height: random.integer(768, 2048),
