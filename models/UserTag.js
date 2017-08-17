@@ -1,11 +1,10 @@
 'use strict';
 
 const db = require('../db');
-const StampedModel = require('./StampedModel');
 
-class JournalEntry extends StampedModel {
+class UserTag extends db.Model {
     static get tableName() {
-        return 'journalEntry';
+        return 'userTag';
     }
 
     static get relationMappings() {
@@ -14,24 +13,24 @@ class JournalEntry extends StampedModel {
                 relation: db.Model.BelongsToOneRelation,
                 modelClass: __dirname + '/User',
                 join: {
-                    from: 'journalEntry.userId',
+                    from: 'userTag.userId',
                     to: 'user.id'
                 }
             },
-            tags: {
+            journalEntries: {
                 relation: db.Model.ManyToManyRelation,
-                modelClass: __dirname + '/Tag',
+                modelClass: __dirname + '/JournalEntry',
                 join: {
-                    from: 'journalEntry.id',
-                    through: {
-                        from: 'journalEntryTag.journalEntryId',
-                        to: 'journalEntryTag.userTagId'
+                    from: 'userTag.id',
+                    through :{
+                        from: 'journalEntryUserTag.userTagId',
+                        to:   'journalEntryUserTag.journalEntryId'
                     },
-                    to: 'tag.id'
+                    to: 'journalEntry.id'
                 }
             }
         }
     }
 }
 
-module.exports = JournalEntry;
+module.exports = UserTag;

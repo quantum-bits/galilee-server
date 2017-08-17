@@ -34,7 +34,8 @@ exports.deleteAllData = function () {
         knex('journalEntry').del(),     // FK journalEntryTag
         knex('permission').del(),       // FK userPermission
         knex('resource').del(),         // FK resourceTag
-        knex('tag').del(),              // FK journalEntryTag, resourceTag
+        knex('userTag').del(),          // FK journalEntryTag
+        knex('tag').del(),              // FK resourceTag
 
     ])).then(() => Promise.all([
 

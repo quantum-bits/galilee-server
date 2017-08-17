@@ -9,24 +9,16 @@ class Tag extends db.Model {
 
     static get relationMappings() {
         return {
-            user: {
-                relation: db.Model.BelongsToOneRelation,
-                modelClass: __dirname + '/User',
-                join: {
-                    from: 'tag.userId',
-                    to: 'user.id'
-                }
-            },
-            journalEntries: {
+            resources: {
                 relation: db.Model.ManyToManyRelation,
-                modelClass: __dirname + '/JournalEntry',
+                modelClass: __dirname + '/Resource',
                 join: {
                     from: 'tag.id',
                     through :{
-                        from: 'journalEntryTag.tagId',
-                        to:   'journalEntryTag.journalEntryId'
+                        from: 'resourceTag.tagId',
+                        to:   'resourceTag.resourceId'
                     },
-                    to: 'journalEntry.id'
+                    to: 'resource.id'
                 }
             }
         }

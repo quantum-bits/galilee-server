@@ -8,7 +8,7 @@ const moment = require('moment');
 const debug = require('debug')('journal');
 
 const User = require('../models/User');
-const Tag = require('../models/Tag');
+const Tag = require('../models/UserTag');
 const JournalEntry = require('../models/JournalEntry');
 const JournalEntryTag = require('../models/JournalEntryTag');
 

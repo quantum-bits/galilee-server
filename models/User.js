@@ -69,10 +69,10 @@ class User extends db.Model {
             },
             tags: {
                 relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/Tag',
+                modelClass: __dirname + '/UserTag',
                 join: {
                     from: 'user.id',
-                    to: 'tag.userId'
+                    to: 'userTag.userId'
                 }
             }
         }

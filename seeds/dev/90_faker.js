@@ -16,7 +16,7 @@ const uuid = require('uuid');
 const Post = require('../../models/Post');
 const Reading = require('../../models/Reading');
 const ReadingDay = require('../../models/ReadingDay');
-const Tag = require('../../models/Tag');
+const Tag = require('../../models/UserTag');
 const User = require('../../models/User');
 const Version = require('../../models/Version');
 
