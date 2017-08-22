@@ -27,6 +27,7 @@ exports.up = function (knex, Promise) {
             table.increments('id');
             table.uuid('fileId').notNullable().comment('Unique ID for file storage');
             table.string('title').notNullable().comment('Title for display to user');
+            // TODO: userId should be notNullable
             table.integer('userId').unsigned().references('user.id').comment('User who created resource');
             table.string('sourceUrl').comment('URL where this resource lives (if any)');
             table.string('source').comment('Where this resource lives (if no URL)');

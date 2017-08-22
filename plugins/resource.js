@@ -57,8 +57,6 @@ function typeOfFile(path) {
 
 exports.register = function (server, options, next) {
 
-    const extensionRe = /^\.(?:gif|jpe?g|png)$/;
-
     server.route([
 
         {
@@ -112,8 +110,6 @@ exports.register = function (server, options, next) {
                         fileId: Joi.string().uuid().required().description('FileID of resource')
                     },
                     payload: {
-                        // stepId: Joi.number().positive().required().description('ID of step for this resource'),
-                        // seq: Joi.number().positive().required().description('Sequence within step'),
                         creator: Joi.string().required().description('Person who created this resource'),
                         creationDate: Joi.date().iso(),
                         copyrightDate: Joi.date().iso(),
@@ -124,7 +120,6 @@ exports.register = function (server, options, next) {
                         tags: Joi.array().items(Joi.string()),
                         source: Joi.string().required().description('Free-form text regarding source of resource'),
                         title: Joi.string().required().description('Title to display to user'),
-                        // description: Joi.string().required().description('Description to display to user'),
                         notes: Joi.string().allow('').description('Arbitrary notes regarding resource'),
                         height: Joi.number().positive().description('Height (pixels) of image, video'),
                         width: Joi.number().positive().description('Width (pixels) of image, video'),
@@ -139,14 +134,16 @@ exports.register = function (server, options, next) {
                 const insertObj = Object.assign({},
                     request.payload,
                     {
-                        fileId: request.params.fileId
+                        fileId: request.params.fileId,
+                        userId: request.auth.credentials.id,
+                        tags: request.payload.tags.map(tag => ({label: tag}))
                     });
 
+                // TODO: Reuse existing tags in the database.
+
                 return Resource.query()
-                    .insertAndFetch(insertObj)
-                    .then(newRow => {
-                        return reply(newRow);
-                    });
+                    .insertGraph(insertObj)
+                    .then(newRow => reply(newRow));
             }
         },
 
