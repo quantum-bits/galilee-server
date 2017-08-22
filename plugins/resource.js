@@ -2,13 +2,12 @@
 
 const path = require('path');
 const uuid = require('uuid');
+const readChunk = require('read-chunk');
+const fileType = require('file-type');
 const debug = require('debug')('resource');
-
-const Promise = require('bluebird');
 const fs = require('fs');
-const fsMkdir = Promise.promisify(fs.mkdir);
-const fsRename = Promise.promisify(fs.rename);
-const fsReaddir = Promise.promisify(fs.readdir);
+const mkdirp = require('mkdirp');
+const pify = require('pify');
 
 const Boom = require('boom');
 const Joi = require('joi');
@@ -41,11 +40,19 @@ class FileIdManager {
 
     // Check whether there is a file for the fileId.
     fileIdExists() {
-        return fsReaddir(this.fileIdDir())
+        return pify(fs.readdir)(this.fileIdDir())
             .then(files => {
                 return files.find(elt => elt === this.baseName);
             });
     }
+}
+
+// Determine the type of the file based on its contents.
+// Returns an object like: {ext: 'png', mime: 'image/png'}.
+function typeOfFile(path) {
+    // The 4100 isn't a magic number; it's in the documentation for the package.
+    return readChunk(path, 0, 4100)
+        .then(buffer => fileType(buffer));
 }
 
 exports.register = function (server, options, next) {
@@ -65,7 +72,8 @@ exports.register = function (server, options, next) {
                 },
                 payload: {
                     parse: true,
-                    output: 'file'
+                    output: 'file',
+                    allow: 'multipart/form-data'
                 },
                 validate: {
                     payload: {
@@ -74,16 +82,19 @@ exports.register = function (server, options, next) {
                 }
             },
             handler: function (request, reply) {
-                debug("PAYLOAD %O", request.payload);
                 const uploadPath = request.payload.file.path;
                 const fileIdMgr = new FileIdManager();
 
-                return fsMkdir(fileIdMgr.fileIdDir(), 0o750)
-                    .then(() => {
-                        return fsRename(uploadPath, fileIdMgr.fileIdPath());
-                    }).then(() => {
-                        return reply({fileId: fileIdMgr.fileId});
-                    });
+                return typeOfFile(uploadPath)
+                    .then(fileType => {
+                        const [mimeType, mimeSubtype] = fileType.mime.split('/');
+                        if (mimeType !== 'image') {
+                            return reply(Boom.unsupportedMediaType(`Invalid type '${fileType}`));
+                        }
+                    })
+                    .then(() => pify(mkdirp)(fileIdMgr.fileIdDir(), 0o750))
+                    .then(() => pify(fs.rename)(uploadPath, fileIdMgr.fileIdPath()))
+                    .then(() => reply({fileId: fileIdMgr.fileId}));
             }
         },
 
