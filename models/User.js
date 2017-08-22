@@ -67,6 +67,22 @@ class User extends db.Model {
                     to: 'post.userId'
                 }
             },
+            resources: {
+                relation: db.Model.HasManyRelation,
+                modelClass: __dirname + '/Resource',
+                join: {
+                    from: 'user.id',
+                    to: 'resource.userId'
+                }
+            },
+            resourceFiles: {
+                relation: db.Model.HasManyRelation,
+                modelClass: __dirname + '/ResourceFile',
+                join: {
+                    from: 'user.id',
+                    to: 'resourceFile.userId'
+                }
+            },
             tags: {
                 relation: db.Model.HasManyRelation,
                 modelClass: __dirname + '/UserTag',

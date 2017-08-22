@@ -11,10 +11,10 @@ class MimeType extends db.Model {
         return {
             resources: {
                 relation: db.Model.HasManyRelation,
-                modelClass: __dirname + '/Resource',
+                modelClass: __dirname + '/ResourceFile',
                 join: {
                     from: 'mimeType.id',
-                    to: 'resource.mimeTypeId'
+                    to: 'resourceFile.mimeTypeId'
                 }
             }
         }

@@ -46,10 +46,11 @@ exports.deleteAllData = function () {
         knex('user').del(),             // FK journalEntry, membership, resource, tag, userPermission
         knex('license').del(),          // FK resource
         knex('mediaType').del(),        // FK resource
-        knex('mimeType').del(),         // FK resource
+        knex('resourceFile').del(),     // FK resource
 
     ])).then(() => Promise.all([
 
+        knex('mimeType').del(),         // FK resourceFile
         knex('readingDay').del(),       // FK direction, reading
         knex('version').del(),          // FK user
 

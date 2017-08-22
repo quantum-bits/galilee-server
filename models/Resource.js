@@ -9,6 +9,22 @@ class Resource extends db.Model {
 
     static get relationMappings() {
         return {
+            user: {
+                relation: db.Model.BelongsToOneRelation,
+                modelClass: __dirname + '/User',
+                join: {
+                    from: 'resource.userId',
+                    to: 'user.id'
+                }
+            },
+            resourceFile: {
+                relation: db.Model.HasOneRelation,
+                modelClass: __dirname + '/ResourceFile',
+                join: {
+                    from: 'resource.resourceFileId',
+                    to: 'resourceFile.id'
+                }
+            },
             steps: {
                 relation: db.Model.ManyToManyRelation,
                 modelClass: __dirname + '/Step',
